@@ -39,7 +39,17 @@ The block names show the areas ([kfa1/0004](../kfa1/0004-text.md#block-header)).
 
 ## Images
 
-91 of the 475 unique images have the same bytes as an Additional I image. None of the seven images edited for Additional I ([kfa1/0012](../kfa1/0012-images.md)) is among them: the town maps, the status screen, the roulette images, the shop panels and the HUD atlas need their own edits. The HUD atlas is not yet located.
+91 of the 475 unique images have the same bytes as an Additional I image. The images edited for Additional I ([kfa1/0012](../kfa1/0012-images.md)) have counterparts with other bytes; a comparison of 32 × 32 grayscale thumbnails finds them:
+
+| Additional I | Additional II | Mean difference (0–255) |
+|---|---|---|
+| `c000_20.jpg`, `c000_19.jpg` (town maps) | `c000_15.jpg`, `c000_14.jpg` | 9, 11: the town is in ruins; the labels are at the same places |
+| `c009_04.jpg` (status screen) | `c011_04.jpg` | 0.9 |
+| `c004_04.jpg`, `c004_06.jpg` (roulette) | `c004_04.jpg`, `c004_06.jpg` | 0 |
+| `c000_00.gim` (shop panels) | `c000_00.gim` | 0.3 |
+| `g_02aa00.gim` (HUD atlas) | `g_02afe0.gim` | 0.1 |
+
+The Additional I specs apply with two changes on the full town map: the Inn label is 4 pixels further right and the Smithy label is 4 pixels wider (pixel diff of the two maps). `research/img/edit/kfaII-specs` holds the specs; each budget is the size of the Additional II file. The Additional II JPEGs are more compressed: the edits fit at quality 78 to 85.
 
 ## BOOT.BIN
 
@@ -74,11 +84,11 @@ The title menu has a third item, `DATA CONVERT`. Additional I offers to save cle
 
 `scripts/text_merge.py` carries 1,533 of the 2,385 Additional I translations into `research/text/kfaII-test.json`; the other 852 have no matching entry in Additional II. 180 FMG messages carry over by ID; the five that differ get `KFA II`. `scripts/build_english.sh kfaII` builds `research/builds/kfaII-english.iso` ([kfa1/0009](../kfa1/0009-test-builds.md)): 39,200 slots in place, 947 strings moved, 63 chunks relocated, nothing refused. With no subtitle tables, the build skips the subtitle patch and applies only the chunk base patch.
 
-Headless PPSSPP: the town and the status overlay. Menu text from the carried-over English shows (`Status`, `Items`, `Magic`, `Camp`, `Short Sword`). Image text stays Japanese: the town map labels and the HUD stats.
+Headless PPSSPP: the town and the status overlay. Menu text from the carried-over English shows (`Status`, `Items`, `Magic`, `Camp`, `Short Sword`). With the seven edited images, the town map and the status overlay are English too.
 
 ## Next steps
 
 1. Translate the new entries.
-2. Locate the image text: town map, status screen, casino boards, HUD.
+2. Find image text that Additional I does not have, for example the new casino games.
 3. Transcribe the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
 4. A build script for Additional II and a headless test.
