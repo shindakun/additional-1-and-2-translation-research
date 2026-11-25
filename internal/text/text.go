@@ -17,17 +17,19 @@ const none = 0xFFFFFFFF
 
 // Kind of a slot.
 const (
-	KindText = "text" // NUL-terminated string reached through a text header
-	KindName = "name" // 0x18-byte name field of a command record
-	KindMenu = "menu" // 0x1D-byte name field of a system menu record
-	KindFlag = "flag" // 0x18-byte name field of a flag record (items, stats)
+	KindText  = "text"  // NUL-terminated string reached through a text header
+	KindName  = "name"  // 0x18-byte name field of a command record
+	KindMenu  = "menu"  // 0x1D-byte name field of a system menu record
+	KindFlag  = "flag"  // 0x18-byte name field of a flag record (items, stats)
+	KindBlock = "block" // 0x20-byte name field of a block header; the save data title
 )
 
 // nameField is the size of a command name field; menuField is the size of
 // a system menu name field, at record +3.
 const (
-	nameField = 0x18
-	menuField = 0x1D
+	nameField  = 0x18
+	menuField  = 0x1D
+	blockField = 0x20
 )
 
 // Slot is one place that holds a string.
@@ -82,6 +84,12 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 		case KindMenu:
 			raw = bytes.TrimRight(v.data[off:off+menuField], "\x00")
 			budget = menuField - 1
+		case KindBlock:
+			raw = v.data[off : off+blockField]
+			if z := bytes.IndexByte(raw, 0); z >= 0 {
+				raw = raw[:z]
+			}
+			budget = blockField - 1
 		default:
 			end := bytes.IndexByte(v.data[off:], 0)
 			if end < 0 {
@@ -161,6 +169,10 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 		case strings.HasPrefix(u.Name, "chunks/"):
 			v := unitView{u.Data, uint32(u.Off)}
 			ci := strings.TrimSuffix(strings.TrimPrefix(u.Name, "chunks/"), ".bin")[:3]
+			// Block name at header +0x20: the save data title.
+			if err := add(ui, v, v.base+0x20, KindBlock, "c"+ci+"/b", -1); err != nil {
+				return nil, err
+			}
 			count := uint32(binary.LittleEndian.Uint16(u.Data[0x0C:]))
 			list := v.u32(v.base + 0x14)
 			for s := uint32(0); s < count; s++ {
