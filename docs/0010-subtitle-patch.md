@@ -139,25 +139,64 @@ Option A test (`subpatch.Counter` with `loadFont`): the hook loads `Font/BitFont
 
 ## Timing
 
-The narration appears at known times in the video. [0011](0011-movie-script.md) lists the text and its approximate times. The counter rate is not known: the game loop and the 29.97 fps video can differ. A first test build draws the counter on screen so the rate can be read against the video.
+The counter counts video frames at 29.97 per second, from 0 at the start of each movie. In a headless run the counter and the emulated time agree: frame = 30 × (emulated seconds − movie start). [0011](0011-movie-script.md) lists the narration times, measured with the counter build.
+
+## Subtitle build
+
+`kfa patch subtitles BOOT.BIN IN.tsv OUT` builds the patch from a table. Each TSV line is one screen line:
+
+| Column | Content |
+|---|---|
+| `START`, `END` | Seconds from the start of the movie; × 29.97 gives frames |
+| `ROW` | 0 is the bottom row (y 256); each row is 14 pixels higher |
+| `ALIGN` | `l`, `c` or `r` |
+| `X` | The pixel column that the alignment refers to |
+| `TEXT` | ASCII, no `%` |
+
+The hook keeps the counter, the exit hook resets it, and the frame code walks a table of 8-word records: start, end, x, y, shadow x, shadow y, text offset, alignment. For each record whose range holds the counter, it sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 192 words; the table and the text follow it in the same code space.
+
+`FsFontSetAlignment` (`0x15168`) values for the horizontal position, from a headless test with four lines at x 240:
+
+| Value | Position |
+|---|---|
+| `0x00` | Text starts at x |
+| `0x10` | Text ends at x |
+| `0x20` | Text is centered on x |
+| `0x30` | Same as `0x00` |
+
+The ASCII glyphs of the game font are about 8 pixels wide: a 60-character line is 480 pixels, the full screen.
+
+## Subtitle results
+
+`research/subs/kfaI-movie000.tsv` holds 33 lines for the 11 narration blocks of `movie000`. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 at the right.
+
+The New Game opening plays `movie000` after the title, with the font loaded. Headless runs show every block in English at the planned position, and the game continues to the town map after the movie.
+
+Limits:
+
+- The first play at boot has no font, so it shows no subtitles ([Font at boot](#font-at-boot)). The attract replays and the New Game opening show them.
+- One table serves every movie. The other movies (`movie001`, `movie010`, `movie011`) need their own tables and a way to tell the movies apart, for example a hook on `CSimpleMovieScene::SetMovieFile` (`0x3E984`).
 
 ## Test builds
 
 | Build | Shows | State |
 |---|---|---|
 | Frame counter | Hook runs; counter rate | Done; see results |
-| One subtitle | Font, shadow and position | Not built |
-| Full table, movie000 | Timing against the narration | Not built |
+| Alignment test | `FsFontSetAlignment` values | Done |
+| Full table, movie000 | Timing and position against the narration | Done; see results |
+| Tables for each movie | Correct lines for each movie | Not built |
 
 ## Tools
 
 `internal/prx` reads and edits the relocation table. `internal/mips` encodes the instructions; its test compares the encodings with instructions in `BOOT.BIN`. `internal/subpatch` builds the patch and checks that the hooked word is the expected `jal` with an `R_MIPS_26` relocation. Its test checks that no relocation inside the code space stays active and that nothing outside the code space and the hook changes except the 61 relocation types.
 
 ```sh
-./kfa patch counter research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/builds/kfaI-counter-BOOT.BIN
-cp research/iso/kfaI.iso research/builds/kfaI-counter.iso
-./kfa iso put research/builds/kfaI-counter.iso PSP_GAME/SYSDIR/EBOOT.BIN research/builds/kfaI-counter-BOOT.BIN
+./kfa patch subtitles research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/subs/kfaI-movie000.tsv research/builds/kfaI-sub-BOOT.BIN
+cp research/builds/kfaI-text.iso research/builds/kfaI-sub.iso
+./kfa iso put research/builds/kfaI-sub.iso PSP_GAME/SYSDIR/EBOOT.BIN research/builds/kfaI-sub-BOOT.BIN
 ```
+
+`kfa patch counter` builds the counter test the same way.
 
 ## Other discs
 

@@ -13,7 +13,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 | Text | Export and in-place import built; translated text seen in game |
 | Images | Export and in-place JPEG and GIM import built; English town map and status overlay seen in game |
 | Fonts | Format known; ASCII glyphs present |
-| Movies | All have burned-in Japanese narration |
+| Movies | All have burned-in Japanese narration; English subtitles drawn over the opening (`movie000`) in game |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
 
 ## Requirements
