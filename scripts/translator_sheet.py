@@ -29,7 +29,9 @@ fmg.json. An empty cell removes the translation. A cell that lost its
 trailing line breaks gets back as many as the old English had (or the
 Japanese, for a new line). It warns about dialogue lines over 52 characters,
 and about English with more than 3 lines and more lines than the Japanese
-(docs/kfa1/0004-text.md).
+(docs/kfa1/0004-text.md). It also lists changed lines the build will not
+write: a character with no Shift-JIS code (for example é), or a
+name, menu or block over its max bytes.
 """
 import csv
 import hashlib
@@ -107,7 +109,14 @@ def export(game, out):
 
 
 def warn(row, en, ja):
+    try:
+        size = len(en.replace("\n", "\r\n").encode("cp932"))
+    except UnicodeEncodeError as err:
+        print(f"not written {row['where']}: {en[err.start]!r} has no Shift-JIS code", file=sys.stderr)
+        return
     if row["kind"] != "text":
+        if row["max"] and size > int(row["max"]):
+            print(f"not written {row['where']}: {size} bytes, room for {row['max']}", file=sys.stderr)
         return
     lines = [ln for ln in en.split("\n") if ln.strip()]
     jlines = [ln for ln in ja.split("\n") if ln.strip()]
@@ -157,8 +166,9 @@ def import_(game, src):
             en += "\n" * trailing(prev if prev else e["ja"])
         if en != prev:
             changed += 1
+            if en:
+                warn(r, en, e["ja"])
         if en:
-            warn(r, en, e["ja"])
             old[r["id"]] = {"key": r["id"], "kind": e["kind"], "where": e["where"][:1],
                             "max": e["max"], "en": en}
         else:
