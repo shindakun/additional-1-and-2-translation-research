@@ -93,6 +93,33 @@ Stored in the code space after the code:
 
 Text is Shift-JIS with ASCII. Frame numbers count calls of the patched draw function.
 
+## Font calls in order
+
+`FsFontDrawText` only queues glyphs. The patch uses the sequence of `CAdvMenuPrinter::Begin` and `End`:
+
+1. `FsFontSetCurrent(font)` (`0x14C1C`)
+2. `FsFontBegin()` (`0x168F4`)
+3. `FsFontSetScale(1.0, 1.0)` (`0x150E8`, `$f12`, `$f13`)
+4. `FsFontSetAlignment`, `FsFontSetBaseColor`, `FsFontDrawText` for each pass
+5. `FsFontEnd()` (`0x16958`) draws the queued glyphs
+6. `sceGuDisable` for states 10, 7 and 1
+
+`FsFontBegin` writes through the draw-state pointer at `0x1415FC`. `FsFontInit` sets it when the first font loads (`CFont::Init`, `0xC044`). The patch skips the text while the pointer is zero.
+
+## Counter results
+
+Test: `kfa patch counter`, run headless for 300 emulated seconds.
+
+- The first play of the opening at boot shows no counter: no font is loaded yet, so the guard skips the text. The game does not crash.
+- After the title screen the opening replays (attract loop). The counter shows at (16, 16) in white with a black shadow.
+- The counter rises by 600 in 20 seconds: one step per video frame at 29.97 fps. Subtitle times in seconds convert to frames by × 29.97.
+- The counter does not reset between plays. It counted about 4,230 frames during the first play (141 s).
+
+Remaining problems:
+
+1. The first play at boot has no font. The subtitles need the font loaded before that play, or their own glyph drawing.
+2. The counter must reset when a movie starts.
+
 ## Timing
 
 The narration appears at known times in the video. [0011](0011-movie-script.md) lists the text and its approximate times. The counter rate is not known: the game loop and the 29.97 fps video can differ. A first test build draws the counter on screen so the rate can be read against the video.
@@ -101,7 +128,7 @@ The narration appears at known times in the video. [0011](0011-movie-script.md) 
 
 | Build | Shows | State |
 |---|---|---|
-| Frame counter | Hook runs; counter rate | Built (`kfa patch counter`); not yet seen on screen |
+| Frame counter | Hook runs; counter rate | Done; see results |
 | One subtitle | Font, shadow and position | Not built |
 | Full table, movie000 | Timing against the narration | Not built |
 

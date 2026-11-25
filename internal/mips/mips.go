@@ -55,6 +55,9 @@ func Jr(rs uint32) uint32 { return rtype(rs, 0, 0, 0x08) }
 // Jalr encodes jalr rs, linking to ra.
 func Jalr(rs uint32) uint32 { return rtype(rs, 0, RA, 0x09) }
 
+// Beq encodes beq rs, rt, off (branch to pc+4+off*4).
+func Beq(rs, rt uint32, off int32) uint32 { return itype(4, rs, rt, off) }
+
 // Mtc1 moves a general register to floating-point register fs.
 func Mtc1(rt, fs uint32) uint32 { return 0x11<<26 | 4<<21 | rt<<16 | fs<<11 }
 

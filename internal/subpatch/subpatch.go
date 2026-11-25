@@ -23,6 +23,10 @@ type Addrs struct {
 	SetColor      uint32 // FsFontSetBaseColor
 	SetAlign      uint32 // FsFontSetAlignment
 	DrawText      uint32 // FsFontDrawText
+	SetScale      uint32 // FsFontSetScale
+	Begin, End    uint32 // FsFontBegin, FsFontEnd: queue glyphs, then draw them
+	DrawState     uint32 // word FsFontInit sets; zero until the first font loads
+	GuDisable     uint32 // sceGuDisable
 	Sprintf       uint32 // sprintf
 }
 
@@ -32,7 +36,9 @@ var known = map[string]Addrs{
 		DrawCall: 0x3EB30, MovieDraw: 0xB35D0,
 		Cave: 0xF232C, CaveEnd: 0xF232C + 6552,
 		FontPtr: 0x1262F4, SetCurrent: 0x14C1C, SetColor: 0x14EA0,
-		SetAlign: 0x15168, DrawText: 0x15288, Sprintf: 0xFE6F0,
+		SetAlign: 0x15168, DrawText: 0x15288, SetScale: 0x150E8,
+		Begin: 0x168F4, End: 0x16958, GuDisable: 0xC4B4C, Sprintf: 0xFE6F0,
+		DrawState: 0x1415FC,
 	},
 }
 
@@ -100,7 +106,7 @@ func Counter(boot []byte, x, y float32) ([]byte, error) {
 	b.p.Emit(mips.Or(mips.S0, mips.RA, mips.Zero))
 
 	// Data follows the code; reserve its addresses first.
-	const codeWords = 128
+	const codeWords = 192
 	data := a.Cave + codeWords*4
 	counter, buf, format := data, data+4, data+36
 
@@ -116,9 +122,22 @@ func Counter(boot []byte, x, y float32) ([]byte, error) {
 	b.addr(mips.A1, format)
 	b.call(a.Sprintf)
 
+	// No font is loaded during the first opening movie: FsFontInit has not
+	// set the draw state, and FsFontBegin would write through a null pointer.
+	b.addr(mips.T1, a.DrawState)
+	b.p.Emit(mips.Lw(mips.T0, mips.T1, 0))
+	skip := len(b.p.Words)
+	b.p.Emit(mips.Beq(mips.T0, mips.Zero, 0), mips.Nop()) // offset set below
+
+	// The sequence CAdvMenuPrinter uses: set the font, begin, scale, draw,
+	// end. FsFontDrawText only queues glyphs; FsFontEnd draws them.
 	b.addr(mips.T1, a.FontPtr)
 	b.p.Emit(mips.Lw(mips.A0, mips.T1, 0))
 	b.call(a.SetCurrent)
+	b.call(a.Begin)
+	b.floatArg(12, 1)
+	b.floatArg(13, 1)
+	b.call(a.SetScale)
 	b.p.Emit(mips.Or(mips.A0, mips.Zero, mips.Zero))
 	b.call(a.SetAlign)
 	// Shadow first, then the text: black one pixel down and right, white on top.
@@ -133,7 +152,13 @@ func Counter(boot []byte, x, y float32) ([]byte, error) {
 		b.addr(mips.A0, buf)
 		b.call(a.DrawText)
 	}
+	b.call(a.End)
+	for _, state := range []int32{10, 7, 1} { // as CAdvMenuPrinter::End
+		b.p.Emit(mips.Addiu(mips.A0, mips.Zero, state))
+		b.call(a.GuDisable)
+	}
 
+	b.p.Words[skip] = mips.Beq(mips.T0, mips.Zero, int32(len(b.p.Words)-skip-1))
 	b.p.Emit(
 		mips.Lw(mips.RA, mips.SP, 32),
 		mips.Lw(mips.S0, mips.SP, 36),

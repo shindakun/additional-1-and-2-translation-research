@@ -65,6 +65,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
 | `scripts/prx_unreferenced.py` | List functions no relocation or branch refers to |
+| `scripts/headless_shots.sh` | Screenshots of an image at emulated times, no window |
 | `scripts/ghidra/analyze.sh` | Decompile the executables with Ghidra |
 | `scripts/boot_info.py`, `gameinfo_dump.py`, `maindat_survey.py` | Early survey tools |
 

@@ -19,6 +19,7 @@ func TestEncodings(t *testing.T) {
 		{"jalr t9", Jalr(T9), 0x0320F809},
 		{"mtc1 t0,$f12", Mtc1(T0, 12), 0x44886000},
 		{"bal +1", Bal(1), 0x04110001},
+		{"beq s2,zero,+0x3b", Beq(18, Zero, 0x3B), 0x1240003B},
 	} {
 		if c.got != c.want {
 			t.Errorf("%s: got %#08x, want %#08x", c.name, c.got, c.want)
