@@ -61,7 +61,7 @@ var known = map[string]Addrs{
 		DelFont: 0x10910, BinderDelete: 0x257C0, ExitCall: 0x3EB58, ExitTarget: 0xB33FC,
 		FileCall: 0x3E998, FileTarget: 0xAFCC, BootCall: 0x688C4, BootTarget: 0x689A4, SysTime: 0x11C444,
 		TableLoad: 0x59A70, BaseStore: 0x59BC8, Cave2: 0xC877C, Cave2End: 0xC877C + 1712,
-	}, "4f8cd62a3a35ca37f8cf0cf233e73348056bdb9a": { // Additional II, mapped by scripts/map_boot.py (docs/kfa2/0001)
+	}, "4f8cd62a3a35ca37f8cf0cf233e73348056bdb9a": { // Additional II, mapped by scripts/map_boot.py (docs/kfa2/0002)
 		DrawCall: 0x3EBE8, MovieDraw: 0xB3668,
 		Cave: 0xF252C, CaveEnd: 0xF252C + 6552,
 		FontPtr: 0x1264F4, SetCurrent: 0x14CD4, SetColor: 0x14F58,

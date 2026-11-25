@@ -8,7 +8,7 @@ script searches TO for the same 16 words around it, with jal targets and
 16-bit immediates masked, and prints the unique match. For a data address
 (not inside a matched code pattern) it finds an instruction pair in FROM that
 builds the address (lui, then an addiu/ori/lw/sw/lb/lbu on the same register)
-and reads the same pair at the matching place in TO. See docs/kfa2/0001.
+and reads the same pair at the matching place in TO. See docs/kfa2/0002.
 """
 import struct
 import sys

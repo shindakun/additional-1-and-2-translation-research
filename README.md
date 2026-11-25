@@ -115,4 +115,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 
 | Document | Subject |
 |---|---|
-| [0001](docs/kfa2/0001-initial-findings.md) | Disc, differences from Additional I, tool results |
+| [0001](docs/kfa2/0001-initial-findings.md) | Disc, differences from Additional I, first tool results |
+| [0002](docs/kfa2/0002-boot-addresses.md) | `BOOT.BIN` addresses for the patches |
+| [0003](docs/kfa2/0003-images.md) | Image text |
+| [0004](docs/kfa2/0004-translation.md) | Translation and builds |

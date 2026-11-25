@@ -23,7 +23,7 @@ The layout of `main.dat` is in [kfa1/0003](../kfa1/0003-maindat.md). The keys ar
 | `kfa fmg export` | 316 messages; 311 are the same as in Additional I |
 | `kfa img export` | 1,499 images, 475 unique |
 | `kfa font pad` | Pads `BitFont_Game12.bnd` without errors |
-| `kfa patch subtitles`, `kfa patch chunkbase` | Apply; see [BOOT.BIN](#bootbin) |
+| `kfa patch subtitles`, `kfa patch chunkbase` | Refused: `BOOT.BIN` is not known ([0002](0002-boot-addresses.md)) |
 
 ## Text
 
@@ -39,56 +39,16 @@ The block names show the areas ([kfa1/0004](../kfa1/0004-text.md#block-header)).
 
 ## Images
 
-91 of the 475 unique images have the same bytes as an Additional I image. The images edited for Additional I ([kfa1/0012](../kfa1/0012-images.md)) have counterparts with other bytes; a comparison of 32 × 32 grayscale thumbnails finds them:
+91 of the 475 unique images have the same bytes as an Additional I image. None of the seven images edited for Additional I ([kfa1/0012](../kfa1/0012-images.md)) is among them. [0003](0003-images.md) finds their counterparts.
 
-| Additional I | Additional II | Mean difference (0–255) |
-|---|---|---|
-| `c000_20.jpg`, `c000_19.jpg` (town maps) | `c000_15.jpg`, `c000_14.jpg` | 9, 11: the town is in ruins; the labels are at the same places |
-| `c009_04.jpg` (status screen) | `c011_04.jpg` | 0.9 |
-| `c004_04.jpg`, `c004_06.jpg` (roulette) | `c004_04.jpg`, `c004_06.jpg` | 0 |
-| `c000_00.gim` (shop panels) | `c000_00.gim` | 0.3 |
-| `g_02aa00.gim` (HUD atlas) | `g_02afe0.gim` | 0.1 |
-
-The Additional I specs apply with two changes on the full town map: the Inn label is 4 pixels further right and the Smithy label is 4 pixels wider (pixel diff of the two maps). `research/img/edit/kfaII-specs` holds the specs; each budget is the size of the Additional II file. The Additional II JPEGs are more compressed: the edits fit at quality 78 to 85.
-
-## BOOT.BIN
-
-The patches identify `BOOT.BIN` by a code range; Additional II has its own entry in `subpatch`. `scripts/map_boot.py FROM.BIN TO.BIN ADDR...` maps each Additional I address:
-
-- Code: the same 16 words around the address, with `jal` targets and 16-bit immediates masked, must match once.
-- Data in segment 0 (`FontPtr`): the `lui` pairs that build the address; 37 sites agree.
-- Data in segment 1: instructions hold offsets from the segment base, `0x13D4A0` in Additional I and `0x13D6A0` in Additional II. All matching instructions hold the same offsets (3 for `DrawState`, 64 for `FileSystem`).
-- The `sceKernelGetSystemTimeWide` stub: import stubs have the same code, so the address comes from the `jal` at a matching call site.
-
-| Address | Additional I | Additional II |
-|---|---|---|
-| Movie draw call, target | `0x3EB30`, `0xB35D0` | `0x3EBE8`, `0xB3668` |
-| Movie exit call, target | `0x3EB58`, `0xB33FC` | `0x3EC10`, `0xB3490` |
-| Movie file call, target | `0x3E998`, `0xAFCC` | `0x3EA50`, `0xB084` |
-| Boot movie call, target | `0x688C4`, `0x689A4` | `0x68954`, `0x68A34` |
-| Chunk table load, base store | `0x59A70`, `0x59BC8` | `0x59B44`, `0x59C9C` |
-| Code spaces | `0xF232C` (6,552), `0xC877C` (1,712) | `0xF252C` (6,552), `0xC897C` (1,712) |
-| Font: set current, color, align, draw, scale | `0x14C1C`, `0x14EA0`, `0x15168`, `0x15288`, `0x150E8` | `0x14CD4`, `0x14F58`, `0x15220`, `0x15340`, `0x151A0` |
-| Font: begin, end, set, delete | `0x168F4`, `0x16958`, `0x107FC`, `0x10910` | `0x169AC`, `0x16A10`, `0x108B4`, `0x109C8` |
-| `sceGuDisable`, `sprintf`, `AllocRead`, `CBinder::Delete` | `0xC4B4C`, `0xFE6F0`, `0xACA8`, `0x257C0` | `0xC4D4C`, `0xFE8F0`, `0xAD60`, `0x25878` |
-| Font pointer, draw state, file system | `0x1262F4`, `0x1415FC`, `0x1529E8` | `0x1264F4`, `0x1417FC`, `0x152BE8` |
-| System time stub | `0x11C444` | `0x11C64C` |
-
-No relocation reaches either code space. Both patches accept the file: each checks the expected instruction and relocation at its hooks.
-
-Test: `kfa patch subtitles --boot-font` with one line on `movie000`, then `kfa patch chunkbase`. Headless PPSSPP shows the line over the boot movie, then the title and the town map. No fatal error.
+## Title menu
 
 The title menu has a third item, `DATA CONVERT`. Additional I offers to save clear data for Additional II at its end (global text 3203, [kfa1/0004](../kfa1/0004-text.md)); the link between the two is not yet checked.
 
-## First build
+## Later documents
 
-`scripts/text_merge.py` carries 1,533 of the 2,385 Additional I translations into `research/text/kfaII-test.json`; the other 852 have no matching entry in Additional II. 180 FMG messages carry over by ID; the five that differ get `KFA II`. `scripts/build_english.sh kfaII` builds `research/builds/kfaII-english.iso` ([kfa1/0009](../kfa1/0009-test-builds.md)): 39,200 slots in place, 947 strings moved, 63 chunks relocated, nothing refused. With no subtitle tables, the build skips the subtitle patch and applies only the chunk base patch.
-
-Headless PPSSPP: the town and the status overlay. Menu text from the carried-over English shows (`Status`, `Items`, `Magic`, `Camp`, `Short Sword`). With the seven edited images, the town map and the status overlay are English too.
-
-## Next steps
-
-1. Translate the new entries. `scripts/gen_items.py` fills the found, used, priced and description entries from the item tables (165 entries, with 17 names and 15 description lines added to the tables). The new command, person and area names are done. The dialogue and message entries (1,298) go in batches of index-to-English TSV files, `research/text/kfaII-bN.tsv`. Many sources end in extra line breaks; `scripts/tail_breaks.py` copies the same number onto each English line. Batches 1 and 2 (town people, merchants, guards, tavern, casino and the verse that retells Additional I) set 330 entries; 968 remain.
-2. Find image text that Additional I does not have, for example the new casino games.
-3. Transcribe the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
-4. A build script for Additional II and a headless test.
+| Document | Subject |
+|---|---|
+| [0002](0002-boot-addresses.md) | `BOOT.BIN` addresses for the patches |
+| [0003](0003-images.md) | Image text |
+| [0004](0004-translation.md) | Translation and builds |
