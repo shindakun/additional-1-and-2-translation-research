@@ -70,4 +70,4 @@ English text can use the existing ASCII glyphs at a fixed 8-pixel advance: 60 ch
 
 `kfa font pad IN.bnd OUT.bnd` moves the 94 printable ASCII glyphs (`0x21`–`0x7E`) to page 7 (`Tex01`, layer 3), each in a 10 × 18 slot with a blank border, and changes their texture coordinates. Each pixel keeps the states of the other three layers. In `BitFont_Game12`, page 7 has room for about 800 such slots. All 21 `BitFont_GameNN.bnd` fonts and the copy in `AdvMenu.bnd` pad without a size change. `scripts/build_english.sh` pads them all.
 
-The test checks that each moved glyph has the original ink and a blank border, and that layers 0–2 of `Tex01` do not change. Headless PPSSPP at 1× shows the subtitles and the menu text unchanged. The effect at a raised render resolution needs a check in the PPSSPP app.
+The test checks that each moved glyph has the original ink and a blank border, and that layers 0–2 of `Tex01` do not change. Headless PPSSPP at 1× shows the subtitles and the menu text unchanged. In the PPSSPP app at a raised render resolution, the text shows no slivers.
