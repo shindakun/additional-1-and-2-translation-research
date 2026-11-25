@@ -11,7 +11,7 @@ The movie format, the subtitle patch and the method are in [kfa1/0006](../kfa1/0
 
 Times are seconds from the first frame. Each block starts 1 s before the Japanese and ends about 1 s after it. The opening times come from a 10 fps edge count ([kfa1/0011](../kfa1/0011-movie-script.md)); the others from one frame every 2 s, ±1 s. `/` marks a line break.
 
-The English is a draft. Names follow [kfa1/0004](../kfa1/0004-text.md#proper-names).
+The English is a draft machine translation. Names follow [kfa1/0004](../kfa1/0004-text.md#proper-names).
 
 ## movie201 (opening)
 

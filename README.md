@@ -2,6 +2,8 @@
 
 Format research and tools for the PSP games King's Field Additional I (ULJS-00070) and King's Field Additional II (ULJS-00076). The goal is an English translation that runs on PPSSPP and on PSP hardware with custom firmware.
 
+**The current English is a draft machine translation.** No person has checked it against the Japanese yet. Expect wrong meanings, awkward wording and names that may change. Corrections are welcome: `scripts/translator_sheet.py` writes a CSV with the Japanese and English side by side ([kfa1/0004](docs/kfa1/0004-text.md#translator-sheet)).
+
 The repository holds no game data and no keys. The scripts read both from your own disc images.
 
 ## Status
@@ -10,11 +12,21 @@ The repository holds no game data and no keys. The scripts read both from your o
 |---|---|
 | Disc file system, BND, FMG | Parsed |
 | `main.dat` container and encryption | Decoded and verified for both games |
-| Text | Both games: all `main.dat` and FMG text a player sees has a first-draft English; chunks grow and relocate for longer English; seen in game |
-| Images | Both games: the town map, status screen, HUD, shop panels and roulette images edited; seen in game |
+| Text | Both games: all `main.dat` and FMG text a player sees has a draft machine translation; chunks grow and relocate for longer English; seen in game |
+| Images | Both games: the town map, status screen, HUD, shop panels and roulette images edited; seen in game. Additional II: the Slots labels edited, not seen in game |
 | Fonts | Format known; ASCII glyphs padded against filtering slivers (`kfa font pad`) |
-| Movies | All have burned-in Japanese narration. Additional I: English subtitle tables for all four movies. Additional II: tables for all seven. The openings are seen in game |
+| Movies | All have burned-in Japanese narration. Additional I: English subtitle tables for all four movies. Additional II: tables for all seven. The subtitles are a draft machine translation. The openings are seen in game |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
+
+## Patches
+
+The [releases](https://github.com/shindakun/additional-1-and-2-translation-research/releases) hold xdelta3 patches, one per game, with their own version numbers (`kfaI-v…`, `kfaII-v…`). Each release has a readme with the SHA-256 of the original and the patched ISO. Apply a patch to your own ISO:
+
+```sh
+xdelta3 -d -B 1073741824 -s ORIGINAL.iso kfaI-english-0.1.1.xdelta kfaI-english.iso
+```
+
+The patches are pre-releases of the draft machine translation.
 
 ## Requirements
 

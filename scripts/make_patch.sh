@@ -40,7 +40,7 @@ Original ISO SHA-256: $(sum "$orig")
 Patched ISO SHA-256:  $(sum "$built")
 Patch SHA-256:        $(sum "$out/$name.xdelta")
 
-The English is a first draft. The patch changes main.dat (text, images),
+The English is a draft machine translation. The patch changes main.dat (text, images),
 AdvSys.bnd (system messages), the fonts and EBOOT.BIN (movie subtitles and
 the loader change for longer text). It runs on PPSSPP; on PSP hardware it
 needs custom firmware to run the unencrypted EBOOT.BIN.
