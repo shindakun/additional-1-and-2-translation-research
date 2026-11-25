@@ -15,36 +15,43 @@ import (
 
 // Addrs holds the addresses one BOOT.BIN needs.
 type Addrs struct {
-	DrawCall      uint32 // the jal to CAcffMovie::Draw in CSimpleMovieScene::Draw
-	MovieDraw     uint32 // CAcffMovie::Draw
-	Cave, CaveEnd uint32 // unreferenced function used as code space
-	FontPtr       uint32 // word holding the current font
-	SetCurrent    uint32 // FsFontSetCurrent
-	SetColor      uint32 // FsFontSetBaseColor
-	SetAlign      uint32 // FsFontSetAlignment
-	DrawText      uint32 // FsFontDrawText
-	SetScale      uint32 // FsFontSetScale
-	Begin, End    uint32 // FsFontBegin, FsFontEnd: queue glyphs, then draw them
-	DrawState     uint32 // word FsFontInit sets; zero until the first font loads
-	FileSystem    uint32 // the CFileSystem object
-	AllocRead     uint32 // CFileSystem::AllocRead(void**, path, ...)
-	SetFont       uint32 // CFontMng::SetFont(mng, slot, bnd, 1, 0, 0, 0, 0)
-	DelFont       uint32 // CFontMng::DelFont(mng, slot)
-	BinderDelete  uint32 // CBinder::Delete; frees the buffer the binder owns
-	ExitCall      uint32 // the first jal in CSimpleMovieScene::Exit
-	ExitTarget    uint32 // its target
-	FileCall      uint32 // the jal in CSimpleMovieScene::SetMovieFile; a2 is the path
-	FileTarget    uint32 // its target
-	BootCall      uint32 // the jal that starts movie000 at boot (FUN_00068820)
-	BootTarget    uint32 // its target
-	SysTime       uint32 // sceKernelGetSystemTimeWide import stub; v0 = low word, microseconds
-	GuDisable     uint32 // sceGuDisable
-	Sprintf       uint32 // sprintf
+	DrawCall        uint32 // the jal to CAcffMovie::Draw in CSimpleMovieScene::Draw
+	MovieDraw       uint32 // CAcffMovie::Draw
+	Cave, CaveEnd   uint32 // unreferenced function used as code space
+	FontPtr         uint32 // word holding the current font
+	SetCurrent      uint32 // FsFontSetCurrent
+	SetColor        uint32 // FsFontSetBaseColor
+	SetAlign        uint32 // FsFontSetAlignment
+	DrawText        uint32 // FsFontDrawText
+	SetScale        uint32 // FsFontSetScale
+	Begin, End      uint32 // FsFontBegin, FsFontEnd: queue glyphs, then draw them
+	DrawState       uint32 // word FsFontInit sets; zero until the first font loads
+	FileSystem      uint32 // the CFileSystem object
+	AllocRead       uint32 // CFileSystem::AllocRead(void**, path, ...)
+	SetFont         uint32 // CFontMng::SetFont(mng, slot, bnd, 1, 0, 0, 0, 0)
+	DelFont         uint32 // CFontMng::DelFont(mng, slot)
+	BinderDelete    uint32 // CBinder::Delete; frees the buffer the binder owns
+	ExitCall        uint32 // the first jal in CSimpleMovieScene::Exit
+	ExitTarget      uint32 // its target
+	FileCall        uint32 // the jal in CSimpleMovieScene::SetMovieFile; a2 is the path
+	FileTarget      uint32 // its target
+	BootCall        uint32 // the jal that starts movie000 at boot (FUN_00068820)
+	BootTarget      uint32 // its target
+	SysTime         uint32 // sceKernelGetSystemTimeWide import stub; v0 = low word, microseconds
+	TableLoad       uint32 // lw s2, 8(a0) in the chunk loader: the chunk table offset
+	BaseStore       uint32 // sw s2, 0x2C4(s0): the chunk base for pointer math
+	Cave2, Cave2End uint32 // second unreferenced function, for the chunk-base stubs
+	GuDisable       uint32 // sceGuDisable
+	Sprintf         uint32 // sprintf
 }
 
-// known maps BOOT.BIN SHA-1 to its addresses.
+// idRange is the part of BOOT.BIN that identifies it: code that no patch in
+// this package changes, so a patched file is still known.
+const idStart, idEnd = 0x1000, 0x30000
+
+// known maps the SHA-1 of BOOT.BIN bytes idStart to idEnd to its addresses.
 var known = map[string]Addrs{
-	"e62c3559fc94e9c917081bdf5bbf8dd5713ef1ae": { // Additional I
+	"e091c0eaf910542500d4e58d10091fd7a384bfa0": { // Additional I
 		DrawCall: 0x3EB30, MovieDraw: 0xB35D0,
 		Cave: 0xF232C, CaveEnd: 0xF232C + 6552,
 		FontPtr: 0x1262F4, SetCurrent: 0x14C1C, SetColor: 0x14EA0,
@@ -53,12 +60,16 @@ var known = map[string]Addrs{
 		DrawState: 0x1415FC, FileSystem: 0x1529E8, AllocRead: 0xACA8, SetFont: 0x107FC,
 		DelFont: 0x10910, BinderDelete: 0x257C0, ExitCall: 0x3EB58, ExitTarget: 0xB33FC,
 		FileCall: 0x3E998, FileTarget: 0xAFCC, BootCall: 0x688C4, BootTarget: 0x689A4, SysTime: 0x11C444,
+		TableLoad: 0x59A70, BaseStore: 0x59BC8, Cave2: 0xC877C, Cave2End: 0xC877C + 1712,
 	},
 }
 
 // AddrsFor returns the addresses for a known BOOT.BIN.
 func AddrsFor(boot []byte) (Addrs, error) {
-	sum := sha1.Sum(boot)
+	if len(boot) < idEnd {
+		return Addrs{}, errors.New("subpatch: BOOT.BIN too short")
+	}
+	sum := sha1.Sum(boot[idStart:idEnd])
 	a, ok := known[hex.EncodeToString(sum[:])]
 	if !ok {
 		return a, errors.New("subpatch: unknown BOOT.BIN")

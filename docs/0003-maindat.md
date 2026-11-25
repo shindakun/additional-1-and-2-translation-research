@@ -153,3 +153,13 @@ Additional I addresses (Ghidra, base 0).
 | `FUN_00056450` | Decrypts a loaded unit by slot |
 | `FUN_000635e4` | Load state machine; checks magic and version |
 | `FUN_0001dd1c`, `FUN_0001f520` | AES block encrypt and decrypt |
+
+## Relocation
+
+`File.Relocate(units, i, n)` moves chunk unit `i` to the end of the file with room for `n` bytes:
+
+1. The new offset is the file end rounded up to 0x800. The file grows to the new chunk end, rounded up to 0x800.
+2. The chunk table entry in the body unit gets the new size (word 0) and the new offset (word 2). Word 3, zero on the disc, gets the old offset, once.
+3. The unit data grows to `n` bytes.
+
+`Pack` then writes the file size into the header (`0x18`), encrypts every unit at its offset and signs the file. The loader takes chunks of up to 0x500000 bytes; `Relocate` refuses a larger size. The chunk keeps its pointers; the patched loader uses word 3 as their base ([0004](0004-text.md#chunk-relocation)).

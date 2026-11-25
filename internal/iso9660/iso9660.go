@@ -120,3 +120,86 @@ func Replace(w io.WriterAt, f File, data []byte) error {
 	_, err := w.WriteAt(both[:], f.Record+10)
 	return err
 }
+
+// ReadWriterAt reads and writes an image in place.
+type ReadWriterAt interface {
+	io.ReaderAt
+	io.WriterAt
+}
+
+func putBoth(b []byte, v uint32) {
+	binary.LittleEndian.PutUint32(b[:4], v)
+	binary.BigEndian.PutUint32(b[4:], v)
+}
+
+// volumeSectors returns the volume space size from the primary volume
+// descriptor.
+func volumeSectors(r io.ReaderAt) (int64, error) {
+	var b [4]byte
+	if _, err := r.ReadAt(b[:], 16*SectorSize+80); err != nil {
+		return 0, err
+	}
+	return int64(binary.LittleEndian.Uint32(b[:])), nil
+}
+
+// Grow writes data over file f in rw like Replace, but data can be larger
+// than the sectors f holds. Every file that lies in the sectors f needs
+// moves to the end of the image: its data is copied there and its directory
+// record points to the new place. The volume space size in the primary
+// volume descriptor grows to match. Files are found by path, so moving them
+// does not change what a program reads.
+func Grow(rw ReadWriterAt, img *Image, f File, data []byte) error {
+	need := (int64(len(data)) + SectorSize - 1) / SectorSize
+	if need <= f.Sectors() {
+		return Replace(rw, f, data)
+	}
+	end, err := volumeSectors(rw)
+	if err != nil {
+		return err
+	}
+	for _, g := range img.Files {
+		if g.Extent+uint32(g.Sectors()) > uint32(end) {
+			end = int64(g.Extent) + g.Sectors()
+		}
+	}
+	lo, hi := int64(f.Extent)+f.Sectors(), int64(f.Extent)+need
+	// Moved files go after the grown file, even when it reaches past the
+	// old end of the volume.
+	end = max(end, hi)
+	for i := range img.Files {
+		g := &img.Files[i]
+		if g.Path == f.Path || int64(g.Extent) >= hi || int64(g.Extent)+g.Sectors() <= lo {
+			continue
+		}
+		b, err := img.Read(*g)
+		if err != nil {
+			return err
+		}
+		padded := make([]byte, g.Sectors()*SectorSize)
+		copy(padded, b)
+		if _, err := rw.WriteAt(padded, end*SectorSize); err != nil {
+			return err
+		}
+		var rec [8]byte
+		putBoth(rec[:], uint32(end))
+		if _, err := rw.WriteAt(rec[:], g.Record+2); err != nil {
+			return err
+		}
+		g.Extent = uint32(end)
+		end += g.Sectors()
+	}
+	var vol [8]byte
+	putBoth(vol[:], uint32(end))
+	if _, err := rw.WriteAt(vol[:], 16*SectorSize+80); err != nil {
+		return err
+	}
+	// Extend the image to the new volume size; keep the last byte.
+	last := make([]byte, 1)
+	_, _ = rw.ReadAt(last, end*SectorSize-1) // past the end reads as zero
+	if _, err := rw.WriteAt(last, end*SectorSize-1); err != nil {
+		return err
+	}
+	g := f
+	g.Size = uint32(need * SectorSize)
+	return Replace(rw, g, data)
+}

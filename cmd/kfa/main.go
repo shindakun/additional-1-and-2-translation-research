@@ -28,6 +28,7 @@ import (
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/images"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/iso9660"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/maindat"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/relayout"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/sjis"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/subpatch"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/text"
@@ -103,6 +104,8 @@ func run() error {
 		err = gimScan(args[2:])
 	case "patch subtitles":
 		err = patchSubtitles(args[2:])
+	case "patch chunkbase":
+		err = patchChunkBase(args[2:])
 	case "patch counter":
 		err = patchCounter(args[2:])
 	default:
@@ -148,8 +151,9 @@ Commands:
                                    Write translations into a copy of main.dat,
                                    or of BASE.dat (for example the output of
                                    img import). A text string that does not
-                                   fit moves to space freed by re-encoding a
-                                   JPEG of its chunk. Reports the rest.
+                                   fit moves to free space in its unit; a
+                                   chunk that runs out grows and moves to the
+                                   end of main.dat. Reports the rest.
                                    (GAMEDIR is an extracted PSP_GAME folder)
   fmg export GAMEDIR OUT.json      Write the FMG messages in AdvSys.bnd
   fmg import GAMEDIR IN.json OUT.bnd
@@ -178,6 +182,9 @@ Commands:
                                    ALIGN l, c or r at X pixels. --boot-font
                                    loads the game font for the movie at boot
                                    (docs/0010)
+  patch chunkbase BOOT.BIN OUT     Let the chunk loader take the pointer base
+                                   from the chunk table, for relocated chunks
+                                   (docs/0004)
   patch counter BOOT.BIN OUT       Draw a frame counter over movies (test build)
   version                          Print the version and exit
 `)
@@ -259,7 +266,7 @@ func isoPut(a []string) error {
 		_ = fh.Close() // error path; the lookup error is reported
 		return fmt.Errorf("%s not in image", a[1])
 	}
-	if err := iso9660.Replace(fh, f, data); err != nil {
+	if err := iso9660.Grow(fh, img, f, data); err != nil {
 		_ = fh.Close() // error path; the write error is reported
 		return err
 	}
@@ -606,12 +613,13 @@ func textImport(a []string) error {
 		return err
 	}
 	sp := newSpace(units)
-	r, probs := text.Apply(units, slots, entries, c, sp.alloc)
+	r, probs := text.Apply(units, slots, entries, c, sp)
 	for _, p := range probs {
 		fmt.Fprintf(os.Stderr, "not written: %s: %s (%q)\n", p.Where, p.Reason, p.EN)
 	}
-	if sp.err != nil {
-		return sp.err
+	chunks, err := sp.relocate(f)
+	if err != nil {
+		return err
 	}
 	if err := f.Pack(units); err != nil {
 		return err
@@ -619,39 +627,101 @@ func textImport(a []string) error {
 	if err := os.WriteFile(a[2], f.Raw, 0o644); err != nil {
 		return err
 	}
-	fmt.Printf("wrote %s: %d slots in place, %d strings moved (%d JPEGs re-encoded), %d not written\n",
-		a[2], r.Written, r.Moved, sp.shrunk, len(probs))
+	fmt.Printf("wrote %s: %d slots in place, %d strings moved, %d chunks relocated, %d not written\n",
+		a[2], r.Written, r.Moved, chunks, len(probs))
+	if chunks > 0 {
+		fmt.Println("relocated chunks need BOOT.BIN patched with kfa patch chunkbase")
+	}
 	return nil
 }
 
-// space hands out free bytes inside chunk units. It frees them by
-// re-encoding the chunk's largest JPEGs at a lower quality (docs/0004).
+// space hands out free bytes inside units (docs/0004): vacated slots, the
+// unused tail of the HUD atlas in the header unit, and new bytes at the end
+// of a chunk. A chunk that grows moves to the end of main.dat after the
+// import (see relayout).
 type space struct {
-	units  []maindat.Plain
-	free   map[int][][2]int // unit to free [offset, length] runs
-	ascii  map[int]bool     // units whose free space takes ASCII only
-	done   map[[2]int]int   // unit and image index to qualities tried
-	shrunk int
-	err    error
+	units []maindat.Plain
+	free  map[int][]freeRun // unit to free runs
+	grown map[int]int       // chunk unit to its original length
+	grow  bool              // chunks may grow
 }
 
-// shrinkQualities are tried in order. The disc JPEGs are about quality 85;
-// quality 80 frees about 4% of the JPEG bytes in chunk 0.
-var shrinkQualities = []int{80, 75}
+// EnableGrowth lets chunks grow once the free runs are used up.
+func (s *space) EnableGrowth() { s.grow = true }
+
+// freeRun is free space in a unit. An ascii run takes ASCII bytes only.
+type freeRun struct {
+	off, n int
+	ascii  bool
+}
 
 func newSpace(units []maindat.Plain) *space {
-	s := &space{units: units, free: map[int][][2]int{}, ascii: map[int]bool{}, done: map[[2]int]int{}}
+	s := &space{units: units, free: map[int][]freeRun{}, grown: map[int]int{}}
 	for i := range units {
 		if units[i].Name == "body" {
 			if off, n := gimFreeTail(units[i].Data); n > 0 {
-				s.free[i] = append(s.free[i], [2]int{off, n})
 				// The atlas is RGBA 5551: bit 7 of each high byte is alpha.
 				// ASCII bytes keep every pixel transparent.
-				s.ascii[i] = true
+				s.free[i] = append(s.free[i], freeRun{off, n, true})
 			}
 		}
 	}
 	return s
+}
+
+// Free returns a vacated slot to the unit's free runs.
+func (s *space) Free(unit, off, n int) {
+	s.free[unit] = append(s.free[unit], freeRun{off, n, false})
+}
+
+// Alloc takes the smallest free run that holds data. With none, a chunk
+// grows at its end, up to the loader's limit.
+func (s *space) Alloc(unit int, data []byte) (int, bool) {
+	n := len(data)
+	ascii := true
+	for _, c := range data {
+		if c >= 0x80 {
+			ascii = false
+		}
+	}
+	best := -1
+	for i, r := range s.free[unit] {
+		if r.n >= n && (ascii || !r.ascii) && (best < 0 || r.n < s.free[unit][best].n) {
+			best = i
+		}
+	}
+	if best >= 0 {
+		r := &s.free[unit][best]
+		off := r.off
+		r.off, r.n = r.off+n, r.n-n
+		return off, true
+	}
+	u := &s.units[unit]
+	if !s.grow || !strings.HasPrefix(u.Name, "chunks/") || len(u.Data)+n > maindat.MaxChunk {
+		return 0, false
+	}
+	if _, ok := s.grown[unit]; !ok {
+		s.grown[unit] = len(u.Data)
+	}
+	off := len(u.Data)
+	u.Data = append(u.Data, make([]byte, n)...)
+	return off, true
+}
+
+// relocate moves every grown chunk to the end of f. Pointers keep their
+// values; the patched loader takes their base from the chunk table
+// (kfa patch chunkbase, docs/0004).
+func (s *space) relocate(f *maindat.File) (int, error) {
+	for u := range s.grown {
+		// Original chunk sizes are multiples of 16, and the loader reads
+		// only whole blocks: a string in a partial last block shows as
+		// garbage. Pad to a full sector.
+		n := (len(s.units[u].Data) + 0x7FF) &^ 0x7FF
+		if err := relayout.Move(f, s.units, u, n); err != nil {
+			return 0, err
+		}
+	}
+	return len(s.grown), nil
 }
 
 // gimFreeTail finds the first swizzled GIM in data and returns the empty
@@ -694,60 +764,6 @@ func gimFreeTail(data []byte) (int, int) {
 		return 0, 0
 	}
 	return start + first*band, (bands - first) * band
-}
-
-func (s *space) alloc(unit int, data []byte) (int, bool) {
-	u := &s.units[unit]
-	n := len(data)
-	if s.err != nil {
-		return 0, false
-	}
-	if s.ascii[unit] {
-		for _, c := range data {
-			if c >= 0x80 {
-				return 0, false
-			}
-		}
-	}
-	for {
-		for i, r := range s.free[unit] {
-			if r[1] >= n {
-				s.free[unit][i] = [2]int{r[0] + n, r[1] - n}
-				return r[0], true
-			}
-		}
-		if !strings.HasPrefix(u.Name, "chunks/") {
-			return 0, false
-		}
-		list, err := images.List(u.Data, uint32(u.Off))
-		if err != nil {
-			s.err = err
-			return 0, false
-		}
-		// The largest JPEG with the fewest tries frees the most.
-		var pick *images.Entry
-		tries := len(shrinkQualities)
-		for i := range list {
-			e := &list[i]
-			k := s.done[[2]int{unit, e.Index}]
-			if e.Type == images.TypeJPEG && k < len(shrinkQualities) && (k < tries || k == tries && e.Size > pick.Size) {
-				pick, tries = e, k
-			}
-		}
-		if pick == nil {
-			return 0, false
-		}
-		s.done[[2]int{unit, pick.Index}]++
-		freed, err := images.ShrinkJPEG(u.Data, *pick, shrinkQualities[tries])
-		if err != nil {
-			s.err = fmt.Errorf("%s: %w", u.Name, err)
-			return 0, false
-		}
-		if freed > 0 {
-			s.shrunk++
-			s.free[unit] = append(s.free[unit], [2]int{pick.Off + pick.Size - freed, freed})
-		}
-	}
 }
 
 func writePNG(path string, g *gim.Image) error {
@@ -1272,4 +1288,23 @@ func padFonts(f *bnd.File) (int, error) {
 		}
 	}
 	return n, nil
+}
+
+func patchChunkBase(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	boot, err := os.ReadFile(a[0])
+	if err != nil {
+		return err
+	}
+	out, err := subpatch.ChunkBase(boot)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(a[1], out, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s\n", a[1])
+	return nil
 }

@@ -10,7 +10,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 |---|---|
 | Disc file system, BND, FMG | Parsed |
 | `main.dat` container and encryption | Decoded and verified for both games |
-| Text | Additional I: export and import built; translated text seen in game. Additional II: not started |
+| Text | Additional I: all `main.dat` text translated (first draft); chunks grow and relocate for longer English; seen in game. Additional II: not started |
 | Images | Additional I: export and import built; edited images seen in game. Additional II: not started |
 | Fonts | Format known; ASCII glyphs padded against filtering slivers (`kfa font pad`) |
 | Movies | All have burned-in Japanese narration. Additional I: English subtitles over `movie000` and `movie001`. Additional II: not started |

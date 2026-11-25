@@ -218,3 +218,14 @@ Limits:
 ## Other discs
 
 Additional II needs the same analysis: its `BOOT.BIN` differs, so every address above changes.
+
+## Chunk base patch
+
+`kfa patch chunkbase BOOT.BIN OUT` (`subpatch.ChunkBase`) changes the `main.dat` chunk loader (`FUN_000591B4`) for relocated chunks ([0004](0004-text.md#chunk-relocation)). It works on a file that already has the subtitle patch: patches identify `BOOT.BIN` by a code range (file offsets `0x1000`–`0x30000`) that no patch changes.
+
+| Hook | Original | Stub |
+|---|---|---|
+| `0x59A70` | `lw s2, 8(a0)`: the chunk table offset; `a0` is the entry | Loads `s2` the same way; saves word 3 of the entry, or `s2` when word 3 is 0 |
+| `0x59BC8` | `sw s2, 0x2C4(s0)`: the base for pointer math | Stores the saved value |
+
+The stubs are in a second unused function, `FUN_000C877C` (1,712 bytes). The hooked words had no relocation, and a `jal` needs one: the patch reuses two of the relocations that the code space no longer needs (`prx.Reuse`, type `R_MIPS_26`, segment 0). Both hooks overwrite `ra`: the loader saves `ra` in its prologue, and the word after the second hook is a `jal`. The stubs use `t0`–`t2`; after both hooks the loader writes those registers before it reads them. The instruction after each hook runs in the delay slot, as before.

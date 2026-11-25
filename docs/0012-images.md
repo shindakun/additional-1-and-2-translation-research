@@ -87,6 +87,6 @@ Specs in `research/img/edit`:
 
 ## Not built
 
-- Images larger than the original: they need chunk relayout ([0004](0004-text.md)).
+- Images larger than the original. Chunk relocation exists ([0004](0004-text.md#chunk-relocation)); `kfa img import` does not use it yet.
 
-`kfa text import` can re-encode JPEGs to free space for text ([0004](0004-text.md)). Run `kfa img import` first: it finds images by their original contents.
+Run `kfa img import` before `kfa text import`: img import finds images by their original contents, and text import can move a chunk ([0004](0004-text.md#chunk-relocation)).

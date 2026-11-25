@@ -38,20 +38,21 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 |---|---|---|
 | `kfa iso ls <iso>` | List files with sector and size | Built |
 | `kfa iso extract <iso> <dir>` | Write all files to a directory tree | Built |
-| `kfa iso put <iso> <path> <file>` | Replace a file in place; the new data must fit its sectors | Built |
+| `kfa iso put <iso> <path> <file>` | Replace a file; a larger file moves the files in its way to the end of the image | Built |
 | `kfa iso build <dir> <iso>` | Build a UMD image from a directory tree | Not built |
 | `kfa bnd ls <bnd>` | List entries, nested BNDs included | Built |
 | `kfa bnd unpack <bnd> <dir>` | Write entries | Built |
 | `kfa bnd pack <dir> <bnd>` | Build a BND from a directory and a manifest | Not built; `internal/bnd` writes BNDs |
 | `kfa dat verify <boot> <main.dat>` | Check keys and MD5; re-encrypt every unit | Built |
 | `kfa dat unpack <boot> <main.dat> <dir>` | Write every unit decrypted | Built |
-| `kfa dat pack <boot> <main.dat> <dir> <out>` | Encrypt units from a directory and re-sign | Built for units of unchanged size; a new layout is not built |
+| `kfa dat pack <boot> <main.dat> <dir> <out>` | Encrypt units from a directory and re-sign | Built for units of unchanged size; text import relocates grown chunks |
 | `kfa font vwf <in.bnd> <out.bnd> [gap] [space]` | Proportional ASCII metrics in every font inside a BND | Built |
+| `kfa patch chunkbase <boot> <out>` | Loader takes the pointer base from the chunk table ([0010](0010-subtitle-patch.md#chunk-base-patch)) | Built |
 | `kfa font pad <in> <out>` | Move ASCII glyphs to padded slots ([0005](0005-fonts.md#padding)) | Built |
 | `kfa patch counter <boot> <out>` | Frame counter over movies ([0010](0010-subtitle-patch.md)) | Built |
 | `kfa patch subtitles <boot> <out> <movie>=<tsv>...` | Subtitle lines over movies ([0010](0010-subtitle-patch.md)) | Built; a table for each movie |
 | `kfa text export <gamedir> <json>` | Translatable `main.dat` strings ([0004](0004-text.md)) | Built |
-| `kfa text import <gamedir> <json> <out> [base]` | Translations into `main.dat` | Built; long text strings move into space freed in their chunk |
+| `kfa text import <gamedir> <json> <out> [base]` | Translations into `main.dat` | Built; long strings move, chunks grow and relocate ([0004](0004-text.md#longer-strings)) |
 | `kfa fmg export`, `kfa fmg import` | FMG text out and in ([0013](0013-fmg.md)) | Built; byte-exact rebuild, seen in game |
 | `kfa gim topng`, `kfa gim scan` | GIM to PNG; every GIM inside a file ([0012](0012-images.md)) | Built |
 | `kfa img export`, `kfa img import` | Chunk and header images out and in, in place ([0012](0012-images.md)) | Built; JPEG and GIM edits seen in game |
@@ -106,7 +107,7 @@ Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` ke
 | 4 | `iso build`; boot an unchanged build on PPSSPP | 1 | In-place `iso put` built; full build not built |
 | 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | | Built |
 | 6 | `dat unpack`, `dat pack` | 5 | Built; same-size units only |
-| 7 | Text export and import ([0004](0004-text.md)) | 6 | Built and seen in game; long text strings move within the chunk |
+| 7 | Text export and import ([0004](0004-text.md)) | 6 | Built and seen in game; chunk relocation built |
 | 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 | Test build ready ([0009](0009-test-builds.md)) |
 | 9 | Executable patches: Latin text layout, movie subtitles ([0006](0006-movies.md)) | 7, 8 | Subtitles built and seen in game for `movie001`; other movie tables not written |
 | 10 | `kfa build` end to end | all | Not built |

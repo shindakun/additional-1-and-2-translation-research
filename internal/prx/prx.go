@@ -101,3 +101,19 @@ func (img *Image) RelocAt(addr uint32) byte {
 	}
 	return RNone
 }
+
+// Reuse turns one relocation that Neutralize switched off in [lo, hi) into
+// a relocation of type typ at addr, with offset and target in segment 0.
+// This adds a relocation without growing the table, for example for a jal
+// written where the original instruction had none.
+func (img *Image) Reuse(lo, hi, addr uint32, typ byte) error {
+	for i, r := range img.Relocs {
+		if r.Type == RNone && r.Offset >= lo && r.Offset < hi {
+			binary.LittleEndian.PutUint32(img.Raw[r.FileOff:], addr)
+			binary.LittleEndian.PutUint32(img.Raw[r.FileOff+4:], uint32(typ))
+			img.Relocs[i].Offset, img.Relocs[i].Type = addr, typ
+			return nil
+		}
+	}
+	return errors.New("prx: no free relocation in the range")
+}

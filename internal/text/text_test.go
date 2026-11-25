@@ -145,16 +145,9 @@ func TestMove(t *testing.T) {
 	for i := free; i < len(data); i++ {
 		data[i] = 0
 	}
-	calls := 0
-	alloc := func(unit int, b []byte) (int, bool) {
-		calls++
-		if unit != s.Unit || len(b) > 64 {
-			return 0, false
-		}
-		return free, true
-	}
-	r, probs := Apply(units, slots, []Entry{{JA: s.JA, Kind: KindText, EN: long}}, c, alloc)
-	if r.Moved == 0 || calls == 0 {
+	sp := &testSpace{unit: s.Unit, off: free, n: 64}
+	r, probs := Apply(units, slots, []Entry{{JA: s.JA, Kind: KindText, EN: long}}, c, sp)
+	if r.Moved == 0 || sp.calls == 0 || sp.freed != s.Max+1 {
 		t.Fatalf("not moved: %+v %v", r, probs)
 	}
 	again, err := Extract(units, c)
@@ -171,3 +164,19 @@ func TestMove(t *testing.T) {
 	}
 	t.Fatal("moved string not found by extraction")
 }
+
+type testSpace struct {
+	unit, off, n int
+	calls, freed int
+}
+
+func (t *testSpace) Alloc(unit int, b []byte) (int, bool) {
+	t.calls++
+	if unit != t.unit || len(b) > t.n {
+		return 0, false
+	}
+	t.n = 0
+	return t.off, true
+}
+
+func (t *testSpace) Free(_, _, n int) { t.freed += n }

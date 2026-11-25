@@ -207,9 +207,72 @@ func (f *File) Unpack() (Header, []Plain, error) {
 	return h, out, nil
 }
 
-// Pack encrypts units back in place and re-signs the file. A unit must keep
-// its size; resizing needs a new layout and is not supported.
+// chunkAlign is the alignment of chunks and of the file size.
+const chunkAlign = 0x800
+
+// Relocate moves chunk unit i to new space at the end of the file with room
+// for n bytes. Its data grows to n bytes (the new bytes are zero), its
+// offset changes, and the chunk table entry in the body unit gets the new
+// offset (word 2) and size (word 0). Word 3, zero on the disc, gets the old
+// offset: the pointers in the chunk keep their values, and a patched loader
+// uses word 3 as their base (subpatch.ChunkBase, docs/0004). The old bytes
+// stay where they were; nothing refers to them. It returns the old offset.
+func (f *File) Relocate(units []Plain, i, n int) (int, error) {
+	var name string
+	var idx int
+	if _, err := fmt.Sscanf(units[i].Name, "chunks/%03d_", &idx); err != nil {
+		return 0, fmt.Errorf("maindat: %s is not a chunk", units[i].Name)
+	}
+	name = units[i].Name
+	if n < len(units[i].Data) {
+		return 0, fmt.Errorf("maindat: %s cannot shrink", name)
+	}
+	if n > MaxChunk {
+		return 0, fmt.Errorf("maindat: %s would be %#x bytes; the loader takes %#x", name, n, MaxChunk)
+	}
+	body := -1
+	for k := range units {
+		if units[k].Name == "body" {
+			body = k
+		}
+	}
+	if body < 0 {
+		return 0, errors.New("maindat: no body unit")
+	}
+	le := binary.LittleEndian
+	b := units[body].Data
+	at := func(off int) int { return off - units[body].Off }
+	th := int(le.Uint32(b[at(0x14C):]))
+	table := int(le.Uint32(b[at(th+4):]))
+	e := at(table + idx*16)
+	old := units[i].Off
+	if int(le.Uint32(b[e+8:])) != old {
+		return 0, fmt.Errorf("maindat: chunk table entry %d does not match %s", idx, name)
+	}
+	newOff := (len(f.Raw) + chunkAlign - 1) / chunkAlign * chunkAlign
+	end := (newOff + n + chunkAlign - 1) / chunkAlign * chunkAlign
+	f.Raw = append(f.Raw, make([]byte, end-len(f.Raw))...)
+	le.PutUint32(b[e:], uint32(n))
+	le.PutUint32(b[e+8:], uint32(newOff))
+	if le.Uint32(b[e+12:]) == 0 {
+		le.PutUint32(b[e+12:], uint32(old))
+	}
+	units[i].Data = append(units[i].Data, make([]byte, n-len(units[i].Data))...)
+	units[i].Off, units[i].Len = newOff, n
+	return old, nil
+}
+
+// MaxChunk is the largest chunk the loader reads into its buffer.
+const MaxChunk = 0x500000
+
+// Pack encrypts units back and re-signs the file. A unit keeps its size
+// unless Relocate moved it. The header gets the file size.
 func (f *File) Pack(units []Plain) error {
+	for k := range units {
+		if units[k].Name == "header" && len(units[k].Data) >= 0x18-0x10+4 {
+			binary.LittleEndian.PutUint32(units[k].Data[0x18-0x10:], uint32(len(f.Raw)))
+		}
+	}
 	for _, p := range units {
 		if len(p.Data) != p.Len {
 			return fmt.Errorf("maindat: %s is %d bytes, want %d", p.Name, len(p.Data), p.Len)

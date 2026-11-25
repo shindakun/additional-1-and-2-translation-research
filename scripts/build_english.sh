@@ -17,7 +17,7 @@ mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT
 
 "$kfa" img import "$gamedir" "$root/research/img/edit/$game" "$tmp/img.dat"
-"$kfa" text import "$gamedir" "$root/research/text/$game-test.json" "$tmp/main.dat" "$tmp/img.dat" 2>"$tmp/text.log"
+"$kfa" text import "$gamedir" "$root/research/text/$game-test.json" "$tmp/main.dat" "$tmp/img.dat" 2>"$tmp/text.log" >/dev/null
 grep -c '^not written' "$tmp/text.log" >/dev/null && sed -n '/^not written/p' "$tmp/text.log" >&2
 "$kfa" fmg import "$gamedir" "$root/research/text/$game-fmg-test.json" "$tmp/AdvSys.bnd"
 subs=""
@@ -27,7 +27,10 @@ for t in "$root"/research/subs/"$game"-movie*.tsv; do
 	subs="$subs ${m#"$game"-}.pmf=$t"
 done
 # shellcheck disable=SC2086 # subs is a list of arguments
-"$kfa" patch subtitles --boot-font "$gamedir/SYSDIR/BOOT.BIN" "$tmp/BOOT.BIN" $subs
+"$kfa" patch subtitles --boot-font "$gamedir/SYSDIR/BOOT.BIN" "$tmp/BOOT-sub.BIN" $subs
+# Relocated chunks keep their pointers; the loader takes the base from the
+# chunk table (docs/0004).
+"$kfa" patch chunkbase "$tmp/BOOT-sub.BIN" "$tmp/BOOT.BIN"
 
 for f in "$gamedir"/USRDIR/Font/BitFont_Game*.bnd "$gamedir/USRDIR/Bnd/AdvMenu.bnd"; do
 	"$kfa" font pad "$f" "$tmp/$(basename "$f")" >/dev/null

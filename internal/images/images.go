@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"image/jpeg"
 )
 
 // Image types in the table.
@@ -90,33 +89,4 @@ func Replace(chunk []byte, e Entry, data []byte) error {
 	clear(chunk[e.Off+len(data) : e.Off+e.Size])
 	binary.LittleEndian.PutUint32(chunk[e.TableOff+4:], uint32(len(data)))
 	return nil
-}
-
-// jfif is the APP0 segment that the Go JPEG encoder does not write.
-var jfif = []byte{0xFF, 0xE0, 0x00, 0x10, 'J', 'F', 'I', 'F', 0, 1, 1, 0, 0, 1, 0, 1, 0, 0}
-
-// ShrinkJPEG re-encodes JPEG e at the given quality and writes it in place.
-// It returns the number of bytes freed at the end of the old space, from
-// e.Off+e.Size-freed to e.Off+e.Size. It frees nothing if the new file is
-// not smaller.
-func ShrinkJPEG(chunk []byte, e Entry, quality int) (int, error) {
-	if e.Type != TypeJPEG {
-		return 0, fmt.Errorf("images: entry %d is not a JPEG", e.Index)
-	}
-	img, err := jpeg.Decode(bytes.NewReader(chunk[e.Off : e.Off+e.Size]))
-	if err != nil {
-		return 0, fmt.Errorf("images: entry %d: %w", e.Index, err)
-	}
-	var buf bytes.Buffer
-	if err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: quality}); err != nil {
-		return 0, err
-	}
-	out := append(append([]byte{0xFF, 0xD8}, jfif...), buf.Bytes()[2:]...)
-	if len(out) >= e.Size {
-		return 0, nil
-	}
-	if err := Replace(chunk, e, out); err != nil {
-		return 0, err
-	}
-	return e.Size - len(out), nil
 }

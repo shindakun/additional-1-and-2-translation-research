@@ -223,11 +223,14 @@ type Problem struct {
 	JA, EN, Where, Reason string
 }
 
-// Alloc returns the offset of free space in unit for data (the encoded
-// string and its terminator), or false. Apply uses it for text strings that
-// do not fit their slot. The allocator can refuse data that its space cannot
-// hold, for example non-ASCII bytes in texture space.
-type Alloc func(unit int, data []byte) (int, bool)
+// Space hands out and takes back free bytes inside units. Alloc returns
+// the offset of free space in unit for data (the encoded string and its
+// terminator), or false; it can refuse data its space cannot hold, for
+// example non-ASCII bytes in texture space. Free returns n bytes at off.
+type Space interface {
+	Alloc(unit int, data []byte) (int, bool)
+	Free(unit, off, n int)
+}
 
 // Result counts what Apply did.
 type Result struct {
@@ -240,17 +243,25 @@ type Result struct {
 // extraction after an import measures the shorter text. Every slot whose
 // source has a non-empty translation is rewritten; the rest of the slot is
 // filled with zero bytes. A text string that does not fit goes to space from
-// alloc (if alloc is not nil) and its pointers change to the new address.
-// Translations that do not fit or do not encode are returned as problems.
-func Apply(units []maindat.Plain, slots []Slot, entries []Entry, c *sjis.Codec, alloc Alloc) (Result, []Problem) {
+// sp (if sp is not nil), its pointers change to the new address, and its old
+// slot goes back to sp. Moves repeat until no more fit, so later moves can
+// use the slots that earlier moves left. Translations that do not fit or do
+// not encode are returned as problems.
+func Apply(units []maindat.Plain, slots []Slot, entries []Entry, c *sjis.Codec, sp Space) (Result, []Problem) {
 	en := map[[2]string]string{}
 	for _, e := range entries {
 		if e.EN != "" {
 			en[[2]string{e.Kind, e.JA}] = e.EN
 		}
 	}
+	type move struct {
+		s Slot
+		t string
+		b []byte
+	}
 	var res Result
 	var probs []Problem
+	var moves []move
 	for _, s := range slots {
 		t, ok := en[[2]string{s.Kind, s.JA}]
 		if !ok {
@@ -261,28 +272,56 @@ func Apply(units []maindat.Plain, slots []Slot, entries []Entry, c *sjis.Codec, 
 			probs = append(probs, Problem{s.JA, t, s.Where, err.Error()})
 			continue
 		}
-		data := units[s.Unit].Data
-		old := data[s.Off : s.Off+s.Max+1]
+		old := units[s.Unit].Data[s.Off : s.Off+s.Max+1]
 		if len(b) <= s.Max {
 			copy(old, b)
 			clear(old[len(b):])
 			res.Written++
 			continue
 		}
-		if s.Kind == KindText && len(s.Ptrs) > 0 && alloc != nil {
-			if off, ok := alloc(s.Unit, append(bytes.Clone(b), 0)); ok {
-				copy(data[off:], b)
-				data[off+len(b)] = 0
-				clear(old)
-				addr := uint32(units[s.Unit].Off + off)
-				for _, p := range s.Ptrs {
-					binary.LittleEndian.PutUint32(data[p:], addr)
-				}
-				res.Moved++
-				continue
-			}
+		if s.Kind == KindText && len(s.Ptrs) > 0 && sp != nil {
+			moves = append(moves, move{s, t, b})
+			continue
 		}
 		probs = append(probs, Problem{s.JA, t, s.Where, fmt.Sprintf("%d bytes, room for %d", len(b), s.Max)})
+	}
+	// Largest first: big strings need long runs; small ones fill the gaps.
+	// A Space with an EnableGrowth method gets a second round after the
+	// free space runs out, so units grow only for what does not fit.
+	sort.SliceStable(moves, func(i, j int) bool { return len(moves[i].b) > len(moves[j].b) })
+	g, canGrow := sp.(interface{ EnableGrowth() })
+	for progress := true; len(moves) > 0; {
+		if !progress {
+			if !canGrow {
+				break
+			}
+			g.EnableGrowth()
+			canGrow = false
+		}
+		progress = false
+		var left []move
+		for _, m := range moves {
+			off, ok := sp.Alloc(m.s.Unit, append(bytes.Clone(m.b), 0))
+			if !ok {
+				left = append(left, m)
+				continue
+			}
+			data := units[m.s.Unit].Data
+			copy(data[off:], m.b)
+			data[off+len(m.b)] = 0
+			clear(data[m.s.Off : m.s.Off+m.s.Max+1])
+			addr := uint32(units[m.s.Unit].Off + off)
+			for _, p := range m.s.Ptrs {
+				binary.LittleEndian.PutUint32(data[p:], addr)
+			}
+			sp.Free(m.s.Unit, m.s.Off, m.s.Max+1)
+			res.Moved++
+			progress = true
+		}
+		moves = left
+	}
+	for _, m := range moves {
+		probs = append(probs, Problem{m.s.JA, m.t, m.s.Where, fmt.Sprintf("%d bytes, room for %d", len(m.b), m.s.Max)})
 	}
 	sort.Slice(probs, func(i, j int) bool { return probs[i].Where < probs[j].Where })
 	return res, probs
