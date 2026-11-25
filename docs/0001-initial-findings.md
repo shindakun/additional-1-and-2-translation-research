@@ -28,6 +28,8 @@ Both games use the FromSoftware "Adventure Player" engine. The engine also ran t
 | `scripts/gameinfo_dump.py` | `GameInfo.dat` records |
 | `scripts/boot_info.py` | `BOOT.BIN` sections, AES Te0 offset |
 | `scripts/maindat_survey.py` | `main.dat` entropy, segments, magic counts |
+| `scripts/maindat.py` | `main.dat` verification and extraction, see [0003](0003-maindat.md) |
+| `scripts/ghidra/analyze.sh` | Ghidra project, decompiled C, function list, string references in `research/ghidra` |
 
 Run Python scripts with `python3 -I`.
 
@@ -153,20 +155,7 @@ Three AppliBox records of 0x200 bytes: `UmdGame01.adv` (ハコノナカ), `UmdGa
 
 ## `main.dat`
 
-Data is in segments. Each segment starts on a 0x800 boundary and ends in zero padding. A segment start here is a sector start after 16 zero bytes.
-
-| | Additional I | Additional II |
-|---|---|---|
-| Size | `0xE294800` | `0xC68B000` |
-| Segments | 232 | 213 |
-| High-entropy segments before sound region | 109 | 97 |
-| Sound region (version `0x633` BNDs) | 106, `0xAD3C800` to `0xD565800` | 93, `0x960F800` to `0xB76C000` |
-| HVG banks | 3,920 | 3,216 |
-| High-entropy tail segments | 1, at `0xD5FF800` | 2, at `0xB77D000`, `0xB811000` |
-
-High-entropy segments measure near 8 bits per byte. They are encrypted, compressed, or both. They contain no known magic. Offset 0 is a high-entropy segment, so the pack has no plain header. The segment index is in an encrypted segment or in the executable.
-
-The sound region is plain and parses as unnamed BNDs.
+`main.dat` is an encrypted `ADVP` container. [0003](0003-maindat.md) describes the format and keys.
 
 ## Executable
 
@@ -179,20 +168,16 @@ The sound region is plain and parses as unnamed BNDs.
 | `.data` | `0x125CE0` | `0x17737` |
 | `.bss` | `0x13F380` | `0x17ED0` |
 
-Facts for `main.dat`:
-
-- The string `$(GameDataRoot)main.dat` is present. `GameDataRoot` is `$(AppDataRoot)GameData/01_UmdTitle/`.
-- The AES table Te0 is in `.data`. File offset is `0x126804` (I) and `0x126A04` (II). The plain AES S-box start does not occur.
+The string `$(GameDataRoot)main.dat` is present. `GameDataRoot` is `$(AppDataRoot)GameData/01_UmdTitle/`.
 
 `BOOT.BIN` differs between the discs, import stubs included.
 
 Ghidra 12.2 with the `ghidra-allegrex` extension loads `BOOT.BIN` with the "PSP Executable (ELF)" loader and language `Allegrex:LE:32:default`.
 
+[0003](0003-maindat.md) lists the `main.dat` functions.
+
 ## Open questions
 
-1. Cipher, key and mode of `main.dat` segments. AES is the first candidate.
-2. Position and layout of the `main.dat` segment index.
-3. Compression after decryption.
-4. `.adv` scenario format and text location.
-5. Latin glyph coverage in the font CCM and GIM files.
-6. Japanese text burned into movies.
+1. Scene chunk format and text location.
+2. Latin glyph coverage in the font CCM and GIM files.
+3. Japanese text burned into movies.

@@ -15,14 +15,18 @@ internal/bnd/       BND containers, both variants
 internal/fmg/       FMG message tables
 internal/sjis/      Shift-JIS codec from the game's JIS tables
 internal/gim/       GIM decode and encode (PNG through image/png)
-internal/maindat/   main.dat pack
-internal/adv/       Scenario files
+internal/maindat/   main.dat (ADVP) container
+internal/adv/       Scene chunks
 internal/patch/     Executable patches
 scripts/            Research scripts
 docs/               Numbered design documents
 ```
 
 Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) error`. A format is complete when read then write gives the original bytes.
+
+## main.dat
+
+`kfa dat pack` encrypts each unit with AES-128-CBC and writes the salted MD5. The verifier `FUN_000544a4` checks the MD5. Its use on the disc load path is not known, so the pack always writes a correct MD5. Go's `crypto/aes`, `crypto/cipher` and `crypto/md5` cover all of it. Keys come from `BOOT.BIN` at run time and are not stored in the repository.
 
 ## Shift-JIS
 
@@ -39,7 +43,7 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa fmg export <fmg> <json>` | Write ID, source and empty translation for each string |
 | `kfa fmg import <fmg> <json> <out>` | Write an FMG with the translations |
 | `kfa gim topng`, `kfa gim frompng` | Convert textures |
-| `kfa dat unpack`, `kfa dat pack` | Split and build `main.dat` |
+| `kfa dat unpack`, `kfa dat pack` | Decrypt and split `main.dat`; encrypt, rebuild and re-sign it |
 | `kfa build <project>` | Build a finished ISO from translation files |
 
 ## Translation files
@@ -50,7 +54,7 @@ One JSON file per source text file. A record has string ID, Japanese source, tra
 
 1. Extract the original ISO to a work directory.
 2. Unpack all BNDs, nested and in `main.dat`.
-3. Import translations into FMG and scenario files.
+3. Import translations into FMG files and scene chunks.
 4. Replace font and texture assets.
 5. Pack containers from the inside out.
 6. Install the patched executable as `PSP_GAME/SYSDIR/EBOOT.BIN`.
@@ -88,14 +92,14 @@ Load `BOOT.BIN` as a relocatable ELF at base 0.
 | 2 | `bnd` unpack and pack, both variants | |
 | 3 | `sjis`, `fmg` export and import | 2 |
 | 4 | `iso build`; boot an unchanged build on PPSSPP | 1 |
-| 5 | Find `main.dat` index, cipher, key, compression in `BOOT.BIN` | |
+| 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | |
 | 6 | `dat unpack`, `dat pack` | 5 |
-| 7 | `.adv` format and text export | 6 |
+| 7 | Scene chunk format and text export | 6 |
 | 8 | Font format (CCM, PLT, GIM), Latin glyphs | 3 |
 | 9 | Executable patches for Latin text layout | 7, 8 |
 | 10 | `kfa build` end to end | all |
 
-Step 4 proves the build path before content changes. Step 5 is the main unknown. It runs in parallel with steps 1 to 4.
+Step 4 proves the build path before content changes. Step 7 is the main unknown. Steps 5 to 7 run in parallel with steps 1 to 4.
 
 ## Testing
 
