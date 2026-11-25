@@ -75,6 +75,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
 | `scripts/build_english.sh` | Build `research/builds/kfaI-english.iso` with every current translation |
+| `scripts/map_boot.py` | Map `BOOT.BIN` addresses from one game to the other |
 | `scripts/text_merge.py` | Carry translations into a new text export |
 | `scripts/text_apply_tsv.py` | Set translations from an index-to-English TSV |
 | `scripts/text_center.py` | Center English like its space-padded source |

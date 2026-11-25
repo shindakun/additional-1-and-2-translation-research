@@ -23,7 +23,7 @@ The layout of `main.dat` is in [kfa1/0003](../kfa1/0003-maindat.md). The keys ar
 | `kfa fmg export` | 316 messages; 311 are the same as in Additional I |
 | `kfa img export` | 1,499 images, 475 unique |
 | `kfa font pad` | Pads `BitFont_Game12.bnd` without errors |
-| `kfa patch subtitles`, `kfa patch chunkbase` | Refused: `BOOT.BIN` is not known |
+| `kfa patch subtitles`, `kfa patch chunkbase` | Apply; see [BOOT.BIN](#bootbin) |
 
 ## Text
 
@@ -43,25 +43,36 @@ The block names show the areas ([kfa1/0004](../kfa1/0004-text.md#block-header)).
 
 ## BOOT.BIN
 
-The patches identify `BOOT.BIN` by a code range, and Additional II has its own. A search for the code around each Additional I hook site (12 words, call targets masked) gives one match for each:
+The patches identify `BOOT.BIN` by a code range; Additional II has its own entry in `subpatch`. `scripts/map_boot.py FROM.BIN TO.BIN ADDR...` maps each Additional I address:
 
-| Site | Additional I | Additional II |
+- Code: the same 16 words around the address, with `jal` targets and 16-bit immediates masked, must match once.
+- Data in segment 0 (`FontPtr`): the `lui` pairs that build the address; 37 sites agree.
+- Data in segment 1: instructions hold offsets from the segment base, `0x13D4A0` in Additional I and `0x13D6A0` in Additional II. All matching instructions hold the same offsets (3 for `DrawState`, 64 for `FileSystem`).
+- The `sceKernelGetSystemTimeWide` stub: import stubs have the same code, so the address comes from the `jal` at a matching call site.
+
+| Address | Additional I | Additional II |
 |---|---|---|
-| Movie draw call | `0x3EB30` | `0x3EBE8` |
-| Movie exit call | `0x3EB58` | `0x3EC10` |
-| Movie file call | `0x3E998` | `0x3EA50` |
-| Boot movie call | `0x688C4` | `0x68954` |
-| Chunk table load | `0x59A70` | `0x59B44` |
-| Chunk base store | `0x59BC8` | `0x59C9C` |
-| Code space 1 | `0xF232C` | `0xF252C` |
-| Code space 2 | `0xC877C` | `0xC897C` |
+| Movie draw call, target | `0x3EB30`, `0xB35D0` | `0x3EBE8`, `0xB3668` |
+| Movie exit call, target | `0x3EB58`, `0xB33FC` | `0x3EC10`, `0xB3490` |
+| Movie file call, target | `0x3E998`, `0xAFCC` | `0x3EA50`, `0xB084` |
+| Boot movie call, target | `0x688C4`, `0x689A4` | `0x68954`, `0x68A34` |
+| Chunk table load, base store | `0x59A70`, `0x59BC8` | `0x59B44`, `0x59C9C` |
+| Code spaces | `0xF232C` (6,552), `0xC877C` (1,712) | `0xF252C` (6,552), `0xC897C` (1,712) |
+| Font: set current, color, align, draw, scale | `0x14C1C`, `0x14EA0`, `0x15168`, `0x15288`, `0x150E8` | `0x14CD4`, `0x14F58`, `0x15220`, `0x15340`, `0x151A0` |
+| Font: begin, end, set, delete | `0x168F4`, `0x16958`, `0x107FC`, `0x10910` | `0x169AC`, `0x16A10`, `0x108B4`, `0x109C8` |
+| `sceGuDisable`, `sprintf`, `AllocRead`, `CBinder::Delete` | `0xC4B4C`, `0xFE6F0`, `0xACA8`, `0x257C0` | `0xC4D4C`, `0xFE8F0`, `0xAD60`, `0x25878` |
+| Font pointer, draw state, file system | `0x1262F4`, `0x1415FC`, `0x1529E8` | `0x1264F4`, `0x1417FC`, `0x152BE8` |
+| System time stub | `0x11C444` | `0x11C64C` |
 
-The `sceKernelGetSystemTimeWide` stub gives three matches: import stubs have the same code, so its address comes from the import table. The font and GU function addresses ([kfa1/0010](../kfa1/0010-subtitle-patch.md)) are not yet mapped. The candidates above need a check against the instructions each patch expects before the patches accept this `BOOT.BIN`.
+No relocation reaches either code space. Both patches accept the file: each checks the expected instruction and relocation at its hooks.
+
+Test: `kfa patch subtitles --boot-font` with one line on `movie000`, then `kfa patch chunkbase`. Headless PPSSPP shows the line over the boot movie, then the title and the town map. No fatal error.
+
+The title menu has a third item, `DATA CONVERT`. Additional I offers to save clear data for Additional II at its end (global text 3203, [kfa1/0004](../kfa1/0004-text.md)); the link between the two is not yet checked.
 
 ## Next steps
 
-1. Map the remaining `BOOT.BIN` addresses; add the Additional II entry to `subpatch`.
-2. Merge the Additional I English into an Additional II translation file; translate the new entries.
-3. Locate the image text: town map, status screen, casino boards, HUD.
-4. Transcribe the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
-5. A build script for Additional II and a headless test.
+1. Merge the Additional I English into an Additional II translation file; translate the new entries.
+2. Locate the image text: town map, status screen, casino boards, HUD.
+3. Transcribe the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
+4. A build script for Additional II and a headless test.
