@@ -94,8 +94,8 @@ Load `BOOT.BIN` as a relocatable ELF at base 0.
 | 4 | `iso build`; boot an unchanged build on PPSSPP | 1 |
 | 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | |
 | 6 | `dat unpack`, `dat pack` | 5 |
-| 7 | Scene chunk format and text export | 6 |
-| 8 | Font format (CCM, PLT, GIM), Latin glyphs | 3 |
+| 7 | Chunk command format; exact string pointers; text export ([0004](0004-text.md)) | 6 |
+| 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 |
 | 9 | Executable patches for Latin text layout | 7, 8 |
 | 10 | `kfa build` end to end | all |
 
@@ -110,5 +110,6 @@ Step 4 proves the build path before content changes. Step 7 is the main unknown.
 
 ## Not in the first release
 
-- Audio (`.at3`, `.hvg`) and movie (`.pmf`) changes. Check movies for burned-in text first.
+- Audio (`.at3`, `.hvg`) changes.
+- Movie changes. All 11 movies have burned-in Japanese narration ([0006](0006-movies.md)).
 - Distribution patches (xdelta, BPS). The build gives a full ISO.

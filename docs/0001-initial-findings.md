@@ -28,7 +28,10 @@ Both games use the FromSoftware "Adventure Player" engine. The engine also ran t
 | `scripts/gameinfo_dump.py` | `GameInfo.dat` records |
 | `scripts/boot_info.py` | `BOOT.BIN` sections, AES Te0 offset |
 | `scripts/maindat_survey.py` | `main.dat` entropy, segments, magic counts |
-| `scripts/maindat.py` | `main.dat` verification and extraction, see [0003](0003-maindat.md) |
+| `scripts/maindat.py` | `main.dat` verification and extraction |
+| `scripts/text_survey.py` | Text counts by kind |
+| `scripts/font_render.py` | Font glyph layers as PNG |
+| `scripts/movie_sheets.sh` | Movie contact sheets |
 | `scripts/ghidra/analyze.sh` | Ghidra project, decompiled C, function list, string references in `research/ghidra` |
 
 Run Python scripts with `python3 -I`.
@@ -176,8 +179,19 @@ Ghidra 12.2 with the `ghidra-allegrex` extension loads `BOOT.BIN` with the "PSP 
 
 [0003](0003-maindat.md) lists the `main.dat` functions.
 
+## Further documents
+
+| Document | Subject |
+|---|---|
+| [0003](0003-maindat.md) | `main.dat` container and keys |
+| [0004](0004-text.md) | Text location and size |
+| [0005](0005-fonts.md) | Fonts and Latin glyphs |
+| [0006](0006-movies.md) | Movies |
+
 ## Open questions
 
-1. Scene chunk format and text location.
-2. Latin glyph coverage in the font CCM and GIM files.
-3. Japanese text burned into movies.
+1. Chunk object (command) format, and the exact location of every string pointer.
+2. Meaning of `#e[n]` in text.
+3. Engine use of the CCM glyph metrics (left offset, width, advance).
+4. How a glyph selects its texture and layer.
+5. PSMF muxing for re-encoded movies.
