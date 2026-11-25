@@ -64,6 +64,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/movie_sheets.sh` | Write movie contact sheets |
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
+| `scripts/prx_unreferenced.py` | List functions no relocation or branch refers to |
 | `scripts/ghidra/analyze.sh` | Decompile the executables with Ghidra |
 | `scripts/boot_info.py`, `gameinfo_dump.py`, `maindat_survey.py` | Early survey tools |
 
@@ -80,3 +81,4 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | [0007](docs/0007-adventure-player.md) | Adventure Player disc and authoring tool |
 | [0008](docs/0008-open-questions.md) | Open questions |
 | [0009](docs/0009-test-builds.md) | Test builds |
+| [0010](docs/0010-subtitle-patch.md) | Subtitle patch |

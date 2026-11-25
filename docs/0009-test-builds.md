@@ -34,3 +34,5 @@ What to check:
 3. The game boots and Japanese text looks unchanged.
 
 A narrower gap confirms the engine applies CCM metrics, so English can be proportional without code patches.
+
+Result: the build boots and regular text looks unchanged. The game shows little ASCII text, so the spacing change is not yet seen on screen. A subtitle test build ([0010](0010-subtitle-patch.md)) draws ASCII text and gives the next check.
