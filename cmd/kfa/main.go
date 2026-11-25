@@ -81,6 +81,8 @@ func run() error {
 		err = datUnpack(args[2:])
 	case "dat pack":
 		err = datPack(args[2:])
+	case "font pad":
+		err = fontPad(args[2:])
 	case "font vwf":
 		err = fontVWF(args[2:])
 	case "text export":
@@ -134,6 +136,10 @@ Commands:
   dat pack BOOT.BIN main.dat DIR OUT
                                    Encrypt units from DIR into a copy of
                                    main.dat (same sizes) and re-sign it
+  font pad IN.bnd OUT.bnd          Move the ASCII glyphs of every font inside
+                                   IN to page 7 with a blank border, so
+                                   filtered text shows no slivers of
+                                   neighboring glyphs (docs/0005)
   font vwf IN.bnd OUT.bnd [GAP] [SPACE]
                                    Proportional ASCII metrics in every font
                                    inside IN (default gap 1, space 4)
@@ -1194,4 +1200,76 @@ func readSubtitles(path string, key uint32) ([]subpatch.Line, error) {
 		})
 	}
 	return lines, nil
+}
+
+func fontPad(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	f, err := readBND(a[0])
+	if err != nil {
+		return err
+	}
+	n, err := padFonts(f)
+	if err != nil {
+		return fmt.Errorf("%s: %w", a[0], err)
+	}
+	if n == 0 {
+		return fmt.Errorf("%s holds no font", a[0])
+	}
+	out := f.Bytes()
+	if err := os.WriteFile(a[1], out, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("%s: %d fonts padded\n", a[1], n)
+	return nil
+}
+
+// padFonts pads the ASCII glyphs of every font BND inside f, recursing into
+// nested BNDs, and returns the number of fonts changed.
+func padFonts(f *bnd.File) (int, error) {
+	get := func(name string) *bnd.Entry {
+		for i := range f.Entries {
+			if f.Entries[i].Name == name {
+				return &f.Entries[i]
+			}
+		}
+		return nil
+	}
+	n := 0
+	ccmE, t0, t1, p0, p1 := get("Ccm.ccm"), get("Tex00.gim"), get("Tex01.gim"), get("Plt00.plt"), get("Plt01.plt")
+	if ccmE != nil && t0 != nil && t1 != nil && p0 != nil && p1 != nil {
+		c, err := font.ReadCCM(ccmE.Data)
+		if err != nil {
+			return 0, err
+		}
+		var tex [2]*font.Texture
+		for i, g := range []*bnd.Entry{t0, t1} {
+			if tex[i], err = font.ReadTexture(g.Data); err != nil {
+				return 0, err
+			}
+		}
+		if _, err := c.PadASCII(tex, [2][]byte{p0.Data, p1.Data}, 7); err != nil {
+			return 0, err
+		}
+		ccmE.Data = c.Bytes()
+		t0.Data = tex[0].Encode(t0.Data)
+		t1.Data = tex[1].Encode(t1.Data)
+		n++
+	}
+	for i := range f.Entries {
+		sub, err := bnd.Read(f.Entries[i].Data)
+		if err != nil {
+			continue
+		}
+		m, err := padFonts(sub)
+		if err != nil {
+			return 0, err
+		}
+		if m > 0 {
+			f.Entries[i].Data = sub.Bytes()
+			n += m
+		}
+	}
+	return n, nil
 }

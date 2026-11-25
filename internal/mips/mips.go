@@ -18,6 +18,8 @@ const (
 	S0   = 16
 	S1   = 17
 	S2   = 18
+	S3   = 19
+	S4   = 20
 	T9   = 25
 	SP   = 29
 	RA   = 31
@@ -55,6 +57,9 @@ func Lbu(rt, base uint32, off int32) uint32 { return itype(0x24, base, rt, off) 
 
 // Sll encodes sll rd, rt, sa.
 func Sll(rd, rt, sa uint32) uint32 { return rt<<16 | rd<<11 | (sa&31)<<6 }
+
+// AddS encodes add.s fd, fs, ft (single-precision float add).
+func AddS(fd, fs, ft uint32) uint32 { return 0x11<<26 | 0x10<<21 | ft<<16 | fs<<11 | fd<<6 }
 
 // Subu encodes subu rd, rs, rt.
 func Subu(rd, rs, rt uint32) uint32 { return rtype(rs, rt, rd, 0x23) }

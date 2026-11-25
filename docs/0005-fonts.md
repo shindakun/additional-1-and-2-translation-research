@@ -50,7 +50,9 @@ Pages in `BitFont_Game00`:
 
 ## Textures
 
-GIM, 512 × 512, 8-bit index, PSP swizzle (16-byte × 8-row tiles). Each pixel index holds four glyph layers. Palettes 0–3 of `Plt00.plt` each map the index to one layer's alpha (0, 85, 170 or 255). Palettes 4–15 map every index to alpha 0.
+GIM, 512 × 512, 8-bit index, PSP swizzle (16-byte × 8-row tiles). Each pixel index holds four glyph layers. `PltNN.plt` belongs to `TexNN.gim`. Palettes 0–3 each map the index to one layer's alpha. Palettes 4–15 map every index to alpha 0.
+
+In `BitFont_Game12`, `Plt00` uses indices 0–15: each is one of the 16 on/off combinations of the four layers. `Plt01` uses indices 0–31: layers 0–2 are on or off, layer 3 has four levels (0, 85, 170, 255).
 
 ## Latin coverage
 
@@ -61,3 +63,11 @@ Layer 0 of `Tex00` holds:
 - Greek capitals.
 
 English text can use the existing ASCII glyphs at a fixed 8-pixel advance: 60 characters across the 480-pixel screen.
+
+## Padding
+
+`FsFontEnd` draws text with linear texture filtering (`sceGuTexFilter(5, 1)` in `FUN_000085A4`). The ASCII cells are 8 × 16 pixels with no blank column between them: the next glyph's ink starts in the next texture column. At 1× the samples fall on texel centers and nothing shows. At a raised render resolution in PPSSPP, samples fall between texels, and each letter shows a sliver of its neighbor (`thalt`, `wi l l l`).
+
+`kfa font pad IN.bnd OUT.bnd` moves the 94 printable ASCII glyphs (`0x21`–`0x7E`) to page 7 (`Tex01`, layer 3), each in a 10 × 18 slot with a blank border, and changes their texture coordinates. Each pixel keeps the states of the other three layers. In `BitFont_Game12`, page 7 has room for about 800 such slots. All 21 `BitFont_GameNN.bnd` fonts and the copy in `AdvMenu.bnd` pad without a size change. `scripts/build_english.sh` pads them all.
+
+The test checks that each moved glyph has the original ink and a blank border, and that layers 0–2 of `Tex01` do not change. Headless PPSSPP at 1× shows the subtitles and the menu text unchanged. The effect at a raised render resolution needs a check in the PPSSPP app.

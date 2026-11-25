@@ -13,6 +13,7 @@ func TestEncodings(t *testing.T) {
 		{"sll a0,a1,8", Sll(A0, A1, 8), 0x00052200},
 		{"sltu v0,a0,a1", Sltu(V0, A0, A1), 0x0085102B},
 		{"subu v0,a0,a1", Subu(V0, A0, A1), 0x00851023},
+		{"add.s f12,f12,f14", AddS(12, 12, 14), 0x460E6300},
 		{"sw ra,0x10(sp)", Sw(RA, SP, 0x10), 0xAFBF0010},
 		{"jal 0xB35D0", Jal(0xB35D0), 0x0C02CD74},
 		{"addiu a0,a0,0x130", Addiu(A0, A0, 0x130), 0x24840130},

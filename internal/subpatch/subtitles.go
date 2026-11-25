@@ -45,6 +45,23 @@ const (
 	AlignCenter = 0x20
 )
 
+// outline lists the draw passes: black at the eight one-pixel offsets, then
+// white. A single offset shadow shows as a second, shifted font.
+var outline = func() []struct {
+	color  uint32
+	dx, dy float32
+} {
+	type pass = struct {
+		color  uint32
+		dx, dy float32
+	}
+	var p []pass
+	for _, d := range [][2]float32{{-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}} {
+		p = append(p, pass{0xFF000000, d[0], d[1]})
+	}
+	return append(p, pass{0xFFFFFFFF, 0, 0})
+}()
+
 // recordWords is the size of one line record: start, end, x, y, shadow x,
 // shadow y, the text offset from the code base, the alignment and the movie
 // key.
@@ -52,8 +69,8 @@ const recordWords = 9
 
 // Subtitles patches boot to draw lines over movies. A frame counter starts
 // at 0 for each movie (the exit hook resets it). Every frame, each line
-// whose range holds the counter is drawn in white with a black shadow one
-// pixel down and right. A line with a Movie key shows only over that movie.
+// whose range holds the clock is drawn in white with a one-pixel black
+// outline. A line with a Movie key shows only over that movie.
 // The opening
 // at boot has no font, so it shows nothing (docs/0010).
 //
@@ -94,7 +111,8 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	const frame = 56
 	data := a.Cave + codeWords*4
 	counter, curKey, loaded, bndPtr, startT, elapsed := data, data+4, data+8, data+12, data+16, data+20
-	table := data + 24
+	passes := data + 24
+	table := passes + uint32(len(outline)*12)
 	fontPath := table + uint32(len(lines)*recordWords*4)
 	const fontName = "$(AppDataRoot)Font/BitFont_Game12.bnd\x00"
 
@@ -105,6 +123,8 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 		mips.Sw(mips.S0, mips.SP, 36),
 		mips.Sw(mips.S1, mips.SP, 40),
 		mips.Sw(mips.S2, mips.SP, 44),
+		mips.Sw(mips.S3, mips.SP, 48),
+		mips.Sw(mips.S4, mips.SP, 52),
 		mips.Bal(1),
 		mips.Nop(),
 	)
@@ -165,22 +185,34 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	anyMovie()
 	b.p.Emit(mips.Lw(mips.A0, mips.S1, 28))
 	b.call(a.SetAlign)
-	for _, pass := range []struct {
-		color uint32
-		xy    int32
-	}{{0xFF000000, 16}, {0xFFFFFFFF, 8}} {
-		b.p.LoadConst(mips.A0, pass.color)
-		b.call(a.SetColor)
-		b.p.Emit(
-			mips.Lw(mips.T0, mips.S1, pass.xy),
-			mips.Mtc1(mips.T0, 12),
-			mips.Lw(mips.T0, mips.S1, pass.xy+4),
-			mips.Mtc1(mips.T0, 13),
-			mips.Lw(mips.A0, mips.S1, 24),
-			mips.Addu(mips.A0, mips.A0, mips.S0),
-		)
-		b.call(a.DrawText)
-	}
+	// Outline: black at the eight one-pixel offsets, then white at the
+	// position. The passes table holds color, dx, dy (floats) for each pass.
+	b.addr(mips.S3, passes)
+	b.p.Emit(mips.Addiu(mips.S4, mips.Zero, int32(len(outline))))
+	passLoop := len(b.p.Words)
+	b.p.Emit(mips.Lw(mips.A0, mips.S3, 0))
+	b.call(a.SetColor)
+	b.p.Emit(
+		mips.Lw(mips.T0, mips.S1, 8),
+		mips.Mtc1(mips.T0, 12),
+		mips.Lw(mips.T0, mips.S1, 12),
+		mips.Mtc1(mips.T0, 13),
+		mips.Lw(mips.T0, mips.S3, 4),
+		mips.Mtc1(mips.T0, 14),
+		mips.AddS(12, 12, 14),
+		mips.Lw(mips.T0, mips.S3, 8),
+		mips.Mtc1(mips.T0, 14),
+		mips.AddS(13, 13, 14),
+		mips.Lw(mips.A0, mips.S1, 24),
+		mips.Addu(mips.A0, mips.A0, mips.S0),
+	)
+	b.call(a.DrawText)
+	b.p.Emit(
+		mips.Addiu(mips.S3, mips.S3, 12),
+		mips.Addiu(mips.S4, mips.S4, -1),
+	)
+	passBack := len(b.p.Words)
+	b.p.Emit(mips.Bne(mips.S4, mips.Zero, int32(passLoop-passBack-1)), mips.Nop())
 	early()
 	late()
 	other()
@@ -202,6 +234,8 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 		mips.Lw(mips.S0, mips.SP, 36),
 		mips.Lw(mips.S1, mips.SP, 40),
 		mips.Lw(mips.S2, mips.SP, 44),
+		mips.Lw(mips.S3, mips.SP, 48),
+		mips.Lw(mips.S4, mips.SP, 52),
 		mips.Jr(mips.RA),
 		mips.Addiu(mips.SP, mips.SP, frame),
 	)
@@ -358,6 +392,9 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	}
 
 	b.p.Emit(0, 0, 0, 0, 0, 0) // started, movie key, boot font state, font BND pointer, start time, elapsed
+	for _, o := range outline {
+		b.p.Emit(o.color, math.Float32bits(o.dx), math.Float32bits(o.dy))
+	}
 	text := []byte(fontName)
 	at := map[string]uint32{} // equal texts share one copy
 	for _, l := range lines {

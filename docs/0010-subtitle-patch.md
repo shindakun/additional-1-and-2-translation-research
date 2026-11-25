@@ -67,7 +67,9 @@ Before the plain black quad it calls `sceGuColorMaterial(7)`, `sceGuColor(0xFF00
 
 ## Style
 
-Subtitles use white text with a black shadow, like film subtitles. The patch draws each line twice with `FsFontDrawText`: black at (x + 1, y + 1), then white at (x, y). A four-way black outline (offsets of one pixel left, right, up and down) is an option for bright backgrounds.
+Subtitles use white text with a one-pixel black outline: the patch draws each line nine times with `FsFontDrawText`, in black at the eight one-pixel offsets, then in white at the position. Without the outline the text is hard to read on bright frames.
+
+Stray marks beside the letters at a raised render resolution come from the font atlas, not from the outline: see [0005](0005-fonts.md#padding).
 
 Subtitles do not cover the burned-in Japanese text. Each subtitle has its own position, in screen space that the Japanese block does not use ([0011](0011-movie-script.md) gives the bounds). A translucent box (see the `Gfx_FastSprite` notes above) is a last resort for a block with no clear space.
 
@@ -166,7 +168,7 @@ The patch has three entries, four with `--boot-font`:
 
 The movie key is the three characters before the last `.` of the path: `movie001.pmf` gives `001`. The clock: on the first draw of a movie the patch stores the low word of `sceKernelGetSystemTimeWide` (import stub `0x11C444`); every draw computes the elapsed microseconds. A draw counter falls behind the video when the emulator skips frames; system time follows the emulated clock and the movie audio.
 
-The draw entry walks a table of 9-word records: start and end in microseconds, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 352 words; the font path, the table and the text follow it in the same code space. Equal texts share one copy. The code space (6,552 bytes) holds about 70 records with their texts.
+The draw entry walks a table of 9-word records: start and end in microseconds, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the passes of a 9-entry table (color, dx, dy): black at the eight one-pixel offsets, then white. The code uses 352 words; the font path, the table and the text follow it in the same code space. Equal texts share one copy. The code space (6,552 bytes) holds about 70 records with their texts.
 
 To read the current key on screen, point a line's text offset at the key word: the bytes are the three characters in reverse order, then a zero.
 
@@ -183,7 +185,7 @@ The ASCII glyphs of the game font are about 8 pixels wide: a 60-character line i
 
 ## Subtitle results
 
-`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. `movie000` is the same video 5.0 s later (the logo part): frame matching at 2 frames per second gives the best fit at 5.0 s. `research/subs/kfaI-movie000.tsv` is the `movie001` table with 5 s added. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 in three short lines at the upper right. Each block starts 0.3 s before the Japanese is fully visible; a 10 fps measurement of the video shows the Japanese fade-in starts 0.5 to 1 s after those times.
+`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. `movie000` is the same video 5.0 s later (the logo part): frame matching at 2 frames per second gives the best fit at 5.0 s. `research/subs/kfaI-movie000.tsv` is the `movie001` table with 5 s added. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 in three short lines at the upper right. Each block starts 1.3 s before the measured time, as the Japanese fades in, and ends 1.5 s after the Japanese, or 0.2 s before the next block starts.
 
 The New Game opening plays `movie001` (the key on screen reads `001`), after the title, with the font loaded. `movie000` is the same narration after the FromSoftware logo; it plays at boot. Which movie the attract loop plays is not yet checked. Headless runs show every block in English at the planned position, and the game continues to the town map after the movie.
 

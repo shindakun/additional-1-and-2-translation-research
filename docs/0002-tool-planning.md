@@ -47,6 +47,7 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa dat unpack <boot> <main.dat> <dir>` | Write every unit decrypted | Built |
 | `kfa dat pack <boot> <main.dat> <dir> <out>` | Encrypt units from a directory and re-sign | Built for units of unchanged size; a new layout is not built |
 | `kfa font vwf <in.bnd> <out.bnd> [gap] [space]` | Proportional ASCII metrics in every font inside a BND | Built |
+| `kfa font pad <in> <out>` | Move ASCII glyphs to padded slots ([0005](0005-fonts.md#padding)) | Built |
 | `kfa patch counter <boot> <out>` | Frame counter over movies ([0010](0010-subtitle-patch.md)) | Built |
 | `kfa patch subtitles <boot> <out> <movie>=<tsv>...` | Subtitle lines over movies ([0010](0010-subtitle-patch.md)) | Built; a table for each movie |
 | `kfa text export <gamedir> <json>` | Translatable `main.dat` strings ([0004](0004-text.md)) | Built |

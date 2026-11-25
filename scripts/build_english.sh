@@ -2,7 +2,8 @@
 # Usage: scripts/build_english.sh [GAME]
 # Builds research/builds/<GAME>-english.iso (default GAME kfaI) with every
 # current translation: main.dat text and images (docs/0004, docs/0012), FMG
-# messages (docs/0013) and movie subtitles with the boot font (docs/0010).
+# messages (docs/0013), movie subtitles with the boot font (docs/0010) and
+# fonts with padded ASCII glyphs (docs/0005).
 # Inputs are in research/text, research/img/edit and research/subs.
 set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -28,10 +29,18 @@ done
 # shellcheck disable=SC2086 # subs is a list of arguments
 "$kfa" patch subtitles --boot-font "$gamedir/SYSDIR/BOOT.BIN" "$tmp/BOOT.BIN" $subs
 
+for f in "$gamedir"/USRDIR/Font/BitFont_Game*.bnd "$gamedir/USRDIR/Bnd/AdvMenu.bnd"; do
+	"$kfa" font pad "$f" "$tmp/$(basename "$f")" >/dev/null
+done
+
 cp "$root/research/iso/$game.iso" "$iso.part"
 "$kfa" iso put "$iso.part" PSP_GAME/USRDIR/GameData/01_UmdTitle/main.dat "$tmp/main.dat"
 "$kfa" iso put "$iso.part" PSP_GAME/USRDIR/Bnd/AdvSys.bnd "$tmp/AdvSys.bnd"
 "$kfa" iso put "$iso.part" PSP_GAME/SYSDIR/EBOOT.BIN "$tmp/BOOT.BIN"
+for f in "$tmp"/BitFont_Game*.bnd; do
+	"$kfa" iso put "$iso.part" "PSP_GAME/USRDIR/Font/$(basename "$f")" "$f" >/dev/null
+done
+"$kfa" iso put "$iso.part" PSP_GAME/USRDIR/Bnd/AdvMenu.bnd "$tmp/AdvMenu.bnd"
 "$kfa" dat verify "$gamedir/SYSDIR/BOOT.BIN" "$tmp/main.dat"
 mv "$iso.part" "$iso"
 echo "built $iso"
