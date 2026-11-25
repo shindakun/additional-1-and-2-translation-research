@@ -9,6 +9,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"image/png"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/bnd"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/font"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/gim"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/iso9660"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/maindat"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/sjis"
@@ -78,6 +80,10 @@ func run() error {
 		err = textExport(args[2:])
 	case "text import":
 		err = textImport(args[2:])
+	case "gim topng":
+		err = gimToPNG(args[2:])
+	case "gim scan":
+		err = gimScan(args[2:])
 	case "patch counter":
 		err = patchCounter(args[2:])
 	default:
@@ -119,6 +125,9 @@ Commands:
                                    Write translations in place into a copy of
                                    main.dat; report those that do not fit
                                    (GAMEDIR is an extracted PSP_GAME folder)
+  gim topng IN.gim OUT.png         Convert a GIM image to PNG
+  gim scan FILE DIR                Write every GIM found inside FILE as
+                                   DIR/<offset>.png
   patch counter BOOT.BIN OUT       Draw a frame counter over movies (test build)
   version                          Print the version and exit
 `)
@@ -555,5 +564,65 @@ func textImport(a []string) error {
 		return err
 	}
 	fmt.Printf("wrote %s: %d slots translated, %d not written\n", a[2], n, len(probs))
+	return nil
+}
+
+func writePNG(path string, g *gim.Image) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	if err := png.Encode(f, g.Image); err != nil {
+		_ = f.Close() // the encode error is reported
+		return err
+	}
+	return f.Close()
+}
+
+func gimToPNG(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	b, err := os.ReadFile(a[0])
+	if err != nil {
+		return err
+	}
+	g, err := gim.Decode(b)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s: %dx%d, format %d, order %d\n", a[0], g.Width, g.Height, g.Format, g.Order)
+	return writePNG(a[1], g)
+}
+
+func gimScan(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	b, err := os.ReadFile(a[0])
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(a[1], 0o755); err != nil {
+		return err
+	}
+	mark := []byte("MIG.00.1PSP\x00")
+	n, bad := 0, 0
+	for off := bytes.Index(b, mark); off >= 0; {
+		g, err := gim.Decode(b[off:])
+		if err != nil {
+			bad++
+		} else if err := writePNG(filepath.Join(a[1], fmt.Sprintf("%08x_%dx%d.png", off, g.Width, g.Height)), g); err != nil {
+			return err
+		} else {
+			n++
+		}
+		next := bytes.Index(b[off+1:], mark)
+		if next < 0 {
+			break
+		}
+		off += 1 + next
+	}
+	fmt.Printf("%s: %d images written, %d not decoded\n", a[0], n, bad)
 	return nil
 }

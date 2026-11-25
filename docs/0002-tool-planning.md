@@ -51,7 +51,8 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa text export <gamedir> <json>` | Translatable `main.dat` strings ([0004](0004-text.md)) | Built |
 | `kfa text import <gamedir> <json> <out>` | Translations into `main.dat`, in place | Built; strings must fit their original length |
 | `kfa fmg export`, `kfa fmg import` | FMG text out and in | Not built |
-| `kfa gim topng`, `kfa gim frompng` | Convert textures; town map labels and the title are images | Not built |
+| `kfa gim topng`, `kfa gim scan` | GIM to PNG; every GIM inside a file ([0012](0012-images.md)) | Built |
+| `kfa gim frompng` | PNG to GIM | Not built |
 | `kfa build <project>` | Build a finished ISO from translation files | Not built |
 
 ## Translation files
