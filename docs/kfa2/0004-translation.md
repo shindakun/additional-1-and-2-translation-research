@@ -10,11 +10,10 @@ Headless PPSSPP: the town and the status overlay. Menu text from the carried-ove
 
 ## New entries
 
-`scripts/gen_items.py` fills the found, used, priced and description entries from the item tables (165 entries, with 17 names and 15 description lines added to the tables). The new command, person and area names are done. The dialogue and message entries (1,298) go in batches of index-to-English TSV files, `research/text/kfaII-bN.tsv`. Many sources end in extra line breaks; `scripts/tail_breaks.py` copies the same number onto each English line. Batches 1 to 4 set 672 entries: town people, merchants, guards, the tavern, the casino rules (including Memory and Slots), the bard's songs and verses, the survey team, the scholar, the shop, and the first labyrinth scenes. 618 remain.
+`scripts/gen_items.py` fills the found, used, priced and description entries from the item tables (165 entries, with 17 names and 15 description lines added to the tables). The new command, person and area names are done. The dialogue and message entries (1,298) go in batches of index-to-English TSV files, `research/text/kfaII-bN.tsv`. Many sources end in extra line breaks; `scripts/tail_breaks.py` copies the same number onto each English line. Batches 1 to 7 set all of them: the town, the casino rules (including Memory and Slots), the bard's songs and verses, the survey team, the labyrinth scenes, the castle, the endings, the new enemy and person names, and the key item descriptions. Untranslated `text`, `name`, `menu` and `block` entries are only placeholders and debug labels, as in Additional I ([kfa1/0014](../kfa1/0014-debug-screens.md)). The 1,293 flag names are not translated.
 
-Test after batch 4: 42,013 slots in place, 1,490 strings moved, 77 chunks relocated, nothing refused. After batch 2, headless PPSSPP showed the tavern owner's lines and the tavern menu (`Talk to the dealer`) in English.
+Test with all batches: 43,799 slots in place, 3,277 strings moved, 77 chunks relocated, nothing refused. Headless PPSSPP shows the town map and the tavern dialogue in English. The deeper labyrinth text is not seen in a test run.
 
 ## Open work
 
-1. Translate the remaining dialogue and message entries.
-2. Transcribe and subtitle the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
+1. Transcribe and subtitle the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
