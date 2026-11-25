@@ -41,17 +41,17 @@ Output goes to `research/`, which git ignores.
 To build the translated image:
 
 ```sh
-go build -o kfa ./cmd/kfa
+make kfa
 scripts/build_english.sh
 ```
 
-The result is `research/builds/kfaI-english.iso`. The translation files it reads stay in `research/` because they hold the Japanese source text ([0009](docs/kfa1/0009-test-builds.md)).
+The result is `research/builds/kfaI-english.iso` (`scripts/build_english.sh kfaII` for Additional II). The translations are in `translations/`, without Japanese; the build takes the Japanese from the disc ([0004](docs/kfa1/0004-text.md#translation-files), [0009](docs/kfa1/0009-test-builds.md)).
 
 ### Go tools
 
 ```sh
-go build -o kfa ./cmd/kfa
-./kfa                      # lists commands
+make kfa
+./bin/kfa                      # lists commands
 KFA_DATA=$PWD/research go test ./...
 make check                 # format, vet, lint, test, markdown lint, tidy
 ```
@@ -76,6 +76,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
 | `scripts/build_english.sh` | Build `research/builds/kfaI-english.iso` with every current translation |
 | `scripts/map_boot.py` | Map `BOOT.BIN` addresses from one game to the other |
+| `scripts/translation.py` | Convert between English-only translation files and full ones |
 | `scripts/text_merge.py` | Carry translations into a new text export |
 | `scripts/text_apply_tsv.py` | Set translations from an index-to-English TSV |
 | `scripts/tail_breaks.py` | Give English lines the same trailing line breaks as their source |

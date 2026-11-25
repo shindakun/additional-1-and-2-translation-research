@@ -1,0 +1,902 @@
+[
+ {
+  "file": "AdvCommon.fmg",
+  "id": 300000,
+  "en": "#c[FFFF00]#m[38] #bWarning#b\n#cNo Memory Stick#m[82] is inserted.\nYou cannot save or load data.\nStart anyway?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 300001,
+  "en": "#c[FFFF00]#m[38] #cInsert a Memory Stick#m[82]."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 300002,
+  "en": "#c[FFFF00]#m[38] #bWarning#b\n#cNot enough free space on the Memory Stick#m[82].\nYou cannot save or load data.\nStart anyway?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301000,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cNo Memory Stick#m[82] is inserted.\nInsert the Memory Stick#m[82]\nand try again."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301001,
+  "en": "#c[FFFF00]#m[38] #bNote#b\n#cAn \"App BOX\" will be created on the\nMemory Stick#m[82]. Do not remove the\nMemory Stick#m[82] meanwhile. Continue?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301002,
+  "en": "Creating the \"App BOX\"..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301003,
+  "en": "#c[0000FF]#m[46]#c The \"App BOX\" was created."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301004,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nThe \"App BOX\" could not be created."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301005,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThe Memory Stick#m[82] was removed,\nor sleep mode started."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301006,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cNot enough free space on the Memory Stick#m[82].\nThe \"App BOX\" needs %03dKB\nor more."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 301007,
+  "en": "#c[FF8080]#m[58] Error\n#cThe \"App BOX\" could not be created.\nThe Memory Stick#m[82] is locked."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302000,
+  "en": "Searching the UMD for apps..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302001,
+  "en": "Searching the Memory Stick#m[82]\nfor apps..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302002,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cNo Memory Stick#m[82] is inserted.\nInsert the Memory Stick#m[82]\nand try again."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302003,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThe Memory Stick#m[82] was removed,\nor sleep mode started."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302004,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThere is no app on the Memory Stick#m[82]."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302005,
+  "en": "\n\nwill start. Continue?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302006,
+  "en": "\n\nwill be transferred. Continue?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302007,
+  "en": "Checking game data..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302008,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nInvalid data was found.\nThe game cannot start."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302009,
+  "en": "#c[FFFF00]#m[38] #bWarning#c#b\nThis app's data was output\nin #c[FFFF00]debug mode#c."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302010,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nAn error occurred\nwhile checking game data."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302011,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nThis app #c[FF8080]cannot be exchanged#c."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302012,
+  "en": "#c[FFFF00]#m[38] #bWarning#b\n#cNo Memory Stick#m[82] is inserted.\nYou cannot save or load data.\nStart anyway?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302013,
+  "en": "#c[FFFF00]#m[38] #bWarning#c#b\nNot enough free space on the Memory Stick#m[82].\nSaving game data needs %03dKB or more.\nYou may not be able to save. Start anyway?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302014,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cNo Memory Stick#m[82] is inserted.\nInsert the Memory Stick#m[82]\nand try again."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302015,
+  "en": "#c[FFFF00]#m[38] #bWarning#c#b\nDo not remove or insert the Memory Stick#m[82]\nwith game data while the game runs.\nIt may cause unexpected errors."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302016,
+  "en": "\n\nwill be deleted. Continue?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302017,
+  "en": "#c[FFFF00]#m[38] #bWarning#c#b\nThis game is licensed.\nReally delete it?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302018,
+  "en": "Deleting..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302019,
+  "en": "Deleted.\n#c[FFFF00]Note:#c\nSave data was not deleted.\nDelete it separately if needed."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302020,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nThe deletion failed."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302021,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThe Memory Stick#m[82] was removed,\nor sleep mode started."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302022,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThe app could not be deleted.\nThe Memory Stick#m[82] is locked."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302023,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cNot enough free space on the Memory Stick#m[82]."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302024,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThe app to delete was not found\non the Memory Stick#m[82]."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 302025,
+  "en": "#c[FF8080]#m[58] #bLicense error#b\n#cThe license in this app was not\nissued by this \"PSP\".\nThe app will not start."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303000,
+  "en": "#c[FFFF00]#m[38] Warning#c\nTurn on the wireless LAN switch."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303001,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nA communication error occurred."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303002,
+  "en": "Connecting to the network..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303003,
+  "en": "Waiting for the sender..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303004,
+  "en": "\nwill be sent the app. Continue?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303005,
+  "en": "Waiting for the receiver to reply..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303006,
+  "en": "#c[FF8080]#m[58]#c The receiver refused the app."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303007,
+  "en": "\nwants to send an app. Accept?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303008,
+  "en": "Accepting the request..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303009,
+  "en": "Refusing the request..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303010,
+  "en": "Preparing to send the app..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303011,
+  "en": "Preparing to receive the app..."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303012,
+  "en": "#c[FFFF00]#m[38] #bNote#b\n#cSending the app.\nDo not remove the Memory Stick#m[82],\nturn off the wireless LAN switch,\nor quit the game."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303013,
+  "en": "#c[FFFF00]#m[38] #bNote#b\n#cReceiving the app.\nDo not remove the Memory Stick#m[82],\nturn off the wireless LAN switch,\nor quit the game."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303014,
+  "en": "#c[0000FF]#m[46]#c The app was sent."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303015,
+  "en": "#c[0000FF]#m[46]#c The app was received."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303016,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cInsert a Memory Stick#m[82]."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303017,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nNot enough free space on the Memory Stick#m[82]\nto save the received app.\nReceiving stopped."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303018,
+  "en": "#c[FFFF00]#m[38] Warning\n#cAn app with the same file name is on\nthe Memory Stick#m[82]. Receiving will overwrite\nit and delete the old app.\nContinue receiving?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303019,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nThe network connection was lost.\nThe exchange stopped."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303020,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThe Memory Stick#m[82] was removed,\nor sleep mode started.\nThe exchange stopped."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303021,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nAn error occurred during the exchange.\nThe exchange stopped."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303022,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nThere is no App BOX on the Memory Stick#m[82].\nCreate an App BOX."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303023,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nThe wireless LAN switch was turned off.\nThe exchange stopped."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303024,
+  "en": "#c[0000FF]#m[46]#c The sender canceled the request."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303025,
+  "en": "#c[FF8080]#m[58] #bError#c#b\nCannot connect to the network.\nThe exchange stopped."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 303026,
+  "en": "#c[FF8080]#m[58] #bError#b\n#cThe received app cannot be written\nto the Memory Stick#m[82].\nThe Memory Stick#m[82] is locked."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501001,
+  "en": "Select"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501002,
+  "en": "Change"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501003,
+  "en": "Music volume"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501004,
+  "en": "Effects"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501005,
+  "en": "Auto focus"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501006,
+  "en": "  On  "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501007,
+  "en": "  Off  "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501008,
+  "en": "Cursor mode"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501009,
+  "en": "Analog"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501010,
+  "en": "Digital"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501011,
+  "en": "Cursor speed"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501012,
+  "en": " Slow "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501013,
+  "en": " Normal "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501014,
+  "en": " Fast "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501015,
+  "en": "Remember cursor"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501016,
+  "en": "  On  "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501017,
+  "en": "  Off  "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501018,
+  "en": "Remember command"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501019,
+  "en": "  On  "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501020,
+  "en": "  Off  "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501021,
+  "en": "Message speed"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501022,
+  "en": " Slow "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501023,
+  "en": " Normal "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501024,
+  "en": " Fast "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501025,
+  "en": "   OK   "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501026,
+  "en": "Cancel"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501027,
+  "en": "Defaults"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501030,
+  "en": "#c[FFFF00]Set the music (BGM) volume.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501031,
+  "en": "#c[FFFF00]Set the sound effect (SE) volume.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501032,
+  "en": "#c[FFFF00]Move the cursor freely in the main window.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501033,
+  "en": "#c[FFFF00]Move the cursor between set points.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501034,
+  "en": "#c[FFFF00]Slow cursor speed. (Analog mode only)#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501035,
+  "en": "#c[FFFF00]Normal cursor speed. (Analog mode only)#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501036,
+  "en": "#c[FFFF00]Fast cursor speed. (Analog mode only)#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501037,
+  "en": "#c[FFFF00]Remember the last cursor position.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501038,
+  "en": "#c[FFFF00]The cursor always returns to the default.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501039,
+  "en": "#c[FFFF00]Remember the last command.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501040,
+  "en": "#c[FFFF00]The command cursor always returns to the default.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501041,
+  "en": "#c[FFFF00]Slow message speed.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501042,
+  "en": "#c[FFFF00]Normal message speed.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501043,
+  "en": "#c[FFFF00]Fast message speed.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501044,
+  "en": "#c[FFFF00]Apply the settings above.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501045,
+  "en": "#c[FFFF00]Leave the options without applying.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501046,
+  "en": "#c[FFFF00]Reset all settings.#c"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501050,
+  "en": "If you cancel, the settings"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501051,
+  "en": "are not applied. Continue?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501052,
+  "en": "Yes"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501053,
+  "en": "No"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501100,
+  "en": "Key guide"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501101,
+  "en": "Move cursor\nChoose command/item"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501104,
+  "en": "Confirm / next message"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501105,
+  "en": "Back"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501106,
+  "en": "Shortcut mode on/off"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501107,
+  "en": "Zoom scene image"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501108,
+  "en": "Switch active window"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501109,
+  "en": "Open system menu"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501110,
+  "en": "Open key guide"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501111,
+  "en": "Back"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501120,
+  "en": "Text log"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501121,
+  "en": "Scroll"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501122,
+  "en": "Close"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501130,
+  "en": "Quit the game and restart"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501131,
+  "en": "from the beginning?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501132,
+  "en": "Yes"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501133,
+  "en": "No"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501135,
+  "en": "Quit and return to the"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501136,
+  "en": "AdventurePlayer title?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501137,
+  "en": "Yes"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501138,
+  "en": "No"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501140,
+  "en": "Change view"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501141,
+  "en": "Back to the app"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501145,
+  "en": "Action log"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501170,
+  "en": "Save"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501171,
+  "en": "Load"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501172,
+  "en": "Delete save"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501173,
+  "en": "Options"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501174,
+  "en": "Restart"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 501175,
+  "en": "Quit"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505000,
+  "en": "#c[FFFFFF]#m[9B]#c Cancel"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505001,
+  "en": "#c[FFFFFF]#m[9A]#c OK"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505010,
+  "en": "Invalid data was found."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505011,
+  "en": "Stopping the game; back to the title."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505012,
+  "en": "#c[FFFFFF]#m[9B]#c OK"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505013,
+  "en": "A fatal error occurred during play.\nThe game will end and return\nto the KFA II title."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505014,
+  "en": "The game data could not be read correctly.\nThe game will end and return\nto the KFA II title."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505015,
+  "en": "The game data could not be loaded.\nThe game will end and return\nto the KFA II title."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505016,
+  "en": "No Memory Stick%s is inserted.\nThe game will end and return\nto the KFA II title."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505020,
+  "en": "Title: %s \nAuthor: %s "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505021,
+  "en": "\n***DEBUG MODE***"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505023,
+  "en": "AdventurePlayer save data"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505024,
+  "en": "Title: %s \nAuthor: %s \nPlay time: %s "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505025,
+  "en": "Play time: %s "
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505026,
+  "en": " save data"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505030,
+  "en": "AdventurePlayer App BOX"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505031,
+  "en": "*Note*\n Deleting the App BOX deletes all\n app data inside it."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505035,
+  "en": "Checking data...\nDo not remove or insert\nthe Memory Stick#m[82]."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505036,
+  "en": "The Memory Stick#m[82] was removed during play,\nor sleep mode started.\nChecking the data.\nDo not remove or insert\nthe Memory Stick#m[82] meanwhile."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505037,
+  "en": "Data check complete."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505039,
+  "en": "Loading data from the Memory Stick#m[82].\nInsert the Memory Stick#m[82]."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505040,
+  "en": "Corrupt data"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505041,
+  "en": "Corrupt data. Delete it."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505105,
+  "en": "Sleep mode started,"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505106,
+  "en": "so the process stopped."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505108,
+  "en": "#c[FFFFFF]#m[9A]#c OK"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505110,
+  "en": "Corrupt data was found."
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505111,
+  "en": "Delete the corrupt data?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505113,
+  "en": "Yes"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505114,
+  "en": "No"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505116,
+  "en": "Quit the game?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505118,
+  "en": "Yes"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505119,
+  "en": "No"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505120,
+  "en": "Quit the game and return"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505121,
+  "en": "to the KFA title?"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505123,
+  "en": "Yes"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 505124,
+  "en": "No"
+ },
+ {
+  "file": "AdvCommon.fmg",
+  "id": 506000,
+  "en": "Controls"
+ }
+]

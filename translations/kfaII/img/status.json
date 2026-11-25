@@ -1,0 +1,415 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "budget": 24347,
+ "threshold": 120,
+ "labels": [
+  {
+   "box": [
+    143,
+    22,
+    186,
+    34
+   ],
+   "text": "Vitality",
+   "size": 10,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    143,
+    36,
+    186,
+    48
+   ],
+   "text": "Magic",
+   "size": 10,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    143,
+    50,
+    186,
+    62
+   ],
+   "text": "Speed",
+   "size": 10,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    68,
+    90,
+    82
+   ],
+   "text": "Weapon",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    83,
+    90,
+    96
+   ],
+   "text": "Magic",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    97,
+    90,
+    109
+   ],
+   "text": "Shield",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    111,
+    90,
+    124
+   ],
+   "text": "Armor",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    125,
+    90,
+    137
+   ],
+   "text": "Helm",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    138,
+    90,
+    151
+   ],
+   "text": "Gauntlet",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    152,
+    90,
+    165
+   ],
+   "text": "Greaves",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    166,
+    90,
+    180
+   ],
+   "text": "Accessory",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    36,
+    181,
+    90,
+    194
+   ],
+   "text": "Items",
+   "size": 10,
+   "color": [
+    215,
+    175,
+    95
+   ],
+   "threshold": 100,
+   "align": "left"
+  },
+  {
+   "box": [
+    247,
+    21,
+    279,
+    34
+   ],
+   "text": "Atk",
+   "size": 10,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 100,
+   "align": "center"
+  },
+  {
+   "box": [
+    282,
+    21,
+    314,
+    34
+   ],
+   "text": "Def",
+   "size": 10,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 100,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    36,
+    252,
+    48
+   ],
+   "text": "Cut",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    50,
+    252,
+    62
+   ],
+   "text": "Hit",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    63,
+    252,
+    76
+   ],
+   "text": "Stab",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    77,
+    252,
+    89
+   ],
+   "text": "Fire",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    91,
+    252,
+    103
+   ],
+   "text": "Earth",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    105,
+    252,
+    118
+   ],
+   "text": "Wind",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    119,
+    252,
+    131
+   ],
+   "text": "Water",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    133,
+    252,
+    145
+   ],
+   "text": "Light",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    224,
+    147,
+    252,
+    159
+   ],
+   "text": "Dark",
+   "size": 9,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "center"
+  },
+  {
+   "box": [
+    219,
+    168,
+    246,
+    180
+   ],
+   "text": "Load",
+   "size": 10,
+   "color": [
+    225,
+    225,
+    215
+   ],
+   "threshold": 165,
+   "align": "left"
+  }
+ ]
+}

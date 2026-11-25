@@ -17,6 +17,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -712,7 +713,13 @@ func (s *space) Alloc(unit int, data []byte) (int, bool) {
 // values; the patched loader takes their base from the chunk table
 // (kfa patch chunkbase, docs/kfa1/0004).
 func (s *space) relocate(f *maindat.File) (int, error) {
+	// Map order is random; sort so the same input gives the same file.
+	units := make([]int, 0, len(s.grown))
 	for u := range s.grown {
+		units = append(units, u)
+	}
+	sort.Ints(units)
+	for _, u := range units {
 		// Original chunk sizes are multiples of 16, and the loader reads
 		// only whole blocks: a string in a partial last block shows as
 		// garbage. Pad to a full sector.

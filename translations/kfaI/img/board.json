@@ -1,0 +1,23 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "budget": 57674,
+ "labels": [
+  {
+   "box": [
+    396,
+    189,
+    445,
+    222
+   ],
+   "text": "Payout\ntable",
+   "size": 10,
+   "color": [
+    20,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  }
+ ]
+}

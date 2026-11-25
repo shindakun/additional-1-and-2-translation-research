@@ -1,4 +1,4 @@
-.PHONY: all help build run test race cover vet fmt lint md-lint tidy tidy-check hooks check clean
+.PHONY: all help build kfa run test race cover vet fmt lint md-lint tidy tidy-check hooks check clean
 
 all: check ## Default: run the full local check suite
 
@@ -13,11 +13,11 @@ LDFLAGS := -s -w -X main.version=$(VERSION)
 build: ## Build every package (no binary written)
 	go build -o /dev/null ./...
 
-$(BIN): ## Build the binary for this host
-	go build -trimpath -ldflags="$(LDFLAGS)" -o $(BIN) ./cmd/$(BIN)
+kfa: ## Build bin/kfa for this host
+	go build -trimpath -ldflags="$(LDFLAGS)" -o bin/$(BIN) ./cmd/$(BIN)
 
-run: $(BIN) ## Build and run (pass args with ARGS=...)
-	./$(BIN) $(ARGS)
+run: kfa ## Build and run (pass args with ARGS=...)
+	./bin/$(BIN) $(ARGS)
 
 # --- Checks ----------------------------------------------------------------
 
@@ -76,4 +76,4 @@ hooks: ## Install pre-commit hooks
 check: fmt vet lint test md-lint tidy-check ## Run the full local check suite
 
 clean: ## Remove build output and coverage data
-	rm -f $(BIN) coverage.out coverage.html
+	rm -rf bin coverage.out coverage.html

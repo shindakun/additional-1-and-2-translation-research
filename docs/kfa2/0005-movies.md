@@ -1,6 +1,6 @@
 # 0005: Movies, Additional II
 
-The movie format, the subtitle patch and the method are in [kfa1/0006](../kfa1/0006-movies.md), [kfa1/0010](../kfa1/0010-subtitle-patch.md) and [kfa1/0011](../kfa1/0011-movie-script.md). The tables are in `research/subs/kfaII-movieNNN.tsv`; `scripts/build_english.sh kfaII` applies them.
+The movie format, the subtitle patch and the method are in [kfa1/0006](../kfa1/0006-movies.md), [kfa1/0010](../kfa1/0010-subtitle-patch.md) and [kfa1/0011](../kfa1/0011-movie-script.md). The tables are in `translations/kfaII/subs/movieNNN.tsv`; `scripts/build_english.sh kfaII` applies them.
 
 | Movie | Length | Content |
 |---|---|---|

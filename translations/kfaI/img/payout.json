@@ -1,0 +1,142 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "budget": 61045,
+ "labels": [
+  {
+   "box": [
+    61,
+    12,
+    139,
+    31
+   ],
+   "text": "4 numbers",
+   "size": 13,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  },
+  {
+   "box": [
+    199,
+    49,
+    281,
+    71
+   ],
+   "text": "2 numbers",
+   "size": 13,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  },
+  {
+   "box": [
+    376,
+    12,
+    465,
+    32
+   ],
+   "text": "2 rows",
+   "size": 13,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  },
+  {
+   "box": [
+    86,
+    112,
+    167,
+    134
+   ],
+   "text": "1 number",
+   "size": 13,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  },
+  {
+   "box": [
+    376,
+    112,
+    465,
+    132
+   ],
+   "text": "1 row",
+   "size": 13,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  },
+  {
+   "box": [
+    189,
+    164,
+    278,
+    186
+   ],
+   "text": "1 column",
+   "size": 13,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  },
+  {
+   "box": [
+    293,
+    164,
+    384,
+    186
+   ],
+   "text": "2 columns",
+   "size": 13,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  },
+  {
+   "box": [
+    17,
+    207,
+    203,
+    229
+   ],
+   "text": "Even/odd, red/black, low/high",
+   "size": 12,
+   "color": [
+    30,
+    20,
+    20
+   ],
+   "fill": "box",
+   "shadow": false
+  }
+ ]
+}

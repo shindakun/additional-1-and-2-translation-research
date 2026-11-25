@@ -1,0 +1,90 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "labels": [
+  {
+   "box": [
+    222,
+    0,
+    262,
+    12
+   ],
+   "text": "Vit",
+   "size": 11,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 110,
+   "align": "left"
+  },
+  {
+   "box": [
+    222,
+    13,
+    262,
+    26
+   ],
+   "text": "Mag",
+   "size": 11,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 110,
+   "align": "left"
+  },
+  {
+   "box": [
+    222,
+    27,
+    262,
+    40
+   ],
+   "text": "Agi",
+   "size": 11,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "threshold": 110,
+   "align": "left"
+  },
+  {
+   "box": [
+    398,
+    3,
+    421,
+    14
+   ],
+   "text": "Next",
+   "size": 8,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "fill": "clear",
+   "align": "left"
+  },
+  {
+   "box": [
+    412,
+    14,
+    452,
+    26
+   ],
+   "text": "EXP",
+   "size": 11,
+   "color": [
+    60,
+    180,
+    240
+   ],
+   "fill": "clear",
+   "align": "left"
+  }
+ ]
+}

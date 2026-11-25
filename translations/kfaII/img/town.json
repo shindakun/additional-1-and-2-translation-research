@@ -1,0 +1,87 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "budget": 46008,
+ "threshold": 120,
+ "labels": [
+  {
+   "box": [
+    322,
+    8,
+    466,
+    34
+   ],
+   "text": "Town of Traujito",
+   "size": 14
+  },
+  {
+   "box": [
+    288,
+    72,
+    337,
+    99
+   ],
+   "text": "Road",
+   "size": 13
+  },
+  {
+   "box": [
+    412,
+    101,
+    462,
+    129
+   ],
+   "text": "Shop",
+   "size": 13
+  },
+  {
+   "box": [
+    159,
+    107,
+    209,
+    135
+   ],
+   "text": "Tavern",
+   "size": 12
+  },
+  {
+   "box": [
+    16,
+    138,
+    107,
+    167
+   ],
+   "text": "Labyrinth",
+   "size": 13
+  },
+  {
+   "box": [
+    242,
+    159,
+    292,
+    189
+   ],
+   "text": "Inn",
+   "size": 13
+  },
+  {
+   "box": [
+    135,
+    198,
+    203,
+    228
+   ],
+   "text": "Smithy",
+   "size": 13
+  },
+  {
+   "box": [
+    384,
+    244,
+    466,
+    262
+   ],
+   "text": "Status",
+   "size": 12
+  }
+ ]
+}

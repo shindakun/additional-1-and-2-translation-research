@@ -23,7 +23,7 @@ ninja PPSSPPHeadless
 Build `kfa` first:
 
 ```sh
-go build -o kfa ./cmd/kfa
+make kfa
 ```
 
 ## VWF test
@@ -57,9 +57,11 @@ Result: the build boots and regular text looks unchanged. The game shows little 
 
 ## Text test
 
-`scripts/build_english.sh [GAME]` builds `research/builds/GAME-english.iso` (default `kfaI`) with every current translation, in this order: images into `main.dat` (`research/img/edit/GAME`), text on top (`research/text/GAME-test.json`), FMG messages into `AdvSys.bnd` (`research/text/GAME-fmg-test.json`), the subtitle patch with the boot font and the chunk base patch into `EBOOT.BIN` (every `research/subs/GAME-movieNNN.tsv`; with none, only the chunk base patch), and the padded fonts. It verifies `main.dat` and leaves no other files. This is the image to play. It is larger than the original disc image: `main.dat` grows when chunks relocate, and `kfa iso put` moves the movies and `DUMMY.BIN` after it to the end of the image.
+`scripts/build_english.sh [GAME]` builds `research/builds/GAME-english.iso` (default `kfaI`) from `translations/GAME` ([0004](0004-text.md#translation-files)). It builds `bin/kfa`, exports the Japanese from the extracted disc and fills in the English, redraws the image labels from the specs (Pillow and the fonts in the specs), writes the images, then the text, into `main.dat`, writes the FMG messages into `AdvSys.bnd`, applies the subtitle and chunk base patches to `EBOOT.BIN` (with no subtitle tables, only the chunk base patch), and pads the fonts. It verifies `main.dat` and leaves no other files. The same input gives the same image byte for byte. This is the image to play.
 
 Test builds for one change go to `research/builds` under a name that says what they test, and are deleted after the test. Screenshots that show a result stay in `research/ppsspp/examples`.
+
+The headless memory stick (`research/ppsspp/headless-ms`) must hold no save for these input scripts: with a save, the title selects Load.
 
 In town, Start opens the system menu; Down, Down, Circle opens the options screen.
 

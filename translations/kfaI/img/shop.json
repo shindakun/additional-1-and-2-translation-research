@@ -1,0 +1,158 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "labels": [
+  {
+   "box": [
+    14,
+    3,
+    90,
+    17
+   ],
+   "text": "Repair cost",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    7,
+    44,
+    80,
+    58
+   ],
+   "text": "Sell price",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    7,
+    87,
+    80,
+    101
+   ],
+   "text": "Buy price",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    7,
+    263,
+    62,
+    278
+   ],
+   "text": "Sell price",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    67,
+    263,
+    118,
+    278
+   ],
+   "text": "Owned",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    67,
+    278,
+    118,
+    292
+   ],
+   "text": "Stock",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    7,
+    436,
+    62,
+    451
+   ],
+   "text": "Buy price",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    67,
+    436,
+    118,
+    451
+   ],
+   "text": "Owned",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  },
+  {
+   "box": [
+    67,
+    451,
+    118,
+    465
+   ],
+   "text": "Stock",
+   "size": 9,
+   "color": [
+    225,
+    220,
+    205
+   ],
+   "threshold": 120,
+   "align": "left"
+  }
+ ]
+}

@@ -73,7 +73,7 @@ The menu buttons (`アイテム`, `魔法`, `キャンプ`, `消耗品`, `貴重
 
 ## Test result
 
-Specs in `research/img/edit`:
+Specs in `translations/kfaI/img`:
 
 | Spec | Image | Result |
 |---|---|---|

@@ -185,7 +185,7 @@ The ASCII glyphs of the game font are about 8 pixels wide: a 60-character line i
 
 ## Subtitle results
 
-`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. `movie000` is the same video 5.0 s later (the logo part): frame matching at 2 frames per second gives the best fit at 5.0 s. `research/subs/kfaI-movie000.tsv` is the `movie001` table with 5 s added. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 in three short lines at the upper right. Each block starts 1.3 s before the measured time, as the Japanese fades in, and ends 1.5 s after the Japanese, or 0.2 s before the next block starts.
+`translations/kfaI/subs/movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. `movie000` is the same video 5.0 s later (the logo part): frame matching at 2 frames per second gives the best fit at 5.0 s. `translations/kfaI/subs/movie000.tsv` is the `movie001` table with 5 s added. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 in three short lines at the upper right. Each block starts 1.3 s before the measured time, as the Japanese fades in, and ends 1.5 s after the Japanese, or 0.2 s before the next block starts.
 
 The New Game opening plays `movie001` (the key on screen reads `001`), after the title, with the font loaded. `movie000` is the same narration after the FromSoftware logo; it plays at boot. Which movie the attract loop plays is not yet checked. Headless runs show every block in English at the planned position, and the game continues to the town map after the movie.
 
@@ -208,9 +208,9 @@ Limits:
 `internal/prx` reads and edits the relocation table. `internal/mips` encodes the instructions; its test compares the encodings with instructions in `BOOT.BIN`. `internal/subpatch` builds the patch and checks that the hooked word is the expected `jal` with an `R_MIPS_26` relocation. Its test checks that no relocation inside the code space stays active and that nothing outside the code space and the hook changes except the 61 relocation types.
 
 ```sh
-./kfa patch subtitles --boot-font research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN OUT-BOOT.BIN \
-  movie000.pmf=research/subs/kfaI-movie000.tsv movie001.pmf=research/subs/kfaI-movie001.tsv
-./kfa iso put IMAGE.iso PSP_GAME/SYSDIR/EBOOT.BIN OUT-BOOT.BIN
+./bin/kfa patch subtitles --boot-font research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN OUT-BOOT.BIN \
+  movie000.pmf=translations/kfaI/subs/movie000.tsv movie001.pmf=translations/kfaI/subs/movie001.tsv
+./bin/kfa iso put IMAGE.iso PSP_GAME/SYSDIR/EBOOT.BIN OUT-BOOT.BIN
 ```
 
 `kfa patch counter` builds the counter test the same way.

@@ -8,7 +8,7 @@
 *.exe
 
 # Compiled binary. Named for the project, so update alongside Makefile BIN.
-/kfa
+/bin/
 
 # Release artifacts.
 /dist/

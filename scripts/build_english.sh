@@ -4,27 +4,41 @@
 # current translation: main.dat text and images (docs/kfa1/0004, docs/kfa1/0012), FMG
 # messages (docs/kfa1/0013), movie subtitles with the boot font (docs/kfa1/0010) and
 # fonts with padded ASCII glyphs (docs/kfa1/0005).
-# Inputs are in research/text, research/img/edit and research/subs.
+# Inputs: translations/GAME (text.json, fmg.json, subs/, img/), which hold no
+# Japanese, and the disc extracted by scripts/extract_iso.sh. The script
+# builds bin/kfa, exports the Japanese from the disc and fills it in
+# (scripts/translation.py), and redraws the image labels from the specs in
+# translations/GAME/img (scripts/relabel_jpeg.py; needs Pillow and the
+# fonts named in the specs).
 set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)
 game=${1:-kfaI}
-kfa="$root/kfa"
+kfa="$root/bin/kfa"
 gamedir="$root/research/extract/$game/PSP_GAME"
 out="$root/research/builds"
 tmp="$out/.tmp-$game"
 iso="$out/$game-english.iso"
-mkdir -p "$tmp"
+tr="$root/translations/$game"
+mkdir -p "$tmp/img" "$tmp/edit"
 trap 'rm -rf "$tmp"' EXIT
 
-"$kfa" img import "$gamedir" "$root/research/img/edit/$game" "$tmp/img.dat"
-"$kfa" text import "$gamedir" "$root/research/text/$game-test.json" "$tmp/main.dat" "$tmp/img.dat" 2>"$tmp/text.log" >/dev/null
+(cd "$root" && go build -o "$kfa" ./cmd/kfa)
+"$kfa" text export "$gamedir" "$tmp/export.json" >/dev/null
+python3 -I "$root/scripts/translation.py" fill "$tmp/export.json" "$tr/text.json" "$tmp/text.json" >/dev/null
+"$kfa" img export "$gamedir" "$tmp/img" >/dev/null
+while IFS="$(printf '\t')" read -r spec image; do
+	# -P: Pillow comes from the user site; run from the temporary directory.
+	(cd "$tmp" && python3 -P "$root/scripts/relabel_jpeg.py" "$tr/img/$spec" "$tmp/img/$image" "$tmp/edit/$image" >/dev/null)
+done <"$tr/img/images.tsv"
+
+"$kfa" img import "$gamedir" "$tmp/edit" "$tmp/img.dat"
+"$kfa" text import "$gamedir" "$tmp/text.json" "$tmp/main.dat" "$tmp/img.dat" 2>"$tmp/text.log" >/dev/null
 grep -c '^not written' "$tmp/text.log" >/dev/null && sed -n '/^not written/p' "$tmp/text.log" >&2
-"$kfa" fmg import "$gamedir" "$root/research/text/$game-fmg-test.json" "$tmp/AdvSys.bnd"
+"$kfa" fmg import "$gamedir" "$tr/fmg.json" "$tmp/AdvSys.bnd"
 subs=""
-for t in "$root"/research/subs/"$game"-movie*.tsv; do
+for t in "$tr"/subs/movie*.tsv; do
 	[ -e "$t" ] || continue
-	m=$(basename "$t" .tsv)
-	subs="$subs ${m#"$game"-}.pmf=$t"
+	subs="$subs $(basename "$t" .tsv).pmf=$t"
 done
 # shellcheck disable=SC2086 # subs is a list of arguments
 if [ -n "$subs" ]; then

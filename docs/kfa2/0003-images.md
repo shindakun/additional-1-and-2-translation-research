@@ -12,7 +12,7 @@ The image formats and tools are in [kfa1/0012](../kfa1/0012-images.md).
 | `c000_00.gim` (shop panels) | `c000_00.gim` | 0.3 |
 | `g_02aa00.gim` (HUD atlas) | `g_02afe0.gim` | 0.1 |
 
-The Additional I specs apply with two changes on the full town map: the Inn label is 4 pixels further right and the Smithy label is 4 pixels wider (pixel diff of the two maps). `research/img/edit/kfaII-specs` holds the specs; each budget is the size of the Additional II file. The Additional II JPEGs are more compressed: the edits fit at quality 78 to 85.
+The Additional I specs apply with two changes on the full town map: the Inn label is 4 pixels further right and the Smithy label is 4 pixels wider (pixel diff of the two maps). `translations/kfaII/img` holds the specs; each budget is the size of the Additional II file. The Additional II JPEGs are more compressed: the edits fit at quality 78 to 85.
 
 Test: in headless PPSSPP the town map, the status overlay and the HUD labels show English.
 
