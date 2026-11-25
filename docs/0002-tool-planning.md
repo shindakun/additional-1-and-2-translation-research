@@ -99,7 +99,7 @@ Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` ke
 | 9 | Executable patches for Latin text layout | 7, 8 |
 | 10 | `kfa build` end to end | all |
 
-Step 4 proves the build path before content changes. Steps 7 and 8 hold the open questions of [0001](0001-initial-findings.md). Steps 5 to 8 run in parallel with steps 1 to 4.
+Step 4 proves the build path before content changes. Steps 7 and 8 hold most of the open questions ([0008](0008-open-questions.md)). Steps 5 to 8 run in parallel with steps 1 to 4.
 
 ## Testing
 

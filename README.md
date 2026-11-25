@@ -10,7 +10,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 |---|---|
 | Disc file system, BND, FMG | Parsed |
 | `main.dat` container and encryption | Decoded and verified for both games |
-| Text location | Known through engine structures; action layouts partly named |
+| Text | Locations, IDs, names and markup known |
 | Fonts | Format known; ASCII glyphs present |
 | Movies | All have burned-in Japanese narration |
 | Go tools (`kfa`) | Planned |
@@ -42,6 +42,7 @@ Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
 | `scripts/extract_iso.sh` | Unzip both discs and extract their file trees |
 | `scripts/maindat.py` | Verify and decrypt `main.dat` |
 | `scripts/scene_text.py` | List text through engine structures |
+| `scripts/text_refs.py` | Resolve text IDs in actions; count names |
 | `scripts/text_survey.py` | Count text by kind (scan) |
 | `scripts/chunk_commands.py` | Walk events and actions |
 | `scripts/match_functions.py` | Carry function names from Adventure Player |
@@ -59,7 +60,8 @@ Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
 | [0001](docs/0001-initial-findings.md) | Discs, file layout, BND and FMG formats |
 | [0002](docs/0002-tool-planning.md) | Tool plan |
 | [0003](docs/0003-maindat.md) | `main.dat` container and keys |
-| [0004](docs/0004-text.md) | Text location and size |
+| [0004](docs/0004-text.md) | Text location, IDs, names and markup |
 | [0005](docs/0005-fonts.md) | Fonts |
 | [0006](docs/0006-movies.md) | Movies |
 | [0007](docs/0007-adventure-player.md) | Adventure Player disc and authoring tool |
+| [0008](docs/0008-open-questions.md) | Open questions |
