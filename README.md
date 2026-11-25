@@ -79,6 +79,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/text_merge.py` | Carry translations into a new text export |
 | `scripts/text_apply_tsv.py` | Set translations from an index-to-English TSV |
 | `scripts/text_center.py` | Center English like its space-padded source |
+| `scripts/gen_items.py` | Fill found, used, priced and description entries of a translation file from the item tables |
 | `scripts/item_desc.py` | Build English item and spell descriptions |
 | `scripts/ppsspp-headless-stick.patch` | Analog stick input for PPSSPPHeadless `--press` |
 | `scripts/relabel_jpeg.py` | Replace label text in a JPEG (byte budget) or PNG (Pillow) |
