@@ -1,0 +1,7 @@
+# Game archives and disc images
+*.zip
+*.iso
+*.cso
+
+# Local research: extracted discs, scratch scripts, cloned tools
+/research/
