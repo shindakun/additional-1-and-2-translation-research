@@ -19,10 +19,15 @@ const none = 0xFFFFFFFF
 const (
 	KindText = "text" // NUL-terminated string reached through a text header
 	KindName = "name" // 0x18-byte name field of a command record
+	KindMenu = "menu" // 0x1D-byte name field of a system menu record
 )
 
-// nameField is the size of a command name field.
-const nameField = 0x18
+// nameField is the size of a command name field; menuField is the size of
+// a system menu name field, at record +3.
+const (
+	nameField = 0x18
+	menuField = 0x1D
+)
 
 // Slot is one place that holds a string.
 type Slot struct {
@@ -63,10 +68,14 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 		seen[[2]int{ui, off}] = true
 		var raw []byte
 		budget := 0
-		if kind == KindName {
+		switch kind {
+		case KindName:
 			raw = bytes.TrimRight(v.data[off:off+nameField], "\x00")
 			budget = nameField - 1
-		} else {
+		case KindMenu:
+			raw = bytes.TrimRight(v.data[off:off+menuField], "\x00")
+			budget = menuField - 1
+		default:
 			end := bytes.IndexByte(v.data[off:], 0)
 			if end < 0 {
 				return fmt.Errorf("text: %s not terminated", where)
@@ -121,6 +130,14 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 			}
 			if err := names(ui, v, v.u32(game+0x0C), v.u32(game+0x10), "g"); err != nil {
 				return nil, err
+			}
+			// System menu and key guide: 0x20-byte records from the pointer
+			// at +0xC4 up to the address at +0x00, name at record +3.
+			end := v.u32(game)
+			for k, r := 0, v.u32(game+0xC4); r != none && r+0x20 <= end && v.in(r, 0x20); k, r = k+1, r+0x20 {
+				if err := add(ui, v, r+3, KindMenu, fmt.Sprintf("g/m%04d", k)); err != nil {
+					return nil, err
+				}
 			}
 		case strings.HasPrefix(u.Name, "chunks/"):
 			v := unitView{u.Data, uint32(u.Off)}

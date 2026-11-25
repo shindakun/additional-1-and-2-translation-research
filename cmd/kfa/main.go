@@ -20,6 +20,7 @@ import (
 	"syscall"
 
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/bnd"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/fmg"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/font"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/gim"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/images"
@@ -84,6 +85,10 @@ func run() error {
 		err = textExport(args[2:])
 	case "text import":
 		err = textImport(args[2:])
+	case "fmg export":
+		err = fmgExport(args[2:])
+	case "fmg import":
+		err = fmgImport(args[2:])
 	case "img export":
 		err = imgExport(args[2:])
 	case "img import":
@@ -133,6 +138,10 @@ Commands:
                                    Write translations in place into a copy of
                                    main.dat; report those that do not fit
                                    (GAMEDIR is an extracted PSP_GAME folder)
+  fmg export GAMEDIR OUT.json      Write the FMG messages in AdvSys.bnd
+  fmg import GAMEDIR IN.json OUT.bnd
+                                   Write translations into the FMG messages
+                                   and build a new AdvSys.bnd
   img export GAMEDIR DIR           Write every unique image of every main.dat
                                    chunk (JPEG, BMP, GIM and a PNG of each GIM)
                                    and DIR/index.tsv
@@ -512,20 +521,7 @@ func gameText(dir string) (*maindat.File, []maindat.Plain, *sjis.Codec, []text.S
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
-	sys, err := readBND(filepath.Join(dir, "USRDIR", "Bnd", "AdvSys.bnd"))
-	if err != nil {
-		return nil, nil, nil, nil, err
-	}
-	var j, u []byte
-	for _, e := range sys.Entries {
-		switch e.Name {
-		case "jis2ucs.bin":
-			j = e.Data
-		case "ucs2jis.bin":
-			u = e.Data
-		}
-	}
-	c, err := sjis.New(j, u)
+	_, c, err := sysBND(dir)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -765,5 +761,128 @@ func imgImport(a []string) error {
 		return err
 	}
 	fmt.Printf("wrote %s: %d files replaced %d images\n", a[2], len(files), n)
+	return nil
+}
+
+// sysBND reads AdvSys.bnd and builds the Shift-JIS codec from its tables.
+func sysBND(dir string) (*bnd.File, *sjis.Codec, error) {
+	sys, err := readBND(filepath.Join(dir, "USRDIR", "Bnd", "AdvSys.bnd"))
+	if err != nil {
+		return nil, nil, err
+	}
+	var j, u []byte
+	for _, e := range sys.Entries {
+		switch e.Name {
+		case "jis2ucs.bin":
+			j = e.Data
+		case "ucs2jis.bin":
+			u = e.Data
+		}
+	}
+	c, err := sjis.New(j, u)
+	return sys, c, err
+}
+
+// fmgEntry is one message in a translation file.
+type fmgEntry struct {
+	File string `json:"file"`
+	ID   int    `json:"id"`
+	JA   string `json:"ja"`
+	EN   string `json:"en"`
+}
+
+func fmgExport(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	sys, c, err := sysBND(a[0])
+	if err != nil {
+		return err
+	}
+	var out []fmgEntry
+	for _, e := range sys.Entries {
+		if !strings.HasSuffix(e.Name, ".fmg") {
+			continue
+		}
+		f, err := fmg.Read(e.Data)
+		if err != nil {
+			return fmt.Errorf("%s: %w", e.Name, err)
+		}
+		for i, raw := range f.Strings {
+			if raw == nil {
+				continue
+			}
+			ja, err := c.Decode(raw)
+			if err != nil {
+				return fmt.Errorf("%s string %d: %w", e.Name, i, err)
+			}
+			out = append(out, fmgEntry{e.Name, f.ID(i), ja, ""})
+		}
+	}
+	b, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(a[1], append(b, '\n'), 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s: %d messages\n", a[1], len(out))
+	return nil
+}
+
+func fmgImport(a []string) error {
+	if len(a) != 3 {
+		return errUsage
+	}
+	sys, c, err := sysBND(a[0])
+	if err != nil {
+		return err
+	}
+	b, err := os.ReadFile(a[1])
+	if err != nil {
+		return err
+	}
+	var entries []fmgEntry
+	if err := json.Unmarshal(b, &entries); err != nil {
+		return err
+	}
+	type key struct {
+		file string
+		id   int
+	}
+	tr := map[key]string{}
+	for _, e := range entries {
+		if e.EN != "" {
+			tr[key{e.File, e.ID}] = e.EN
+		}
+	}
+	n := 0
+	for k := range sys.Entries {
+		e := &sys.Entries[k]
+		if !strings.HasSuffix(e.Name, ".fmg") {
+			continue
+		}
+		f, err := fmg.Read(e.Data)
+		if err != nil {
+			return fmt.Errorf("%s: %w", e.Name, err)
+		}
+		for i := range f.Strings {
+			en, ok := tr[key{e.Name, f.ID(i)}]
+			if !ok || f.Strings[i] == nil {
+				continue
+			}
+			raw, err := c.Encode(en)
+			if err != nil {
+				return fmt.Errorf("%s %d: %w", e.Name, f.ID(i), err)
+			}
+			f.Strings[i] = raw
+			n++
+		}
+		e.Data = f.Bytes()
+	}
+	if err := os.WriteFile(a[2], sys.Bytes(), 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s: %d messages translated\n", a[2], n)
 	return nil
 }

@@ -14,7 +14,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 | Images | Export and in-place JPEG import built; English town map seen in game |
 | Fonts | Format known; ASCII glyphs present |
 | Movies | All have burned-in Japanese narration |
-| Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text export and import, fonts, movie patch |
+| Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
 
 ## Requirements
 
@@ -66,6 +66,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
 | `scripts/build_text_test.sh` | Build an image with translations and edited images in `main.dat` |
+| `scripts/text_merge.py` | Carry translations into a new text export |
 | `scripts/relabel_jpeg.py` | Replace label text in a JPEG within a byte budget (Pillow) |
 | `scripts/prx_unreferenced.py` | List functions no relocation or branch refers to |
 | `scripts/headless_shots.sh` | Screenshots of an image at emulated times, no window |
@@ -88,3 +89,4 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | [0010](docs/0010-subtitle-patch.md) | Subtitle patch |
 | [0011](docs/0011-movie-script.md) | Movie script and draft English |
 | [0012](docs/0012-images.md) | Images and image text |
+| [0013](docs/0013-fmg.md) | FMG messages |

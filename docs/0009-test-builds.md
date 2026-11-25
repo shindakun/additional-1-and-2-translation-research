@@ -57,6 +57,8 @@ Result: the build boots and regular text looks unchanged. The game shows little 
 
 ## Text test
 
-`scripts/build_text_test.sh GAME TRANSLATION.json [IMAGEDIR]` writes translations and edited images into `main.dat` and builds `research/builds/GAME-text.iso` ([0004](0004-text.md), [0012](0012-images.md)).
+`scripts/build_text_test.sh GAME TRANSLATION.json [IMAGEDIR [FMG.json]]` writes translations and edited images into `main.dat`, FMG translations into `AdvSys.bnd`, and builds `research/builds/GAME-text.iso` ([0004](0004-text.md), [0012](0012-images.md), [0013](0013-fmg.md)).
+
+In town, Start opens the system menu; Down, Down, Circle opens the options screen.
 
 Headless input: `--press=SECONDS:MASK[:DURATION],...` holds buttons at emulated times (default 0.15 s). Masks: Select `0x1`, Start `0x8`, Up `0x10`, Right `0x20`, Down `0x40`, Left `0x80`, Triangle `0x1000`, Circle `0x2000`, Cross `0x4000`, Square `0x8000`. From boot, Start at 5 and 7 s skips the opening, and Circle at 10 s and after starts a new game; the town shows at about 45 s.

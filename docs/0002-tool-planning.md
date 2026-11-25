@@ -50,7 +50,7 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa patch counter <boot> <out>` | Frame counter over movies ([0010](0010-subtitle-patch.md)) | Built |
 | `kfa text export <gamedir> <json>` | Translatable `main.dat` strings ([0004](0004-text.md)) | Built |
 | `kfa text import <gamedir> <json> <out>` | Translations into `main.dat`, in place | Built; strings must fit their original length |
-| `kfa fmg export`, `kfa fmg import` | FMG text out and in | Not built |
+| `kfa fmg export`, `kfa fmg import` | FMG text out and in ([0013](0013-fmg.md)) | Built; byte-exact rebuild, seen in game |
 | `kfa gim topng`, `kfa gim scan` | GIM to PNG; every GIM inside a file ([0012](0012-images.md)) | Built |
 | `kfa img export`, `kfa img import` | Chunk images out and in, in place ([0012](0012-images.md)) | Built; JPEG and BMP edits seen in game |
 | `kfa gim frompng` | PNG to GIM | Not built |
@@ -100,7 +100,7 @@ Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` ke
 |---|---|---|---|
 | 1 | Module setup, `iso extract`, round-trip test harness | | Built |
 | 2 | `bnd` unpack and pack, both variants | | Library built; CLI unpack built |
-| 3 | `sjis`, `fmg` export and import | 2 | `internal/sjis` built; FMG not built |
+| 3 | `sjis`, `fmg` export and import | 2 | Built |
 | 4 | `iso build`; boot an unchanged build on PPSSPP | 1 | In-place `iso put` built; full build not built |
 | 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | | Built |
 | 6 | `dat unpack`, `dat pack` | 5 | Built; same-size units only |
