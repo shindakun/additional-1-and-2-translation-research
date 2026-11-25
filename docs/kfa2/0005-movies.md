@@ -5,8 +5,8 @@ The movie format, the subtitle patch and the method are in [kfa1/0006](../kfa1/0
 | Movie | Length | Content |
 |---|---|---|
 | `movie000` | 1:58 | FromSoftware logo, then the opening narration; plays at boot |
-| `movie201` | 1:54 | The opening narration without the logo; the `movie000` narration 5.0 s earlier |
-| `movie202`, `movie203` | 1:02, 1:06 | The labyrinth's history; the two differ in the last blocks |
+| `movie201` | 1:54 | The opening narration without the logo; the `movie000` narration 5.0 s earlier. Not seen in a test run |
+| `movie202`, `movie203` | 1:02, 1:06 | The labyrinth's history; the two differ in the last blocks. New Game plays `movie203` |
 | `movie210`, `movie211`, `movie212` | 2:30, 2:06, 2:36 | Three endings, then the credits in English |
 
 Times are seconds from the first frame. Each block starts 1 s before the Japanese and ends about 1 s after it. The opening times come from a 10 fps edge count ([kfa1/0011](../kfa1/0011-movie-script.md)); the others from one frame every 2 s, ±1 s. `/` marks a line break.
@@ -81,4 +81,4 @@ The English is a draft. Names follow [kfa1/0004](../kfa1/0004-text.md#proper-nam
 
 The 96 lines of the seven tables do not fit the first code space of the patch. The text that does not fit goes to the second code space, after the chunk base stubs ([kfa1/0010](../kfa1/0010-subtitle-patch.md)).
 
-Headless PPSSPP: `movie000` at boot shows every block in English clear of the Japanese, then the title and the town. `movie202`, `movie203` and the endings are not reached in a test run.
+Headless PPSSPP: `movie000` at boot shows every block in English clear of the Japanese, then the title. New Game plays `movie203` with its subtitles in place, then the town. `movie201`, `movie202` and the endings are not reached in a test run.
