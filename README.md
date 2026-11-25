@@ -11,7 +11,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 | Disc file system, BND, FMG | Parsed |
 | `main.dat` container and encryption | Decoded and verified for both games |
 | Text | Export and in-place import built; translated text seen in game |
-| Images | Export and in-place JPEG import built; English town map seen in game |
+| Images | Export and in-place JPEG and GIM import built; English town map and status overlay seen in game |
 | Fonts | Format known; ASCII glyphs present |
 | Movies | All have burned-in Japanese narration |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
@@ -69,7 +69,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/text_merge.py` | Carry translations into a new text export |
 | `scripts/text_apply_tsv.py` | Set translations from an index-to-English TSV |
 | `scripts/ppsspp-headless-stick.patch` | Analog stick input for PPSSPPHeadless `--press` |
-| `scripts/relabel_jpeg.py` | Replace label text in a JPEG within a byte budget (Pillow) |
+| `scripts/relabel_jpeg.py` | Replace label text in a JPEG (byte budget) or PNG (Pillow) |
 | `scripts/prx_unreferenced.py` | List functions no relocation or branch refers to |
 | `scripts/headless_shots.sh` | Screenshots of an image at emulated times, no window |
 | `scripts/ghidra/analyze.sh` | Decompile the executables with Ghidra |

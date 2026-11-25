@@ -52,8 +52,8 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa text import <gamedir> <json> <out> [base]` | Translations into `main.dat` | Built; long text strings move into space freed in their chunk |
 | `kfa fmg export`, `kfa fmg import` | FMG text out and in ([0013](0013-fmg.md)) | Built; byte-exact rebuild, seen in game |
 | `kfa gim topng`, `kfa gim scan` | GIM to PNG; every GIM inside a file ([0012](0012-images.md)) | Built |
-| `kfa img export`, `kfa img import` | Chunk images out and in, in place ([0012](0012-images.md)) | Built; JPEG and BMP edits seen in game |
-| `kfa gim frompng` | PNG to GIM | Not built |
+| `kfa img export`, `kfa img import` | Chunk and header images out and in, in place ([0012](0012-images.md)) | Built; JPEG and GIM edits seen in game |
+| PNG to GIM | Through `kfa img import` (`NAME.png`) | Built; HUD edit seen in game |
 | `kfa build <project>` | Build a finished ISO from translation files | Not built |
 
 ## Translation files

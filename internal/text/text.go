@@ -20,6 +20,7 @@ const (
 	KindText = "text" // NUL-terminated string reached through a text header
 	KindName = "name" // 0x18-byte name field of a command record
 	KindMenu = "menu" // 0x1D-byte name field of a system menu record
+	KindFlag = "flag" // 0x18-byte name field of a flag record (items, stats)
 )
 
 // nameField is the size of a command name field; menuField is the size of
@@ -75,7 +76,7 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 		var raw []byte
 		budget := 0
 		switch kind {
-		case KindName:
+		case KindName, KindFlag:
 			raw = bytes.TrimRight(v.data[off:off+nameField], "\x00")
 			budget = nameField - 1
 		case KindMenu:
@@ -140,6 +141,14 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 			}
 			if err := names(ui, v, v.u32(game+0x0C), v.u32(game+0x10), "g"); err != nil {
 				return nil, err
+			}
+			// Flag records: +0x04 count, +0x08 records of 0x20 bytes. Item
+			// and stat names show in game. Bytes 0x0C-0x1B are zero in both
+			// games, so the name field is 0x18 bytes like a command name.
+			for k, r := uint32(0), v.u32(game+0x08); k < v.u32(game+0x04) && r != none; k++ {
+				if err := add(ui, v, r+k*0x20, KindFlag, fmt.Sprintf("g/f%04d", k), -1); err != nil {
+					return nil, err
+				}
 			}
 			// System menu and key guide: 0x20-byte records from the pointer
 			// at +0xC4 up to the address at +0x00, name at record +3.

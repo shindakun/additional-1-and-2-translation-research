@@ -29,6 +29,7 @@ type Image struct {
 	PaletteFormat int
 	ImageOffset   int // file offset of the pixel data
 	PaletteOffset int // file offset of the palette data, or -1
+	Palette       []color.NRGBA
 	Image         *image.NRGBA
 }
 
@@ -101,20 +102,22 @@ func colorAt(f int, b []byte, i int) color.NRGBA {
 	case RGBA8888:
 		return color.NRGBA{b[i*4], b[i*4+1], b[i*4+2], b[i*4+3]}
 	case RGBA5650:
-		v := le.Uint16(b[i*2:])
-		return color.NRGBA{uint8(v&31) * 255 / 31, uint8(v>>5&63) * 255 / 63, uint8(v>>11&31) * 255 / 31, 255}
+		v := int(le.Uint16(b[i*2:]))
+		return color.NRGBA{scale(v, 5), scale(v>>5, 6), scale(v>>11, 5), 255}
 	case RGBA5551:
-		v := le.Uint16(b[i*2:])
-		a := uint8(0)
-		if v>>15 != 0 {
-			a = 255
-		}
-		return color.NRGBA{uint8(v&31) * 255 / 31, uint8(v>>5&31) * 255 / 31, uint8(v>>10&31) * 255 / 31, a}
+		v := int(le.Uint16(b[i*2:]))
+		return color.NRGBA{scale(v, 5), scale(v>>5, 5), scale(v>>10, 5), uint8(255 * (v >> 15))}
 	case RGBA4444:
-		v := le.Uint16(b[i*2:])
-		return color.NRGBA{uint8(v&15) * 17, uint8(v>>4&15) * 17, uint8(v>>8&15) * 17, uint8(v>>12) * 17}
+		v := int(le.Uint16(b[i*2:]))
+		return color.NRGBA{scale(v, 4), scale(v>>4, 4), scale(v>>8, 4), scale(v>>12, 4)}
 	}
 	return color.NRGBA{}
+}
+
+// scale expands the low bits of v to 0-255.
+func scale(v, bits int) uint8 {
+	m := 1<<bits - 1
+	return uint8((v & m) * 255 / m)
 }
 
 // unswizzle turns swizzled pixel data (16-byte by 8-row tiles) into rows.
@@ -209,6 +212,7 @@ func Decode(b []byte) (*Image, error) {
 		}
 	}
 
+	out.Palette = palette
 	dst := image.NewNRGBA(image.Rect(0, 0, ih.width, ih.height))
 	for y := range ih.height {
 		row := px[y*stride:]
@@ -231,5 +235,105 @@ func Decode(b []byte) (*Image, error) {
 		}
 	}
 	out.Image = dst
+	return out, nil
+}
+
+// swizzle is the inverse of unswizzle.
+func swizzle(src []byte, stride, height int) []byte {
+	out := make([]byte, len(src))
+	i := 0
+	for ty := 0; ty < (height+7)/8; ty++ {
+		for tx := 0; tx < stride/16; tx++ {
+			for r := range 8 {
+				y := ty*8 + r
+				if y < height && i+16 <= len(out) {
+					copy(out[i:i+16], src[y*stride+tx*16:])
+				}
+				i += 16
+			}
+		}
+	}
+	return out
+}
+
+func unscale(c uint8, bits int) int {
+	m := 1<<bits - 1
+	return (int(c)*m + 127) / 255
+}
+
+func pack(f int, c color.NRGBA) uint32 {
+	switch f {
+	case RGBA5650:
+		return uint32(unscale(c.R, 5) | unscale(c.G, 6)<<5 | unscale(c.B, 5)<<11)
+	case RGBA5551:
+		a := 0
+		if c.A >= 128 {
+			a = 1
+		}
+		return uint32(unscale(c.R, 5) | unscale(c.G, 5)<<5 | unscale(c.B, 5)<<10 | a<<15)
+	case RGBA4444:
+		return uint32(unscale(c.R, 4) | unscale(c.G, 4)<<4 | unscale(c.B, 4)<<8 | unscale(c.A, 4)<<12)
+	}
+	return uint32(c.R) | uint32(c.G)<<8 | uint32(c.B)<<16 | uint32(c.A)<<24
+}
+
+func nearest(pal []color.NRGBA, c color.NRGBA) int {
+	best, bd := 0, -1
+	for i, p := range pal {
+		dr, dg, db, da := int(p.R)-int(c.R), int(p.G)-int(c.G), int(p.B)-int(c.B), int(p.A)-int(c.A)
+		if d := dr*dr + dg*dg + db*db + 2*da*da; bd < 0 || d < bd {
+			best, bd = i, d
+		}
+	}
+	return best
+}
+
+// Encode writes img into a copy of the GIM file orig. The format, swizzle and
+// palette stay; indexed images use the nearest palette color. img must have
+// the GIM's size. Row padding keeps the original bytes.
+func Encode(orig []byte, img image.Image) ([]byte, error) {
+	g, err := Decode(orig)
+	if err != nil {
+		return nil, err
+	}
+	if img.Bounds().Dx() != g.Width || img.Bounds().Dy() != g.Height {
+		return nil, fmt.Errorf("gim: image is %v, want %dx%d", img.Bounds().Size(), g.Width, g.Height)
+	}
+	var pal []color.NRGBA
+	if g.Format == Index4 || g.Format == Index8 {
+		pal = g.Palette
+	}
+	stride := strideBytes(g.Format, g.Width)
+	alignedH := (g.Height + 7) &^ 7
+	end := min(len(orig), g.ImageOffset+stride*alignedH)
+	out := append([]byte(nil), orig...)
+	px := append([]byte(nil), orig[g.ImageOffset:end]...)
+	if g.Order == 1 {
+		px = unswizzle(px, stride, alignedH)[:len(px)]
+	}
+	b := img.Bounds()
+	le := binary.LittleEndian
+	for y := range g.Height {
+		row := px[y*stride:]
+		for x := range g.Width {
+			c := color.NRGBAModel.Convert(img.At(b.Min.X+x, b.Min.Y+y)).(color.NRGBA)
+			switch g.Format {
+			case Index8:
+				row[x] = byte(nearest(pal, c))
+			case Index4:
+				v := byte(nearest(pal, c))
+				sh := 4 * uint(x&1)
+				row[x/2] = row[x/2]&^(15<<sh) | v<<sh
+			case RGBA8888:
+				le.PutUint32(row[x*4:], pack(g.Format, c))
+			default:
+				le.PutUint16(row[x*2:], uint16(pack(g.Format, c)))
+			}
+		}
+	}
+	if g.Order == 1 {
+		px = swizzle(px, stride, alignedH)
+	}
+	copy(out[g.ImageOffset:end], px)
 	return out, nil
 }

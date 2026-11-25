@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -146,11 +147,13 @@ Commands:
                                    Write translations into the FMG messages
                                    and build a new AdvSys.bnd
   img export GAMEDIR DIR           Write every unique image of every main.dat
-                                   chunk (JPEG, BMP, GIM and a PNG of each GIM)
-                                   and DIR/index.tsv
+                                   chunk and the header GIMs (JPEG, BMP, GIM
+                                   and a PNG of each GIM) and DIR/index.tsv
   img import GAMEDIR DIR OUT.dat [BASE.dat]
                                    Write the images in DIR (names from img
-                                   export) into main.dat, or into BASE.dat,
+                                   export; a GIM can also be NAME.png, which
+                                   is encoded into the original GIM format)
+                                   into main.dat, or into BASE.dat,
                                    in place; each must fit the original size.
                                    BASE.dat must hold the original images, so
                                    run img import before text import
@@ -751,6 +754,25 @@ func gameImages(gamedir, dat string) (*maindat.File, []maindat.Plain, []imageRef
 	names := map[[20]byte]string{}
 	for i := range units {
 		u := &units[i]
+		if u.Name == "body" {
+			// The header unit has GIMs outside any image table (the HUD).
+			mark := []byte("MIG.00.1PSP\x00")
+			for off := bytes.Index(u.Data, mark); off >= 0; {
+				if off+24 <= len(u.Data) {
+					size := 16 + int(binary.LittleEndian.Uint32(u.Data[off+20:]))
+					if off+size <= len(u.Data) {
+						e := images.Entry{Index: -1, Type: images.TypeGIM, Off: off, Size: size, TableOff: -1}
+						refs = append(refs, imageRef{u, e, fmt.Sprintf("g_%06x.gim", off)})
+					}
+				}
+				next := bytes.Index(u.Data[off+1:], mark)
+				if next < 0 {
+					break
+				}
+				off += 1 + next
+			}
+			continue
+		}
 		if !strings.HasPrefix(u.Name, "chunks/") {
 			continue
 		}
@@ -802,7 +824,11 @@ func imgExport(a []string) error {
 			written[r.name] = true
 		}
 		sum := sha1.Sum(data)
-		fmt.Fprintf(&index, "%s\t%d\t%s\t%d\t%d\t%d\t%s\t%s\n", strings.TrimPrefix(r.unit.Name, "chunks/")[:3], r.entry.Index,
+		chunk := "hdr"
+		if strings.HasPrefix(r.unit.Name, "chunks/") {
+			chunk = strings.TrimPrefix(r.unit.Name, "chunks/")[:3]
+		}
+		fmt.Fprintf(&index, "%s\t%d\t%s\t%d\t%d\t%d\t%s\t%s\n", chunk, r.entry.Index,
 			images.Ext(r.entry.Type), r.entry.Width, r.entry.Height, r.entry.Size, hex.EncodeToString(sum[:]), r.name)
 	}
 	if err := os.WriteFile(filepath.Join(a[1], "index.tsv"), []byte(index.String()), 0o644); err != nil {
@@ -826,14 +852,19 @@ func imgImport(a []string) error {
 	}
 	n, files := 0, map[string]bool{}
 	for _, r := range refs {
-		data, err := os.ReadFile(filepath.Join(a[1], r.name))
-		if errors.Is(err, os.ErrNotExist) {
+		data, err := replacement(a[1], r)
+		if err != nil {
+			return fmt.Errorf("%s: %w", r.name, err)
+		}
+		if data == nil {
 			continue
 		}
-		if err != nil {
-			return err
-		}
-		if err := images.Replace(r.unit.Data, r.entry, data); err != nil {
+		if r.entry.TableOff < 0 {
+			if len(data) != r.entry.Size {
+				return fmt.Errorf("%s: %d bytes, want %d", r.name, len(data), r.entry.Size)
+			}
+			copy(r.unit.Data[r.entry.Off:], data)
+		} else if err := images.Replace(r.unit.Data, r.entry, data); err != nil {
 			return fmt.Errorf("%s in %s: %w", r.name, r.unit.Name, err)
 		}
 		files[r.name] = true
@@ -847,6 +878,33 @@ func imgImport(a []string) error {
 	}
 	fmt.Printf("wrote %s: %d files replaced %d images\n", a[2], len(files), n)
 	return nil
+}
+
+// replacement reads the new data for r from dir: the file with the export
+// name, or for a GIM a PNG with the same base name, encoded into the
+// original GIM's format. It returns nil if dir has neither.
+func replacement(dir string, r imageRef) ([]byte, error) {
+	data, err := os.ReadFile(filepath.Join(dir, r.name))
+	if err == nil || !errors.Is(err, os.ErrNotExist) || r.entry.Type != images.TypeGIM {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, nil
+		}
+		return data, err
+	}
+	pf, err := os.Open(filepath.Join(dir, strings.TrimSuffix(r.name, ".gim")+".png"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer pf.Close() //nolint:errcheck // read only
+	img, err := png.Decode(pf)
+	if err != nil {
+		return nil, err
+	}
+	orig := r.unit.Data[r.entry.Off : r.entry.Off+r.entry.Size]
+	return gim.Encode(orig, img)
 }
 
 // sysBND reads AdvSys.bnd and builds the Shift-JIS codec from its tables.
