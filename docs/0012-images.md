@@ -80,7 +80,7 @@ Specs in `research/img/edit`:
 | `hud.json` | HUD atlas `g_02aa00` (PNG) | `Vit`, `Mag`, `Agi`, `Next`, `EXP` |
 | `shop.json` | Shop panels `c000_00` (PNG) | `Repair cost`, `Sell price`, `Buy price`, `Owned`, `Stock` |
 
-`scripts/build_text_test.sh kfaI research/text/kfaI-test.json research/img/edit/kfaI` builds the image. Headless PPSSPP shows the English town map, the status overlay (Cross in town) and the shop price panel. The HUD atlas also holds moved header strings in its unused rows ([0004](0004-text.md)); the HUD draws without change. The full status screen (`c009_04`) has not yet been reached in a test run.
+`scripts/build_text_test.sh kfaI research/text/kfaI-test.json research/img/edit/kfaI` builds the image. Headless PPSSPP shows the English town map, the status overlay (Cross in town) and the shop price panel. The HUD atlas also holds moved header strings in its unused rows ([0004](0004-text.md)); the HUD draws without change. Camp, Equipment shows the full status screen (`c009_04`) with the English labels.
 
 ## Not built
 
