@@ -117,8 +117,26 @@ Test: `kfa patch counter`, run headless for 300 emulated seconds.
 
 Remaining problems:
 
-1. The first play at boot has no font. The subtitles need the font loaded before that play, or their own glyph drawing.
+1. The first play at boot has no font.
 2. The counter must reset when a movie starts.
+
+## Font at boot
+
+Two functions create a movie scene (`FUN_0003E89C` with ID `0x4E3D`) for the opening:
+
+| Function | Order |
+|---|---|
+| `FUN_00068820` (boot) | Creates the scene and plays `movie000` at once (`FUN_000689A4`, number 0). No font is loaded. |
+| `FUN_0009FA3C` (title) | Creates the scene, loads `Bnd/AdvMenu.bnd` in a loop (`FUN_00025730`), takes `BitFont_Game12.bnd` from it (`FUN_00050670`), calls `CFontMng::SetFont` (`0x107FC`), then loads `Title.gim`, `FromLogo.gim` and `Thumb.gim`. |
+
+Options for the first play:
+
+| Option | Work |
+|---|---|
+| A. Load the font in the hook | On the first frame with no font, repeat the title steps: load `AdvMenu.bnd`, take `BitFont_Game12.bnd`, call `CFontMng::SetFont`. Needs a binder object and memory for it. |
+| B. Own glyph drawing | Read prepared subtitle images from a file on the disc (`sceIo` imports exist), draw them with `sceGuTexImage` and `Gfx_FastSprite`. Independent of the boot order. |
+
+Option A is tried first: it adds the least code.
 
 ## Timing
 
