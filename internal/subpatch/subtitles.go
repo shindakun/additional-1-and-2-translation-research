@@ -71,11 +71,11 @@ const recordWords = 7
 // whose range holds the clock is drawn in white with a one-pixel black
 // outline. A line with a Movie key shows only over that movie.
 // The opening
-// at boot has no font, so it shows nothing (docs/0010).
+// at boot has no font, so it shows nothing (docs/kfa1/0010).
 //
 // With bootFont, a fourth hook loads Font/BitFont_Game12.bnd before the
 // opening at boot starts, and the exit hook removes it after that movie, so
-// the title loads its own font as before (docs/0010).
+// the title loads its own font as before (docs/kfa1/0010).
 func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	a, err := AddrsFor(boot)
 	if err != nil {

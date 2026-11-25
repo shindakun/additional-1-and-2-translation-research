@@ -2,7 +2,7 @@ package mips
 
 import "testing"
 
-// Expected words come from the Additional I BOOT.BIN (docs/0010-subtitle-patch.md).
+// Expected words come from the Additional I BOOT.BIN (docs/kfa1/0010-subtitle-patch.md).
 func TestEncodings(t *testing.T) {
 	for _, c := range []struct {
 		name      string

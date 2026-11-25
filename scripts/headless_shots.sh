@@ -2,7 +2,7 @@
 # Usage: scripts/headless_shots.sh IMAGE OUTDIR SECONDS...
 # Runs IMAGE in PPSSPPHeadless (software renderer, no window) and saves a PNG
 # at each emulated second given. Uses its own memory stick under
-# research/ppsspp/headless-ms. Build PPSSPPHeadless first (docs/0009).
+# research/ppsspp/headless-ms. Build PPSSPPHeadless first (docs/kfa1/0009).
 set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)
 headless="$root/research/tools/ppsspp-src/build-headless/PPSSPPHeadless"

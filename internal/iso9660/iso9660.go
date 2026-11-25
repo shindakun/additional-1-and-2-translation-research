@@ -1,5 +1,5 @@
 // Package iso9660 reads the ISO 9660 subset used by UMD images and replaces
-// files in place. See docs/0002-tool-planning.md.
+// files in place. See docs/kfa1/0002-tool-planning.md.
 package iso9660
 
 import (

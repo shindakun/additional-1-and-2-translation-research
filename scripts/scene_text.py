@@ -3,7 +3,7 @@
 Usage: python3 -I scripts/scene_text.py research/maindat/<game> [OUT.tsv]
 Input is the OUTDIR written by scripts/maindat.py. OUT.tsv gets one row per
 text pointer: source, chunk, scene ID, text index, pointer site, text.
-See docs/0004-text.md for the structures.
+See docs/kfa1/0004-text.md for the structures.
 """
 import re
 import struct

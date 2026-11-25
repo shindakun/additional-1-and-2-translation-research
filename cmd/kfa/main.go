@@ -1,5 +1,5 @@
 // Command kfa extracts, inspects and patches King's Field Additional I and II
-// disc data. One binary, several subcommands; see docs/0002-tool-planning.md.
+// disc data. One binary, several subcommands; see docs/kfa1/0002-tool-planning.md.
 package main
 
 import (
@@ -142,7 +142,7 @@ Commands:
   font pad IN.bnd OUT.bnd          Move the ASCII glyphs of every font inside
                                    IN to page 7 with a blank border, so
                                    filtered text shows no slivers of
-                                   neighboring glyphs (docs/0005)
+                                   neighboring glyphs (docs/kfa1/0005)
   font vwf IN.bnd OUT.bnd [GAP] [SPACE]
                                    Proportional ASCII metrics in every font
                                    inside IN (default gap 1, space 4)
@@ -181,10 +181,10 @@ Commands:
                                    (rows count up), -1 at the top (down),
                                    ALIGN l, c or r at X pixels. --boot-font
                                    loads the game font for the movie at boot
-                                   (docs/0010)
+                                   (docs/kfa1/0010)
   patch chunkbase BOOT.BIN OUT     Let the chunk loader take the pointer base
                                    from the chunk table, for relocated chunks
-                                   (docs/0004)
+                                   (docs/kfa1/0004)
   patch counter BOOT.BIN OUT       Draw a frame counter over movies (test build)
   version                          Print the version and exit
 `)
@@ -635,7 +635,7 @@ func textImport(a []string) error {
 	return nil
 }
 
-// space hands out free bytes inside units (docs/0004): vacated slots, the
+// space hands out free bytes inside units (docs/kfa1/0004): vacated slots, the
 // unused tail of the HUD atlas in the header unit, and new bytes at the end
 // of a chunk. A chunk that grows moves to the end of main.dat after the
 // import (see relayout).
@@ -710,7 +710,7 @@ func (s *space) Alloc(unit int, data []byte) (int, bool) {
 
 // relocate moves every grown chunk to the end of f. Pointers keep their
 // values; the patched loader takes their base from the chunk table
-// (kfa patch chunkbase, docs/0004).
+// (kfa patch chunkbase, docs/kfa1/0004).
 func (s *space) relocate(f *maindat.File) (int, error) {
 	for u := range s.grown {
 		// Original chunk sizes are multiples of 16, and the loader reads
@@ -727,7 +727,7 @@ func (s *space) relocate(f *maindat.File) (int, error) {
 // gimFreeTail finds the first swizzled GIM in data and returns the empty
 // tile bands at the end of its pixel data, less one band as a margin. In the
 // header unit this is the bottom of the HUD atlas, which no sprite uses
-// (docs/0004).
+// (docs/kfa1/0004).
 func gimFreeTail(data []byte) (int, int) {
 	off := bytes.Index(data, []byte("MIG.00.1PSP\x00"))
 	if off < 0 {

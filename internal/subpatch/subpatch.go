@@ -1,5 +1,5 @@
 // Package subpatch builds the movie subtitle patch for BOOT.BIN.
-// See docs/0010-subtitle-patch.md.
+// See docs/kfa1/0010-subtitle-patch.md.
 package subpatch
 
 import (
@@ -105,7 +105,7 @@ func (b *builder) floatArg(f int, v float32) {
 // Counter patches boot to draw "F <n>" over every movie frame, where n
 // counts draw calls. It shows that the hook runs and measures the rate.
 // With loadFont, the hook loads a font for the opening at boot; that build
-// ends in the game's fatal-error screen after the movie (docs/0010).
+// ends in the game's fatal-error screen after the movie (docs/kfa1/0010).
 func Counter(boot []byte, x, y float32, loadFont bool) ([]byte, error) {
 	a, err := AddrsFor(boot)
 	if err != nil {
@@ -153,7 +153,7 @@ func Counter(boot []byte, x, y float32, loadFont bool) ([]byte, error) {
 	var haveFont func()
 	if loadFont {
 		// The boot path plays the opening before the title loads a font
-		// (docs/0010). Once, on the first frame without a font, load
+		// (docs/kfa1/0010). Once, on the first frame without a font, load
 		// Font/BitFont_Game12.bnd the way CBinder::LoadFile does and hand it to
 		// CFontMng::SetFont, as the title initializer does with its copy.
 		b.addr(mips.T1, a.DrawState)

@@ -1,5 +1,5 @@
 // Package images lists the images of a main.dat chunk through its image
-// table. See docs/0012-images.md.
+// table. See docs/kfa1/0012-images.md.
 package images
 
 import (

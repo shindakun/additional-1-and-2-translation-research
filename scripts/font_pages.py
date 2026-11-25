@@ -3,7 +3,7 @@
 Usage: python3 -I scripts/font_pages.py FONTDIR [SAMPLES]
 FONTDIR holds Ccm.ccm, Plt00.plt, Tex00.gim and Tex01.gim (unpacked font BND).
 Prints glyphs per page and tests that sampled glyphs have ink in texture
-page // 4, layer page % 4. See docs/0005-fonts.md.
+page // 4, layer page % 4. See docs/kfa1/0005-fonts.md.
 """
 import collections
 import random

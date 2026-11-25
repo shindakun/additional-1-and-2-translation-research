@@ -21,7 +21,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 - The two archives in the repository root:
   - `King's Field - Additional I (Japan, Asia).zip`
   - `King's Field - Additional II (Asia).zip`
-- Optional reference material in the root: `Adventure Player (Japan).zip` and `ADVPStudio101.exe` ([0007](docs/0007-adventure-player.md)).
+- Optional reference material in the root: `Adventure Player (Japan).zip` and `ADVPStudio101.exe` ([0007](docs/kfa1/0007-adventure-player.md)).
 - Go (version in `go.mod`), Python 3, `7z`, `openssl`, `ffmpeg`.
 - For executable analysis: Ghidra 12.2, JDK 25 or later, and the [ghidra-allegrex](https://github.com/kotcrab/ghidra-allegrex) extension v21.6.
 
@@ -45,7 +45,7 @@ go build -o kfa ./cmd/kfa
 scripts/build_english.sh
 ```
 
-The result is `research/builds/kfaI-english.iso`. The translation files it reads stay in `research/` because they hold the Japanese source text ([0009](docs/0009-test-builds.md)).
+The result is `research/builds/kfaI-english.iso`. The translation files it reads stay in `research/` because they hold the Japanese source text ([0009](docs/kfa1/0009-test-builds.md)).
 
 ### Go tools
 
@@ -56,7 +56,7 @@ KFA_DATA=$PWD/research go test ./...
 make check                 # format, vet, lint, test, markdown lint, tidy
 ```
 
-[0002](docs/0002-tool-planning.md) lists every command and its state. [0009](docs/0009-test-builds.md) describes the test builds for PPSSPP.
+[0002](docs/kfa1/0002-tool-planning.md) lists every command and its state. [0009](docs/kfa1/0009-test-builds.md) describes the test builds for PPSSPP.
 
 | Script | Action |
 |---|---|
@@ -88,18 +88,22 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 
 ## Documents
 
+`docs/kfa1` covers Additional I and the shared formats.
+
+### Additional I
+
 | Document | Subject |
 |---|---|
-| [0001](docs/0001-initial-findings.md) | Discs, file layout, BND and FMG formats |
-| [0002](docs/0002-tool-planning.md) | Tool plan |
-| [0003](docs/0003-maindat.md) | `main.dat` container and keys |
-| [0004](docs/0004-text.md) | Text location, IDs, names and markup |
-| [0005](docs/0005-fonts.md) | Fonts |
-| [0006](docs/0006-movies.md) | Movies |
-| [0007](docs/0007-adventure-player.md) | Adventure Player disc and authoring tool |
-| [0008](docs/0008-open-questions.md) | Open questions |
-| [0009](docs/0009-test-builds.md) | Test builds |
-| [0010](docs/0010-subtitle-patch.md) | Subtitle patch |
-| [0011](docs/0011-movie-script.md) | Movie script and draft English |
-| [0012](docs/0012-images.md) | Images and image text |
-| [0013](docs/0013-fmg.md) | FMG messages |
+| [0001](docs/kfa1/0001-initial-findings.md) | Discs, file layout, BND and FMG formats |
+| [0002](docs/kfa1/0002-tool-planning.md) | Tool plan |
+| [0003](docs/kfa1/0003-maindat.md) | `main.dat` container and keys |
+| [0004](docs/kfa1/0004-text.md) | Text location, IDs, names and markup |
+| [0005](docs/kfa1/0005-fonts.md) | Fonts |
+| [0006](docs/kfa1/0006-movies.md) | Movies |
+| [0007](docs/kfa1/0007-adventure-player.md) | Adventure Player disc and authoring tool |
+| [0008](docs/kfa1/0008-open-questions.md) | Open questions |
+| [0009](docs/kfa1/0009-test-builds.md) | Test builds |
+| [0010](docs/kfa1/0010-subtitle-patch.md) | Subtitle patch |
+| [0011](docs/kfa1/0011-movie-script.md) | Movie script and draft English |
+| [0012](docs/kfa1/0012-images.md) | Images and image text |
+| [0013](docs/kfa1/0013-fmg.md) | FMG messages |

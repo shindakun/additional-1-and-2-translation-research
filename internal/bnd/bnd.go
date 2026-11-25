@@ -1,5 +1,5 @@
 // Package bnd reads and writes FromSoftware BND containers as used by the
-// Adventure Player engine. See docs/0001-initial-findings.md.
+// Adventure Player engine. See docs/kfa1/0001-initial-findings.md.
 package bnd
 
 import (

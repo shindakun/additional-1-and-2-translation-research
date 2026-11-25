@@ -1,7 +1,7 @@
 """Resolve text IDs in actions and count command and flag names.
 
 Usage: python3 -I scripts/text_refs.py research/maindat/<game>
-Input is the OUTDIR written by scripts/maindat.py. See docs/0004-text.md.
+Input is the OUTDIR written by scripts/maindat.py. See docs/kfa1/0004-text.md.
 """
 import collections
 import struct

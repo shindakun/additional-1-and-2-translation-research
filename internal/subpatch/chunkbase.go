@@ -9,7 +9,7 @@ import (
 )
 
 // ChunkBase patches the main.dat chunk loader so a chunk can move in the
-// file without changing its pointers (docs/0004). The loader reads a chunk
+// file without changing its pointers (docs/kfa1/0004). The loader reads a chunk
 // at the offset in its table entry (word 2) and also uses that offset as the
 // base of every pointer in the chunk. After the patch, the base comes from
 // word 3 of the entry when word 3 is not zero; word 3 is zero on the disc,

@@ -1,5 +1,5 @@
 // Package relayout moves main.dat chunks that need more room to the end of
-// the file. See docs/0004-text.md.
+// the file. See docs/kfa1/0004-text.md.
 package relayout
 
 import (

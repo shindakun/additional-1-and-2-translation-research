@@ -1,5 +1,5 @@
 // Package font reads and writes CCM glyph tables and reads the glyph
-// textures of a font BND. See docs/0005-fonts.md.
+// textures of a font BND. See docs/kfa1/0005-fonts.md.
 package font
 
 import (

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Usage: scripts/build_vwf_test.sh [kfaI|kfaII]
 # Builds research/builds/<game>-vwf-test.iso: the original image with
-# proportional ASCII metrics in every font (docs/0005-fonts.md). File sizes do
+# proportional ASCII metrics in every font (docs/kfa1/0005-fonts.md). File sizes do
 # not change, so files are replaced in place. Needs kfa built at the repo root.
 set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)

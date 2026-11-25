@@ -1,5 +1,5 @@
 // Package maindat reads and writes the ADVP container (main.dat, .adv).
-// See docs/0003-maindat.md.
+// See docs/kfa1/0003-maindat.md.
 package maindat
 
 import (
@@ -215,7 +215,7 @@ const chunkAlign = 0x800
 // offset changes, and the chunk table entry in the body unit gets the new
 // offset (word 2) and size (word 0). Word 3, zero on the disc, gets the old
 // offset: the pointers in the chunk keep their values, and a patched loader
-// uses word 3 as their base (subpatch.ChunkBase, docs/0004). The old bytes
+// uses word 3 as their base (subpatch.ChunkBase, docs/kfa1/0004). The old bytes
 // stay where they were; nothing refers to them. It returns the old offset.
 func (f *File) Relocate(units []Plain, i, n int) (int, error) {
 	var name string

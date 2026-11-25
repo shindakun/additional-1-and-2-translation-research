@@ -1,9 +1,9 @@
 #!/bin/sh
 # Usage: scripts/build_english.sh [GAME]
 # Builds research/builds/<GAME>-english.iso (default GAME kfaI) with every
-# current translation: main.dat text and images (docs/0004, docs/0012), FMG
-# messages (docs/0013), movie subtitles with the boot font (docs/0010) and
-# fonts with padded ASCII glyphs (docs/0005).
+# current translation: main.dat text and images (docs/kfa1/0004, docs/kfa1/0012), FMG
+# messages (docs/kfa1/0013), movie subtitles with the boot font (docs/kfa1/0010) and
+# fonts with padded ASCII glyphs (docs/kfa1/0005).
 # Inputs are in research/text, research/img/edit and research/subs.
 set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -29,7 +29,7 @@ done
 # shellcheck disable=SC2086 # subs is a list of arguments
 "$kfa" patch subtitles --boot-font "$gamedir/SYSDIR/BOOT.BIN" "$tmp/BOOT-sub.BIN" $subs
 # Relocated chunks keep their pointers; the loader takes the base from the
-# chunk table (docs/0004).
+# chunk table (docs/kfa1/0004).
 "$kfa" patch chunkbase "$tmp/BOOT-sub.BIN" "$tmp/BOOT.BIN"
 
 for f in "$gamedir"/USRDIR/Font/BitFont_Game*.bnd "$gamedir/USRDIR/Bnd/AdvMenu.bnd"; do

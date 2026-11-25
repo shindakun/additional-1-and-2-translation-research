@@ -4,7 +4,7 @@ Usage: python3 -I scripts/maindat.py BOOT.BIN main.dat [OUTDIR]
 
 Derives the AES key from BOOT.BIN, checks the MD5, validates the chunk table
 and, when OUTDIR is given, writes every part decrypted. Needs openssl on PATH.
-See docs/0003-maindat.md.
+See docs/kfa1/0003-maindat.md.
 """
 import hashlib
 import os

@@ -1,5 +1,5 @@
 // Package text finds the translatable strings in main.dat units and writes
-// translations back in place. See docs/0004-text.md.
+// translations back in place. See docs/kfa1/0004-text.md.
 package text
 
 import (

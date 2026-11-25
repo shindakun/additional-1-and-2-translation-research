@@ -4,7 +4,7 @@
 Usage: relabel_jpeg.py SPEC.json IN OUT
 
 A JPEG output is re-encoded to fit the spec "budget". A PNG output keeps the
-alpha channel and has no budget (for GIM edits, docs/0012-images.md).
+alpha channel and has no budget (for GIM edits, docs/kfa1/0012-images.md).
 
 SPEC.json:
   {"font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
@@ -22,7 +22,7 @@ text. Those pixels, grown by 1 pixel, are filled from their neighbours,
 which keeps the background texture ("flat" fills their bounding box with the
 median of the darker pixels instead). The new text is drawn centred in the box with a
 1-pixel black shadow. The output uses the highest JPEG quality whose size is
-not more than the budget (docs/0012-images.md). Needs Pillow.
+not more than the budget (docs/kfa1/0012-images.md). Needs Pillow.
 """
 import json
 import statistics

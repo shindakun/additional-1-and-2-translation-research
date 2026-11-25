@@ -1,5 +1,5 @@
 // Package prx reads and edits the relocation table of a PSP PRX (the plain
-// BOOT.BIN). See docs/0010-subtitle-patch.md.
+// BOOT.BIN). See docs/kfa1/0010-subtitle-patch.md.
 package prx
 
 import (

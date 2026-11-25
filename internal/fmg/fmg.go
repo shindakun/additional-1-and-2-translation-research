@@ -1,4 +1,4 @@
-// Package fmg reads and writes FMG message tables. See docs/0013-fmg.md.
+// Package fmg reads and writes FMG message tables. See docs/kfa1/0013-fmg.md.
 package fmg
 
 import (

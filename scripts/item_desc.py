@@ -7,7 +7,7 @@ Reads research/text/global.tsv, research/text/items.tsv (names),
 /tmp/desc.txt and research/text/desc-en.tsv (free-text lines). Writes
 research/text/global3-en.tsv. Header lines get the English name padded to
 the Japanese column; stat lines (starting with 斬) get two-letter codes:
-Cu Hi St Fi Ea Wi Wa Li Da (docs/0004-text.md).
+Cu Hi St Fi Ea Wi Wa Li Da (docs/kfa1/0004-text.md).
 """
 import json,re
 names=dict(l.rstrip('\n').split('\t') for l in open('research/text/items.tsv',encoding='utf-8'))
