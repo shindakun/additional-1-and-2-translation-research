@@ -13,6 +13,8 @@ const (
 	A3   = 7
 	T0   = 8
 	T1   = 9
+	T2   = 10
+	T3   = 11
 	S0   = 16
 	T9   = 25
 	SP   = 29
@@ -58,6 +60,9 @@ func Jalr(rs uint32) uint32 { return rtype(rs, 0, RA, 0x09) }
 // Beq encodes beq rs, rt, off (branch to pc+4+off*4).
 func Beq(rs, rt uint32, off int32) uint32 { return itype(4, rs, rt, off) }
 
+// Bne encodes bne rs, rt, off (branch to pc+4+off*4).
+func Bne(rs, rt uint32, off int32) uint32 { return itype(5, rs, rt, off) }
+
 // Mtc1 moves a general register to floating-point register fs.
 func Mtc1(rt, fs uint32) uint32 { return 0x11<<26 | 4<<21 | rt<<16 | fs<<11 }
 
@@ -90,6 +95,14 @@ func (p *Program) Bytes() []byte {
 		b[i*4], b[i*4+1], b[i*4+2], b[i*4+3] = byte(w), byte(w>>8), byte(w>>16), byte(w>>24)
 	}
 	return b
+}
+
+// Branch emits a branch with a placeholder offset and a nop delay slot, and
+// returns a function that points the branch at the current position.
+func (p *Program) Branch(enc func(rs, rt uint32, off int32) uint32, rs, rt uint32) func() {
+	at := len(p.Words)
+	p.Emit(enc(rs, rt, 0), Nop())
+	return func() { p.Words[at] = enc(rs, rt, int32(len(p.Words)-at-1)) }
 }
 
 // LoadConst emits lui/ori to put a 32-bit constant in rt.

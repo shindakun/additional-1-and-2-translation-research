@@ -383,7 +383,7 @@ func patchCounter(a []string) error {
 	if err != nil {
 		return err
 	}
-	out, err := subpatch.Counter(boot, 16, 16)
+	out, err := subpatch.Counter(boot, 16, 16, false)
 	if err != nil {
 		return err
 	}

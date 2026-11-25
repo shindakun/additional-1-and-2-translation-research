@@ -10,4 +10,4 @@
 | 6 | How a glyph selects its texture and layer | Answered: page field at `+0x16` ([0005](0005-fonts.md)). |
 | 7 | PSMF muxing for re-encoded movies | Stream layout known; remux by video replacement is possible. PSMF header tables not decoded ([0006](0006-movies.md)). |
 | 8 | Text limits in the King's Field build | Lower bound measured: 56 half-width units per line, 7 lines ([0004](0004-text.md)). Engine limit not known. |
-| 9 | Subtitles over the movies | Hook and font drawing work on replays; counter rate 29.97 per second. No font is loaded for the first play at boot ([0010](0010-subtitle-patch.md)). |
+| 9 | Subtitles over the movies | Hook and font drawing work on replays; counter rate 29.97 per second. No font is loaded for the first play at boot; loading one causes a fatal error after the movie ([0010](0010-subtitle-patch.md)). |

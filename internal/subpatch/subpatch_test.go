@@ -19,7 +19,7 @@ func TestCounter(t *testing.T) {
 	if err != nil {
 		t.Skip(err)
 	}
-	out, err := Counter(boot, 16, 16)
+	out, err := Counter(boot, 16, 16, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,8 @@ func TestCounter(t *testing.T) {
 		if boot[i] != out[i] {
 			off := i - orig.TextFile
 			inCave := off >= int(a.Cave) && off < int(a.CaveEnd)
-			inHook := off >= int(a.DrawCall) && off < int(a.DrawCall)+4
+			inHook := (off >= int(a.DrawCall) && off < int(a.DrawCall)+4) ||
+				(off >= int(a.ExitCall) && off < int(a.ExitCall)+4)
 			if !inCave && !inHook {
 				diff++
 			}

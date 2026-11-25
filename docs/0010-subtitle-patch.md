@@ -115,10 +115,9 @@ Test: `kfa patch counter`, run headless for 300 emulated seconds.
 - The counter rises by 600 in 20 seconds: one step per video frame at 29.97 fps. Subtitle times in seconds convert to frames by × 29.97.
 - The counter does not reset between plays. It counted about 4,230 frames during the first play (141 s).
 
-Remaining problems:
+A second hook replaces the first `jal` in `CSimpleMovieScene::Exit` (`0x3EB58`, target `0xB33FC`). It calls the original function and sets the counter to 0, so every movie starts at frame 0. Headless runs confirm the reset.
 
-1. The first play at boot has no font.
-2. The counter must reset when a movie starts.
+Remaining problem: the first play at boot has no font.
 
 ## Font at boot
 
@@ -136,7 +135,7 @@ Options for the first play:
 | A. Load the font in the hook | On the first frame with no font, repeat the title steps: load `AdvMenu.bnd`, take `BitFont_Game12.bnd`, call `CFontMng::SetFont`. Needs a binder object and memory for it. |
 | B. Own glyph drawing | Read prepared subtitle images from a file on the disc (`sceIo` imports exist), draw them with `sceGuTexImage` and `Gfx_FastSprite`. Independent of the boot order. |
 
-Option A is tried first: it adds the least code.
+Option A test (`subpatch.Counter` with `loadFont`): the hook loads `Font/BitFont_Game12.bnd` with `CFileSystem::AllocRead` (`0xACA8`, object `0x1529E8`) and calls `CFontMng::SetFont`. The counter then shows from the first frame at boot. After the movie the game shows its fatal-error screen (ゲーム実行中に致命的なエラーが発生しました) and stays on "Now loading". Removing the font in the exit hook (`CFontMng::DelFont`, `0x10910`, and `CBinder::Delete`, `0x257C0`, on the binder at `CFontMng + 0x401C0`) does not stop the error. The cause is not known. The default build does not load a font: the first play at boot has no subtitles, and the game runs normally.
 
 ## Timing
 
