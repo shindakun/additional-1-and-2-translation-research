@@ -13,10 +13,14 @@ gamedir="$root/research/extract/$game/PSP_GAME"
 out="$root/research/builds"
 dat="$out/$game-text-main.dat"
 mkdir -p "$out"
-"$kfa" text import "$gamedir" "$json" "$dat"
 if [ -n "$imgdir" ]; then
-	"$kfa" img import "$gamedir" "$imgdir" "$dat.img" "$dat"
-	mv "$dat.img" "$dat"
+	# Images first: text import can re-encode JPEGs, and img import finds
+	# images by their original contents.
+	"$kfa" img import "$gamedir" "$imgdir" "$dat.img"
+	"$kfa" text import "$gamedir" "$json" "$dat" "$dat.img"
+	rm "$dat.img"
+else
+	"$kfa" text import "$gamedir" "$json" "$dat"
 fi
 cp "$root/research/iso/$game.iso" "$out/$game-text.iso"
 "$kfa" iso put "$out/$game-text.iso" PSP_GAME/USRDIR/GameData/01_UmdTitle/main.dat "$dat"

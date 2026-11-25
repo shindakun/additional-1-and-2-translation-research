@@ -66,3 +66,5 @@ The menu buttons (`アイテム`, `魔法`, `キャンプ`, `消耗品`, `貴重
 - GIM write-back: a new GIM must keep the format, the swizzle and the palette size.
 - Writing back the HUD atlas in the header body.
 - Images larger than the original: they need chunk relayout ([0004](0004-text.md)).
+
+`kfa text import` can re-encode JPEGs to free space for text ([0004](0004-text.md)). Run `kfa img import` first: it finds images by their original contents.

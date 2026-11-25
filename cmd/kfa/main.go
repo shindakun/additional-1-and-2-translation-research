@@ -134,9 +134,12 @@ Commands:
                                    Proportional ASCII metrics in every font
                                    inside IN (default gap 1, space 4)
   text export GAMEDIR OUT.json     Write every translatable string of main.dat
-  text import GAMEDIR IN.json OUT.dat
-                                   Write translations in place into a copy of
-                                   main.dat; report those that do not fit
+  text import GAMEDIR IN.json OUT.dat [BASE.dat]
+                                   Write translations into a copy of main.dat,
+                                   or of BASE.dat (for example the output of
+                                   img import). A text string that does not
+                                   fit moves to space freed by re-encoding a
+                                   JPEG of its chunk. Reports the rest.
                                    (GAMEDIR is an extracted PSP_GAME folder)
   fmg export GAMEDIR OUT.json      Write the FMG messages in AdvSys.bnd
   fmg import GAMEDIR IN.json OUT.bnd
@@ -147,9 +150,10 @@ Commands:
                                    and DIR/index.tsv
   img import GAMEDIR DIR OUT.dat [BASE.dat]
                                    Write the images in DIR (names from img
-                                   export) into main.dat, or into BASE.dat
-                                   (for example the output of text import),
-                                   in place; each must fit the original size
+                                   export) into main.dat, or into BASE.dat,
+                                   in place; each must fit the original size.
+                                   BASE.dat must hold the original images, so
+                                   run img import before text import
   gim topng IN.gim OUT.png         Convert a GIM image to PNG
   gim scan FILE DIR                Write every GIM found inside FILE as
                                    DIR/<offset>.png
@@ -550,12 +554,27 @@ func textExport(a []string) error {
 }
 
 func textImport(a []string) error {
-	if len(a) != 3 {
+	if len(a) != 3 && len(a) != 4 {
 		return errUsage
 	}
 	f, units, c, slots, err := gameText(a[0])
 	if err != nil {
 		return err
+	}
+	if len(a) == 4 {
+		// Slots come from the original; the translations go into BASE.
+		f, err = openDat(filepath.Join(a[0], "SYSDIR", "BOOT.BIN"), a[3])
+		if err != nil {
+			return err
+		}
+		var base []maindat.Plain
+		if _, base, err = f.Unpack(); err != nil {
+			return err
+		}
+		if len(base) != len(units) {
+			return fmt.Errorf("%s: %d units, original has %d", a[3], len(base), len(units))
+		}
+		units = base
 	}
 	b, err := os.ReadFile(a[1])
 	if err != nil {
@@ -565,9 +584,13 @@ func textImport(a []string) error {
 	if err := json.Unmarshal(b, &entries); err != nil {
 		return err
 	}
-	n, probs := text.Apply(units, slots, entries, c)
+	sp := newSpace(units)
+	r, probs := text.Apply(units, slots, entries, c, sp.alloc)
 	for _, p := range probs {
 		fmt.Fprintf(os.Stderr, "not written: %s: %s (%q)\n", p.Where, p.Reason, p.EN)
+	}
+	if sp.err != nil {
+		return sp.err
 	}
 	if err := f.Pack(units); err != nil {
 		return err
@@ -575,8 +598,70 @@ func textImport(a []string) error {
 	if err := os.WriteFile(a[2], f.Raw, 0o644); err != nil {
 		return err
 	}
-	fmt.Printf("wrote %s: %d slots translated, %d not written\n", a[2], n, len(probs))
+	fmt.Printf("wrote %s: %d slots in place, %d strings moved (%d JPEGs re-encoded), %d not written\n",
+		a[2], r.Written, r.Moved, sp.shrunk, len(probs))
 	return nil
+}
+
+// space hands out free bytes inside chunk units. It frees them by
+// re-encoding the chunk's largest JPEGs at a lower quality (docs/0004).
+type space struct {
+	units  []maindat.Plain
+	free   map[int][][2]int // unit to free [offset, length] runs
+	done   map[[2]int]int   // unit and image index to qualities tried
+	shrunk int
+	err    error
+}
+
+// shrinkQualities are tried in order. The disc JPEGs are about quality 85;
+// quality 80 frees about 4% of the JPEG bytes in chunk 0.
+var shrinkQualities = []int{80, 75}
+
+func newSpace(units []maindat.Plain) *space {
+	return &space{units: units, free: map[int][][2]int{}, done: map[[2]int]int{}}
+}
+
+func (s *space) alloc(unit, n int) (int, bool) {
+	u := &s.units[unit]
+	if !strings.HasPrefix(u.Name, "chunks/") || s.err != nil {
+		return 0, false
+	}
+	for {
+		for i, r := range s.free[unit] {
+			if r[1] >= n {
+				s.free[unit][i] = [2]int{r[0] + n, r[1] - n}
+				return r[0], true
+			}
+		}
+		list, err := images.List(u.Data, uint32(u.Off))
+		if err != nil {
+			s.err = err
+			return 0, false
+		}
+		// The largest JPEG with the fewest tries frees the most.
+		var pick *images.Entry
+		tries := len(shrinkQualities)
+		for i := range list {
+			e := &list[i]
+			k := s.done[[2]int{unit, e.Index}]
+			if e.Type == images.TypeJPEG && k < len(shrinkQualities) && (k < tries || k == tries && e.Size > pick.Size) {
+				pick, tries = e, k
+			}
+		}
+		if pick == nil {
+			return 0, false
+		}
+		s.done[[2]int{unit, pick.Index}]++
+		freed, err := images.ShrinkJPEG(u.Data, *pick, shrinkQualities[tries])
+		if err != nil {
+			s.err = fmt.Errorf("%s: %w", u.Name, err)
+			return 0, false
+		}
+		if freed > 0 {
+			s.shrunk++
+			s.free[unit] = append(s.free[unit], [2]int{pick.Off + pick.Size - freed, freed})
+		}
+	}
 }
 
 func writePNG(path string, g *gim.Image) error {

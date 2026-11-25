@@ -78,8 +78,8 @@ func TestExtractApply(t *testing.T) {
 	for i := range units {
 		orig[i] = bytes.Clone(units[i].Data)
 	}
-	if n, probs := Apply(units, slots, entries, c); n != 0 || len(probs) != 0 {
-		t.Fatalf("empty translations wrote %d slots, %d problems", n, len(probs))
+	if r, probs := Apply(units, slots, entries, c, nil); r.Written != 0 || len(probs) != 0 {
+		t.Fatalf("empty translations wrote %d slots, %d problems", r.Written, len(probs))
 	}
 	for i := range units {
 		if !bytes.Equal(units[i].Data, orig[i]) {
@@ -97,13 +97,13 @@ func TestExtractApply(t *testing.T) {
 		t.Fatal("known global text not found")
 	}
 	long := Entry{JA: target.JA, Kind: target.Kind, EN: strings.Repeat("x", target.Max+1)}
-	if n, probs := Apply(units, slots, []Entry{long}, c); n != 0 || len(probs) != target.Count {
-		t.Fatalf("overlong translation: wrote %d, %d problems", n, len(probs))
+	if r, probs := Apply(units, slots, []Entry{long}, c, nil); r.Written != 0 || len(probs) != target.Count {
+		t.Fatalf("overlong translation: wrote %d, %d problems", r.Written, len(probs))
 	}
 	target.EN = "Nothing unusual."
-	n, probs := Apply(units, slots, []Entry{*target}, c)
-	if n != target.Count || len(probs) != 0 {
-		t.Fatalf("wrote %d of %d, problems %v", n, target.Count, probs)
+	r, probs := Apply(units, slots, []Entry{*target}, c, nil)
+	if r.Written != target.Count || len(probs) != 0 {
+		t.Fatalf("wrote %d of %d, problems %v", r.Written, target.Count, probs)
 	}
 	again, err := Extract(units, c)
 	if err != nil {
@@ -118,4 +118,56 @@ func TestExtractApply(t *testing.T) {
 	if !found {
 		t.Fatal("translation not read back")
 	}
+}
+
+// TestMove checks that a text string longer than its slot goes to space from
+// the allocator and that extraction finds it there through its pointers.
+func TestMove(t *testing.T) {
+	units, c := setup(t)
+	slots, err := Extract(units, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var s *Slot
+	for i := range slots {
+		if slots[i].Kind == KindText && strings.HasPrefix(slots[i].Where, "c000/") && len(slots[i].Ptrs) > 0 {
+			s = &slots[i]
+			break
+		}
+	}
+	if s == nil {
+		t.Fatal("no chunk 0 text slot")
+	}
+	long := strings.Repeat("y", s.Max+20)
+	// Free space: the last 64 bytes of the chunk's first image.
+	data := units[s.Unit].Data
+	free := len(data) - 64
+	for i := free; i < len(data); i++ {
+		data[i] = 0
+	}
+	calls := 0
+	alloc := func(unit, n int) (int, bool) {
+		calls++
+		if unit != s.Unit || n > 64 {
+			return 0, false
+		}
+		return free, true
+	}
+	r, probs := Apply(units, slots, []Entry{{JA: s.JA, Kind: KindText, EN: long}}, c, alloc)
+	if r.Moved == 0 || calls == 0 {
+		t.Fatalf("not moved: %+v %v", r, probs)
+	}
+	again, err := Extract(units, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, a := range again {
+		if a.Unit == s.Unit && a.Off == free {
+			if a.JA != long {
+				t.Fatalf("read back %q", a.JA)
+			}
+			return
+		}
+	}
+	t.Fatal("moved string not found by extraction")
 }

@@ -37,6 +37,7 @@ type Slot struct {
 	Kind  string // KindText or KindName
 	Where string // location label, for example c067/s00956/t03
 	JA    string // current text, UTF-8, line breaks as \n
+	Ptrs  []int  // offsets in the unit of the pointers to a text string
 }
 
 type unitView struct {
@@ -56,16 +57,21 @@ func (u unitView) in(addr uint32, n int) bool {
 // command name.
 func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 	var slots []Slot
-	seen := map[[2]int]bool{}
-	add := func(ui int, v unitView, addr uint32, kind, where string) error {
+	seen := map[[2]int]int{} // unit and offset to slot index + 1
+	// add records the string at addr. ptr is the unit offset of the pointer
+	// that reaches it, or -1 for a fixed field.
+	add := func(ui int, v unitView, addr uint32, kind, where string, ptr int) error {
 		if !v.in(addr, 1) {
 			return fmt.Errorf("text: %s points outside its unit", where)
 		}
 		off := int(addr - v.base)
-		if seen[[2]int{ui, off}] {
+		if i := seen[[2]int{ui, off}]; i != 0 {
+			if ptr >= 0 {
+				slots[i-1].Ptrs = append(slots[i-1].Ptrs, ptr)
+			}
 			return nil
 		}
-		seen[[2]int{ui, off}] = true
+		seen[[2]int{ui, off}] = len(slots) + 1
 		var raw []byte
 		budget := 0
 		switch kind {
@@ -86,7 +92,11 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 		if err != nil {
 			return fmt.Errorf("text: %s: %w", where, err)
 		}
-		slots = append(slots, Slot{ui, off, budget, kind, where, strings.ReplaceAll(s, "\r\n", "\n")})
+		var ptrs []int
+		if ptr >= 0 {
+			ptrs = []int{ptr}
+		}
+		slots = append(slots, Slot{ui, off, budget, kind, where, strings.ReplaceAll(s, "\r\n", "\n"), ptrs})
 		return nil
 	}
 	table := func(ui int, v unitView, hdr uint32, prefix string) error {
@@ -99,7 +109,7 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 		}
 		for k := uint32(0); k < n; k++ {
 			if p := v.u32(t + 4*k); p != none {
-				if err := add(ui, v, p, KindText, fmt.Sprintf("%s/t%04d", prefix, k)); err != nil {
+				if err := add(ui, v, p, KindText, fmt.Sprintf("%s/t%04d", prefix, k), int(t+4*k-v.base)); err != nil {
 					return err
 				}
 			}
@@ -111,7 +121,7 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 			return nil
 		}
 		for k := uint32(0); k < count; k++ {
-			if err := add(ui, v, recs+k*0x20, KindName, fmt.Sprintf("%s/n%04d", prefix, k)); err != nil {
+			if err := add(ui, v, recs+k*0x20, KindName, fmt.Sprintf("%s/n%04d", prefix, k), -1); err != nil {
 				return err
 			}
 		}
@@ -135,7 +145,7 @@ func Extract(units []maindat.Plain, c *sjis.Codec) ([]Slot, error) {
 			// at +0xC4 up to the address at +0x00, name at record +3.
 			end := v.u32(game)
 			for k, r := 0, v.u32(game+0xC4); r != none && r+0x20 <= end && v.in(r, 0x20); k, r = k+1, r+0x20 {
-				if err := add(ui, v, r+3, KindMenu, fmt.Sprintf("g/m%04d", k)); err != nil {
+				if err := add(ui, v, r+3, KindMenu, fmt.Sprintf("g/m%04d", k), -1); err != nil {
 					return nil, err
 				}
 			}
@@ -204,20 +214,31 @@ type Problem struct {
 	JA, EN, Where, Reason string
 }
 
-// Apply writes translations into the unit data in place. Slots must come
-// from the original data: a slot's budget is the length of the original
-// string, and extraction after an import measures the shorter text. Every slot whose
+// Alloc returns the offset of n free bytes in unit, or false. Apply uses it
+// for text strings that do not fit their slot.
+type Alloc func(unit, n int) (int, bool)
+
+// Result counts what Apply did.
+type Result struct {
+	Written int // slots written in place
+	Moved   int // text strings written to new space, pointers changed
+}
+
+// Apply writes translations into the unit data. Slots must come from the
+// original data: a slot's budget is the length of the original string, and
+// extraction after an import measures the shorter text. Every slot whose
 // source has a non-empty translation is rewritten; the rest of the slot is
-// filled with zero bytes. Translations that do not fit or do not encode are
-// returned as problems and left out.
-func Apply(units []maindat.Plain, slots []Slot, entries []Entry, c *sjis.Codec) (int, []Problem) {
+// filled with zero bytes. A text string that does not fit goes to space from
+// alloc (if alloc is not nil) and its pointers change to the new address.
+// Translations that do not fit or do not encode are returned as problems.
+func Apply(units []maindat.Plain, slots []Slot, entries []Entry, c *sjis.Codec, alloc Alloc) (Result, []Problem) {
 	en := map[[2]string]string{}
 	for _, e := range entries {
 		if e.EN != "" {
 			en[[2]string{e.Kind, e.JA}] = e.EN
 		}
 	}
-	written := 0
+	var res Result
 	var probs []Problem
 	for _, s := range slots {
 		t, ok := en[[2]string{s.Kind, s.JA}]
@@ -229,17 +250,29 @@ func Apply(units []maindat.Plain, slots []Slot, entries []Entry, c *sjis.Codec) 
 			probs = append(probs, Problem{s.JA, t, s.Where, err.Error()})
 			continue
 		}
-		if len(b) > s.Max {
-			probs = append(probs, Problem{s.JA, t, s.Where, fmt.Sprintf("%d bytes, room for %d", len(b), s.Max)})
+		data := units[s.Unit].Data
+		old := data[s.Off : s.Off+s.Max+1]
+		if len(b) <= s.Max {
+			copy(old, b)
+			clear(old[len(b):])
+			res.Written++
 			continue
 		}
-		dst := units[s.Unit].Data[s.Off : s.Off+s.Max+1]
-		copy(dst, b)
-		for i := len(b); i < len(dst); i++ {
-			dst[i] = 0
+		if s.Kind == KindText && len(s.Ptrs) > 0 && alloc != nil {
+			if off, ok := alloc(s.Unit, len(b)+1); ok {
+				copy(data[off:], b)
+				data[off+len(b)] = 0
+				clear(old)
+				addr := uint32(units[s.Unit].Off + off)
+				for _, p := range s.Ptrs {
+					binary.LittleEndian.PutUint32(data[p:], addr)
+				}
+				res.Moved++
+				continue
+			}
 		}
-		written++
+		probs = append(probs, Problem{s.JA, t, s.Where, fmt.Sprintf("%d bytes, room for %d", len(b), s.Max)})
 	}
 	sort.Slice(probs, func(i, j int) bool { return probs[i].Where < probs[j].Where })
-	return written, probs
+	return res, probs
 }
