@@ -2,6 +2,16 @@
 
 King's Field Additional II, ULJS-00076. The formats are the same as in Additional I; [docs/kfa1](../kfa1/0001-initial-findings.md) describes them. This document lists what differs and what the Additional I tools do with this disc.
 
+## SHA-256
+
+| File | SHA-256 |
+|---|---|
+| King's Field - Additional II (Asia).zip | `c570620ec1d76e89a681ac94fc36a814df5be68616cf4b5778dd8b73e08a9f9b` |
+| ISO image (from the zip) | `ad794f2e3aed5c8b30d342576e748ec2e228d3dc13c8069c89acd5415ffccb68` |
+| `PSP_GAME/SYSDIR/BOOT.BIN` | `a308614afdb16374834bb642198bb8fa6793952c1c81a23ce7ac9c0d029a877f` |
+| `PSP_GAME/SYSDIR/EBOOT.BIN` | `2ca76232ea8da9305e95950704a18cb6f9c93ff5d4a7c460fe6332478b453d50` |
+| `USRDIR/GameData/01_UmdTitle/main.dat` | `a9c8d3774ffd2cda07f662e0aa8bf2ebe9b03f2b803b6b27c13ce4216f9cf7d2` |
+
 ## Disc
 
 | Item | Value |

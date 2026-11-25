@@ -91,7 +91,7 @@ Offsets are file offsets. The header starts at `0x10`.
 | `0x58` | `0x6B800` | Body end |
 | `0x5C` | `0x130` | Body start |
 | `0x60` | 4 × (offset, size) | Extra ranges 0–3. Range 0 is unused (`0xFFFFFFFF`, 0). |
-| `0x82` | u16 | Flags; bit 2 selects key index 1 |
+| `0x82` | u16 | Flags; bit 2 selects key index 1; bit 0, 1 or 3 turns debug mode on ([0014](0014-debug-screens.md)) |
 | `0x90` | `KING'S FIELD ADDITIONAL` | Title |
 | `0xD0` | `FromSoftWare` | Publisher |
 | `0x120` | 16 bytes | Must equal 16 bytes at `BOOT.BIN` `0x12CAFC` (zero) |

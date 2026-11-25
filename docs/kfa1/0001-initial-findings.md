@@ -6,8 +6,13 @@
 |---|---|---|
 | Archive | `King's Field - Additional I (Japan, Asia).zip` | `King's Field - Additional II (Asia).zip` |
 | Archive SHA-1 | `ccebf9d21cadc49a7fee2680e91de446d3fc73fe` | `b4619893f41df95c6886fc9e38d031f5b9c2b4a8` |
+| Archive SHA-256 | `25ad3b561411a031e6351524cad4ae52a7407bcdc3cb29a950bfe29f9043434f` | `c570620ec1d76e89a681ac94fc36a814df5be68616cf4b5778dd8b73e08a9f9b` |
 | ISO size | 809,369,600 | 822,738,944 |
 | ISO SHA-1 | `0955d3e00ee2f89862e546492750f7fdf9503fae` | `1c4c950bbb0d3b89aef5cb498568e158b1106a9b` |
+| ISO SHA-256 | `f4e785cc22a199e1dccabce2f083bf3105ca9a54e4abcccfbced86ce02d4c055` | `ad794f2e3aed5c8b30d342576e748ec2e228d3dc13c8069c89acd5415ffccb68` |
+| `BOOT.BIN` SHA-256 | `13c9d059322e23f23e9b49c687d5f27e6f3c138147cfbf7c5278a22bd05ef783` | `a308614afdb16374834bb642198bb8fa6793952c1c81a23ce7ac9c0d029a877f` |
+| `EBOOT.BIN` SHA-256 | `b88a11734981b68ad628c4cf6e27e2348258d522a9126cac8f160a562a2c3653` | `2ca76232ea8da9305e95950704a18cb6f9c93ff5d4a7c460fe6332478b453d50` |
+| `main.dat` SHA-256 | `c23144ffe853c56b246cab218cae2305ead35f0f2cfaee501c7fe8164e3f1cfe` | `a9c8d3774ffd2cda07f662e0aa8bf2ebe9b03f2b803b6b27c13ce4216f9cf7d2` |
 | Disc ID | ULJS-00070 | ULJS-00076 |
 | Disc version | 1.02 | 1.01 |
 | `PSP_SYSTEM_VER` | 2.60 | 2.71 |

@@ -110,6 +110,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | [0011](docs/kfa1/0011-movie-script.md) | Movie script and draft English |
 | [0012](docs/kfa1/0012-images.md) | Images and image text |
 | [0013](docs/kfa1/0013-fmg.md) | FMG messages |
+| [0014](docs/kfa1/0014-debug-screens.md) | Debug mode and debug screens |
 
 ### Additional II
 
