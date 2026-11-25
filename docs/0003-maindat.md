@@ -55,7 +55,7 @@ Units:
 | Encrypted table | `0x12C85C` | `0x12CA5C` |
 | Table key | `0x12C918` | `0x12CB18` |
 
-Both games contain the same table bytes and the same table key.
+Both games contain the same table bytes and the same table key. Adventure Player (ULJS-00011) has them at `0x123944` and `0x123A10`, and its `.adv` files use the same container and keys ([0007](0007-adventure-player.md)).
 
 `FUN_0004fdd0` (Additional I) decrypts the table with AES-128-ECB at startup. The result is 16 records of 8 bytes. Bytes 0–5 of each record are columns 0–5; bytes 6–7 are zero. Each column, read down the 16 records, is a 16-byte value:
 

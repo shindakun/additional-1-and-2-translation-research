@@ -32,6 +32,9 @@ Both games use the FromSoftware "Adventure Player" engine. The engine also ran t
 | `scripts/text_survey.py` | Text counts by kind |
 | `scripts/font_render.py` | Font glyph layers as PNG |
 | `scripts/movie_sheets.sh` | Movie contact sheets |
+| `scripts/scene_text.py` | Text through engine structures |
+| `scripts/chunk_commands.py` | Event and action walk |
+| `scripts/match_functions.py` | Function names from Adventure Player |
 | `scripts/ghidra/analyze.sh` | Ghidra project, decompiled C, function list, string references in `research/ghidra` |
 
 Run Python scripts with `python3 -I`.
@@ -184,14 +187,16 @@ Ghidra 12.2 with the `ghidra-allegrex` extension loads `BOOT.BIN` with the "PSP 
 | Document | Subject |
 |---|---|
 | [0003](0003-maindat.md) | `main.dat` container and keys |
-| [0004](0004-text.md) | Text location and size |
+| [0004](0004-text.md) | Text location, structures and size |
 | [0005](0005-fonts.md) | Fonts and Latin glyphs |
 | [0006](0006-movies.md) | Movies |
+| [0007](0007-adventure-player.md) | Adventure Player disc and authoring tool |
 
 ## Open questions
 
-1. Chunk object (command) format, and the exact location of every string pointer.
+1. Layout of each action struct, and which actions select text.
 2. Meaning of `#e[n]` in text.
-3. Engine use of the CCM glyph metrics (left offset, width, advance).
-4. How a glyph selects its texture and layer.
-5. PSMF muxing for re-encoded movies.
+3. Structure that holds the fixed 0x20-byte name records.
+4. Engine use of the CCM glyph metrics (left offset, width, advance).
+5. How a glyph selects its texture and layer.
+6. PSMF muxing for re-encoded movies.

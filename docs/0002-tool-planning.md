@@ -82,7 +82,7 @@ A patch is a named list of address, original bytes and new bytes. The patcher st
 | ghidra-allegrex | v21.6 (Ghidra 12.2 build), in `Ghidra/Extensions` |
 | REA | `rea-agents`, Ghidra provider |
 
-Load `BOOT.BIN` as a relocatable ELF at base 0.
+Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` keeps its symbols; `scripts/match_functions.py` carries the names to the King's Field builds ([0007](0007-adventure-player.md)).
 
 ## Order of work
 
@@ -94,12 +94,12 @@ Load `BOOT.BIN` as a relocatable ELF at base 0.
 | 4 | `iso build`; boot an unchanged build on PPSSPP | 1 |
 | 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | |
 | 6 | `dat unpack`, `dat pack` | 5 |
-| 7 | Chunk command format; exact string pointers; text export ([0004](0004-text.md)) | 6 |
+| 7 | Text export through text headers ([0004](0004-text.md)); action struct layouts ([0007](0007-adventure-player.md)) | 6 |
 | 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 |
 | 9 | Executable patches for Latin text layout | 7, 8 |
 | 10 | `kfa build` end to end | all |
 
-Step 4 proves the build path before content changes. Step 7 is the main unknown. Steps 5 to 7 run in parallel with steps 1 to 4.
+Step 4 proves the build path before content changes. Steps 7 and 8 hold the open questions of [0001](0001-initial-findings.md). Steps 5 to 8 run in parallel with steps 1 to 4.
 
 ## Testing
 

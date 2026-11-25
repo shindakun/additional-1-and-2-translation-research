@@ -16,6 +16,7 @@ import sys
 KEY_TABLE = {
     "e62c3559fc94e9c917081bdf5bbf8dd5713ef1ae": (0x12C85C, 0x12C918),  # Additional I
     "e832e575aef3cb4cf1e68ec3104c970a0191ab11": (0x12CA5C, 0x12CB18),  # Additional II
+    "c37b28402bc0405c626be1b01329fd305838f20d": (0x123944, 0x123A10),  # Adventure Player
 }
 ELF_DATA_DELTA = 0x80
 
@@ -65,6 +66,14 @@ def main():
 
     body = b"\0" * body_start + dec(body_start, body_end - body_start)
     table_hdr = u32(body, 0x14C)
+    if table_hdr == 0:
+        print("no chunk table at body 0x14C; this body layout is not decoded")
+        if out:
+            os.makedirs(out, exist_ok=True)
+            open(os.path.join(out, "header.bin"), "wb").write(h[0x10:0x130])
+            open(os.path.join(out, "body.bin"), "wb").write(body[body_start:])
+            print("wrote header.bin and body.bin to", out)
+        return
     count, table = u32(body, table_hdr), u32(body, table_hdr + 4)
     rows = [struct.unpack_from("<4I", body, table + i * 16) for i in range(count)]
     good = sum(1 for (sz, _, off, _) in rows if u32(dec(off, 16), 0) == sz)
