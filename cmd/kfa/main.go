@@ -621,12 +621,62 @@ type space struct {
 var shrinkQualities = []int{80, 75}
 
 func newSpace(units []maindat.Plain) *space {
-	return &space{units: units, free: map[int][][2]int{}, done: map[[2]int]int{}}
+	s := &space{units: units, free: map[int][][2]int{}, done: map[[2]int]int{}}
+	for i := range units {
+		if units[i].Name == "body" {
+			if off, n := gimFreeTail(units[i].Data); n > 0 {
+				s.free[i] = append(s.free[i], [2]int{off, n})
+			}
+		}
+	}
+	return s
+}
+
+// gimFreeTail finds the first swizzled GIM in data and returns the empty
+// tile bands at the end of its pixel data, less one band as a margin. In the
+// header unit this is the bottom of the HUD atlas, which no sprite uses
+// (docs/0004).
+func gimFreeTail(data []byte) (int, int) {
+	off := bytes.Index(data, []byte("MIG.00.1PSP\x00"))
+	if off < 0 {
+		return 0, 0
+	}
+	g, err := gim.Decode(data[off:])
+	if err != nil || g.Order != 1 {
+		return 0, 0
+	}
+	stride := 0
+	switch g.Format {
+	case gim.RGBA8888:
+		stride = g.Width * 4
+	case gim.Index8:
+		stride = g.Width
+	case gim.Index4:
+		stride = g.Width / 2
+	default:
+		stride = g.Width * 2
+	}
+	stride = (stride + 15) &^ 15
+	band := stride * 8
+	start := off + g.ImageOffset
+	bands := (g.Height + 7) / 8
+	first := bands
+	for first > 0 {
+		if bytes.Count(data[start+(first-1)*band:start+first*band], []byte{0}) != band {
+			break
+		}
+		first--
+	}
+	first++ // margin
+	if first >= bands {
+		return 0, 0
+	}
+	return start + first*band, (bands - first) * band
 }
 
 func (s *space) alloc(unit, n int) (int, bool) {
 	u := &s.units[unit]
-	if !strings.HasPrefix(u.Name, "chunks/") || s.err != nil {
+	if s.err != nil {
 		return 0, false
 	}
 	for {
@@ -635,6 +685,9 @@ func (s *space) alloc(unit, n int) (int, bool) {
 				s.free[unit][i] = [2]int{r[0] + n, r[1] - n}
 				return r[0], true
 			}
+		}
+		if !strings.HasPrefix(u.Name, "chunks/") {
+			return 0, false
 		}
 		list, err := images.List(u.Data, uint32(u.Off))
 		if err != nil {

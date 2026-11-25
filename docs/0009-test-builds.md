@@ -65,4 +65,4 @@ Headless input: `--press=SECONDS:MASK[:DURATION],...` holds buttons at emulated 
 
 From boot, Start at 5 and 7 s skips the title movie. Circle at 10, 12, 14 and 16 s starts a new game. The opening movie plays from about 19 s; Circle at 28 s skips it. The town map shows at about 31 s.
 
-The town map cursor moves with the left stick only, about 430 pixels per second. It starts at about (255, 135). To enter the tavern: stick left for 0.16 s at 34 s, stick up for 0.06 s at 35 s, Circle at 36 s. Circle at 39 s and after advances the text.
+The town map cursor moves with the left stick only, about 430 pixels per second. It starts at about (255, 135). To enter the tavern: stick left for 0.16 s at 34 s, stick up for 0.06 s at 35 s, Circle at 36 s. Circle at 39 s and after advances the text. To enter the shop: stick right for 0.42 s at 34 s, stick up for 0.05 s at 35 s, Circle at 36, 39, 42, 45 and 48 s (Buy, Items, Herb). Cross in town opens the status overlay.

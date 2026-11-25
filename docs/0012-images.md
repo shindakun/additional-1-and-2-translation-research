@@ -78,8 +78,9 @@ Specs in `research/img/edit`:
 | `town.json`, `town19.json` | Town maps `c000_20`, `c000_19` | Eight labels and the title; quality 86 and 85 |
 | `status.json` | Status screen `c009_04` | Stats, equipment slots, attack and defence, damage types, load; quality 92 |
 | `hud.json` | HUD atlas `g_02aa00` (PNG) | `Vit`, `Mag`, `Agi`, `Next`, `EXP` |
+| `shop.json` | Shop panels `c000_00` (PNG) | `Repair cost`, `Sell price`, `Buy price`, `Owned`, `Stock` |
 
-`scripts/build_text_test.sh kfaI research/text/kfaI-test.json research/img/edit/kfaI` builds the image. Headless PPSSPP shows the English town map, and Cross in town shows the status overlay in English (title, weapon, stats, menu buttons). The full status screen (`c009_04`) has not yet been reached in a test run.
+`scripts/build_text_test.sh kfaI research/text/kfaI-test.json research/img/edit/kfaI` builds the image. Headless PPSSPP shows the English town map, the status overlay (Cross in town) and the shop price panel. The HUD atlas also holds moved header strings in its unused rows ([0004](0004-text.md)); the HUD draws without change. The full status screen (`c009_04`) has not yet been reached in a test run.
 
 ## Not built
 
