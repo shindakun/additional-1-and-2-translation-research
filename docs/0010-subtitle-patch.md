@@ -68,7 +68,7 @@ Text is Shift-JIS with ASCII. Frame numbers count calls of the patched draw func
 
 ## Timing
 
-The narration appears at known times in the video ([0006](0006-movies.md)). The counter rate is not known: the game loop and the 29.97 fps video can differ. A first test build draws the counter on screen so the rate can be read against the video.
+The narration appears at known times in the video. [0011](0011-movie-script.md) lists the text and its approximate times. The counter rate is not known: the game loop and the 29.97 fps video can differ. A first test build draws the counter on screen so the rate can be read against the video.
 
 ## Test builds
 

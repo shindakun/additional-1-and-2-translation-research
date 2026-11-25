@@ -82,3 +82,4 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | [0008](docs/0008-open-questions.md) | Open questions |
 | [0009](docs/0009-test-builds.md) | Test builds |
 | [0010](docs/0010-subtitle-patch.md) | Subtitle patch |
+| [0011](docs/0011-movie-script.md) | Movie script and draft English |
