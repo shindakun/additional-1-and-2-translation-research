@@ -51,7 +51,8 @@ Import writes the new file in place, fills the rest of the old space with zero b
 | `c000_19.jpg` (town map) | `トラウジトの町` |
 | `c000_20.jpg` (town map with locations) | `トラウジトの町`, `街道`, `酒場`, `商店`, `宿屋`, `鍛冶屋`, `迷宮入口`, `ステータス` |
 | `c009_04.jpg` (status screen, 16 uses) | `体力`, `魔力`, `素早さ`, `攻撃力`, `防御力`, equipment slots, damage types, `重量` |
-| `c011_06.jpg` and the other roulette boards | Bet labels and rules |
+| `c004_04.jpg` (roulette board) | `倍率表を見る` (payout table button) |
+| `c004_06.jpg` (roulette payout table) | Bet types: `1個賭け`, `横1列賭け`, `偶数奇数、赤黒、前半後半` and others |
 | Chunk 0 GIM `c000_00` (shop panels) | `修理費用`, `売却額`, `購入額`, `所持数`, `在庫数` |
 | HUD atlas `g_02aa00` in the header body | `体力`, `魔力`, `素早さ` (status overlay), `必要`, `経験値`, `GOLD` |
 
@@ -67,6 +68,7 @@ The menu buttons (`アイテム`, `魔法`, `キャンプ`, `消耗品`, `貴重
 |---|---|
 | `inpaint` (default) | Fill the text pixels, grown by 1 pixel, from their neighbours. The background texture stays. |
 | `flat` | Fill the text's bounding box with the median background color |
+| `box` | Fill the whole box with its median color; for dark text on a light box. `shadow: false` turns off the shadow |
 | `clear` | Make the box transparent (PNG on a transparent background) |
 
 ## Test result
@@ -79,8 +81,9 @@ Specs in `research/img/edit`:
 | `status.json` | Status screen `c009_04` | Stats, equipment slots, attack and defence, damage types, load; quality 92 |
 | `hud.json` | HUD atlas `g_02aa00` (PNG) | `Vit`, `Mag`, `Agi`, `Next`, `EXP` |
 | `shop.json` | Shop panels `c000_00` (PNG) | `Repair cost`, `Sell price`, `Buy price`, `Owned`, `Stock` |
+| `board.json`, `payout.json` | Roulette `c004_04`, `c004_06` | `Payout table`; bet types on the white boxes (`fill: box`) |
 
-`scripts/build_text_test.sh kfaI research/text/kfaI-test.json research/img/edit/kfaI` builds the image. Headless PPSSPP shows the English town map, the status overlay (Cross in town) and the shop price panel. The HUD atlas also holds moved header strings in its unused rows ([0004](0004-text.md)); the HUD draws without change. Camp, Equipment shows the full status screen (`c009_04`) with the English labels.
+`scripts/build_text_test.sh kfaI research/text/kfaI-test.json research/img/edit/kfaI` builds the image. Headless PPSSPP shows the English town map, the status overlay (Cross in town), the shop price panel, the equipment screen and the roulette board button. The payout table image is not yet seen in a run. The HUD atlas also holds moved header strings in its unused rows ([0004](0004-text.md)); the HUD draws without change. Camp, Equipment shows the full status screen (`c009_04`) with the English labels.
 
 ## Not built
 

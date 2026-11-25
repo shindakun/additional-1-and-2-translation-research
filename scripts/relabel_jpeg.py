@@ -12,8 +12,10 @@ SPEC.json:
    "labels": [{"box": [x0, y0, x1, y1], "text": "Inn", "size": 14}, ...]}
 
 Optional label fields: "color" [r, g, b], "threshold" (overrides the spec
-"threshold"), "align" ("center" or "left"), "fill" ("inpaint", the default,
-"flat", or "clear": make the box transparent).
+"threshold"), "align" ("center" or "left"), "fill" ("inpaint", the default;
+"flat"; "box": fill the whole box with its median color, for dark text on a
+light box; "clear": make the box transparent), "shadow" (false: no shadow).
+"text" can hold "\n" for two lines.
 
 For each box: pixels brighter than the threshold (default 120) are the old
 text. Those pixels, grown by 1 pixel, are filled from their neighbours,
@@ -61,12 +63,16 @@ def relabel(img, label, font_path, threshold):
     px = img.load()
     if label.get("fill") == "clear":
         ImageDraw.Draw(img).rectangle([x0, y0, x1, y1], fill=(0, 0, 0, 0))
+    if label.get("fill") == "box":
+        allpx = [px[x, y] for y in range(y0, y1 + 1) for x in range(x0, x1 + 1)]
+        fill = tuple(int(statistics.median(p[i] for p in allpx)) for i in range(len(allpx[0])))
+        ImageDraw.Draw(img).rectangle([x0, y0, x1, y1], fill=fill)
     ink, bg = [], []
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             r, g, b = px[x, y][:3]
             (ink if (r + g + b) / 3 > threshold else bg).append((x, y, px[x, y]))
-    if ink and label.get("fill") != "clear":
+    if ink and label.get("fill") not in ("clear", "box"):
         ix0 = max(x0, min(p[0] for p in ink) - 2)
         ix1 = min(x1, max(p[0] for p in ink) + 2)
         iy0 = max(y0, min(p[1] for p in ink) - 2)
@@ -78,7 +84,7 @@ def relabel(img, label, font_path, threshold):
             inpaint(img, ink, (x0, y0, x1, y1))
     font = ImageFont.truetype(font_path, label.get("size", 14))
     d = ImageDraw.Draw(img)
-    l, t, r, b = d.textbbox((0, 0), label["text"], font=font)
+    l, t, r, b = d.multiline_textbbox((0, 0), label["text"], font=font, align="center")
     cx = (x0 + x1 - (r - l)) // 2 - l
     if label.get("align") == "left":
         cx = x0 - l
@@ -86,8 +92,10 @@ def relabel(img, label, font_path, threshold):
     color = tuple(label.get("color", (235, 228, 210)))
     if img.mode == "RGBA":
         color += (255,)
-    d.text((cx + 1, cy + 1), label["text"], font=font, fill=(0, 0, 0) + ((255,) if img.mode == "RGBA" else ()))
-    d.text((cx, cy), label["text"], font=font, fill=color)
+    if label.get("shadow", True):
+        d.multiline_text((cx + 1, cy + 1), label["text"], font=font, align="center",
+                         fill=(0, 0, 0) + ((255,) if img.mode == "RGBA" else ()))
+    d.multiline_text((cx, cy), label["text"], font=font, fill=color, align="center")
 
 
 def main():
