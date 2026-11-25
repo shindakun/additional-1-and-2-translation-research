@@ -16,4 +16,18 @@ The Additional I specs apply with two changes on the full town map: the Inn labe
 
 Test: in headless PPSSPP the town map, the status overlay and the HUD labels show English.
 
-Not yet done: image text that Additional I does not have, for example the new casino games (Memory, Slots).
+## New casino games
+
+Memory (chunk 5) uses the card sheets `c002_00` to `c002_05` and the table `c005_06`. They have no text.
+
+Slots (chunk 9) has Japanese on three images. The specs are in `translations/kfaII/img`:
+
+| Image | Japanese | English | Spec |
+|---|---|---|---|
+| `c009_11.jpg` (screen) | `賭け金`, `所持金`, `配当表` | Bet, Gold, Payout | `slot-screen.json` |
+| `c009_00.png` (side panel) | `賭け金`, `所持金` | Bet, Gold | `slot-panel.json` |
+| `c009_01.png` (button strip) | `配当表`, vertical | PAYOUT, turned to read top to bottom like `EXIT` | `slot-buttons.json` |
+
+The pay table `c009_12.jpg` is in English on the disc. A label with `rotate` is drawn on its own layer and turned ([kfa1/0012](../kfa1/0012-images.md)).
+
+Headless PPSSPP at the start of a game: the tavern dealer lists Roulette, Poker, High & Low, Blackjack and Memory. Slots is not in the list, so the slot images are not seen in a test run.

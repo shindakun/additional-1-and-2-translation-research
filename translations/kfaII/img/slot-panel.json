@@ -1,0 +1,37 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "labels": [
+  {
+   "box": [
+    181,
+    207,
+    242,
+    229
+   ],
+   "text": "Bet",
+   "size": 12,
+   "color": [
+    240,
+    222,
+    222
+   ],
+   "threshold": 150
+  },
+  {
+   "box": [
+    181,
+    252,
+    242,
+    274
+   ],
+   "text": "Gold",
+   "size": 12,
+   "color": [
+    240,
+    222,
+    222
+   ],
+   "threshold": 150
+  }
+ ]
+}

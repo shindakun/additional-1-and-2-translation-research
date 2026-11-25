@@ -62,7 +62,7 @@ The menu buttons (`アイテム`, `魔法`, `キャンプ`, `消耗品`, `貴重
 
 ## Relabel options
 
-`relabel_jpeg.py` finds the old text in each box by brightness (`threshold`), removes it and draws the new text with a 1-pixel shadow. Label fields: `box`, `text`, `size`, `color`, `threshold`, `align` (`center` or `left`) and `fill`:
+`relabel_jpeg.py` finds the old text in each box by brightness (`threshold`), removes it and draws the new text with a 1-pixel shadow. Label fields: `box`, `text`, `size`, `color`, `threshold`, `align` (`center` or `left`), `rotate` (degrees counterclockwise; `-90` reads top to bottom) and `fill`:
 
 | `fill` | Action |
 |---|---|

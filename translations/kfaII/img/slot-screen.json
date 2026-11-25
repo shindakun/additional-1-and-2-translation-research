@@ -1,0 +1,54 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "budget": 42740,
+ "labels": [
+  {
+   "box": [
+    406,
+    16,
+    465,
+    40
+   ],
+   "text": "Bet",
+   "size": 12,
+   "color": [
+    240,
+    222,
+    222
+   ],
+   "threshold": 150
+  },
+  {
+   "box": [
+    406,
+    62,
+    465,
+    84
+   ],
+   "text": "Gold",
+   "size": 12,
+   "color": [
+    240,
+    222,
+    222
+   ],
+   "threshold": 150
+  },
+  {
+   "box": [
+    72,
+    198,
+    122,
+    217
+   ],
+   "text": "Payout",
+   "size": 10,
+   "color": [
+    200,
+    200,
+    200
+   ],
+   "threshold": 150
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+ "labels": [
+  {
+   "box": [
+    228,
+    72,
+    247,
+    120
+   ],
+   "text": "PAYOUT",
+   "size": 9,
+   "color": [
+    200,
+    200,
+    200
+   ],
+   "threshold": 150,
+   "rotate": -90
+  }
+ ]
+}

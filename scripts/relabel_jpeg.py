@@ -15,7 +15,8 @@ Optional label fields: "color" [r, g, b], "threshold" (overrides the spec
 "threshold"), "align" ("center" or "left"), "fill" ("inpaint", the default;
 "flat"; "box": fill the whole box with its median color, for dark text on a
 light box; "clear": make the box transparent), "shadow" (false: no shadow).
-"text" can hold "\n" for two lines.
+"text" can hold "\n" for two lines. "rotate" turns the text by that many
+degrees counterclockwise (-90 for text that reads top to bottom).
 
 For each box: pixels brighter than the threshold (default 120) are the old
 text. Those pixels, grown by 1 pixel, are filled from their neighbours,
@@ -83,6 +84,9 @@ def relabel(img, label, font_path, threshold):
         else:
             inpaint(img, ink, (x0, y0, x1, y1))
     font = ImageFont.truetype(font_path, label.get("size", 14))
+    if label.get("rotate"):
+        draw_rotated(img, label, font, (x0, y0, x1, y1))
+        return
     d = ImageDraw.Draw(img)
     l, t, r, b = d.multiline_textbbox((0, 0), label["text"], font=font, align="center")
     cx = (x0 + x1 - (r - l)) // 2 - l
@@ -96,6 +100,26 @@ def relabel(img, label, font_path, threshold):
         d.multiline_text((cx + 1, cy + 1), label["text"], font=font, align="center",
                          fill=(0, 0, 0) + ((255,) if img.mode == "RGBA" else ()))
     d.multiline_text((cx, cy), label["text"], font=font, fill=color, align="center")
+
+
+def draw_rotated(img, label, font, box):
+    """Draw the label on its own layer, turn it by label["rotate"] degrees
+    (counterclockwise) and paste it centered in the box."""
+    x0, y0, x1, y1 = box
+    probe = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    l, t, r, b = probe.textbbox((0, 0), label["text"], font=font)
+    layer = Image.new("RGBA", (r - l + 2, b - t + 2), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    if label.get("shadow", True):
+        d.text((1 - l, 1 - t), label["text"], font=font, fill=(0, 0, 0, 255))
+    d.text((-l, -t), label["text"], font=font, fill=tuple(label.get("color", (235, 228, 210))) + (255,))
+    layer = layer.rotate(label["rotate"], expand=True)
+    px = (x0 + x1 + 1 - layer.width) // 2
+    py = (y0 + y1 + 1 - layer.height) // 2
+    if img.mode == "RGBA":
+        img.alpha_composite(layer, (px, py))
+    else:
+        img.paste(layer, (px, py), layer)
 
 
 def main():
