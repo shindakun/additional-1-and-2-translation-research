@@ -8,5 +8,5 @@
 | 4 | Which flag names reach the screen | Answered: none in normal play; only debug screens ([0004](0004-text.md)). |
 | 5 | Engine use of the CCM glyph metrics | Answered in code: offset, width and advance drive layout ([0005](0005-fonts.md)). Not yet seen on screen. |
 | 6 | How a glyph selects its texture and layer | Answered: page field at `+0x16` ([0005](0005-fonts.md)). |
-| 7 | PSMF muxing for re-encoded movies | Open ([0006](0006-movies.md)). |
-| 8 | Text limits in the King's Field build | Open. The authoring tool limits are for the 2005 engine ([0007](0007-adventure-player.md)). |
+| 7 | PSMF muxing for re-encoded movies | Stream layout known; remux by video replacement is possible. PSMF header tables not decoded ([0006](0006-movies.md)). |
+| 8 | Text limits in the King's Field build | Lower bound measured: 56 half-width units per line, 7 lines ([0004](0004-text.md)). Engine limit not known. |

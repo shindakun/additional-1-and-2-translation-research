@@ -51,6 +51,7 @@ Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
 | `scripts/font_render.py` | Render font glyph layers to PNG |
 | `scripts/font_pages.py` | Check glyph pages against textures |
 | `scripts/movie_sheets.sh` | Write movie contact sheets |
+| `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/ghidra/analyze.sh` | Decompile the executables with Ghidra |
 | `scripts/boot_info.py`, `gameinfo_dump.py`, `maindat_survey.py` | Early survey tools |
 

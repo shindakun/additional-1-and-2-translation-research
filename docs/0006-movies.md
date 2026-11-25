@@ -4,7 +4,19 @@ All movies have Japanese narration burned into the video. Staff credits and titl
 
 ## Format
 
-PSMF (`PSMF0014`). A 0x800-byte header precedes an MPEG program stream. Video is H.264, 480 × 272, 29.97 fps. ffmpeg decodes the stream after the header is cut off:
+PSMF (`PSMF0014`). The 0x800-byte header holds the stream offset (`0x08`, big-endian) and size (`0x0C`), then stream and entry-point information. An MPEG program stream follows.
+
+| Stream ID | Contents |
+|---|---|
+| `0xE0` | H.264 video: Main profile, level 2.1, 480 × 272, 29.97 fps, no B-frames |
+| `0xBD`, substream `0x00` | ATRAC3plus audio |
+| `0xBB` | System header |
+| `0xBF` | Private stream 2 |
+| `0xBE` | Padding |
+
+`scripts/pmf_streams.py` counts the packets. All 11 movies parse to the last byte with this stream set.
+
+ffmpeg decodes the video after the header is cut off:
 
 ```sh
 tail -c +2049 movie000.pmf | ffmpeg -f mpeg -i - out.mp4
@@ -28,4 +40,6 @@ tail -c +2049 movie000.pmf | ffmpeg -f mpeg -i - out.mp4
 
 ## Translation
 
-The narration is part of the image. Translation needs new video with English text and a PSMF muxer for the result. The narration sits over moving art, so covering it needs a mask or a box behind the English text.
+The narration is part of the image. Translation needs new video with English text. The narration sits over moving art, so covering it needs a mask or a box behind the English text.
+
+No open-source tool writes PSMF; ffmpeg reads it but does not write it. The audio sits in its own stream, so a remuxer can copy the `0xBD` packets and replace the `0xE0` payload with a new encode at the same profile and level. The header's stream and entry-point tables must then be rebuilt; their layout is not yet decoded.

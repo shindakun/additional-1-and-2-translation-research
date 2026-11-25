@@ -5,6 +5,7 @@ Input is the OUTDIR written by scripts/maindat.py. OUT.tsv gets one row per
 text pointer: source, chunk, scene ID, text index, pointer site, text.
 See docs/0004-text.md for the structures.
 """
+import re
 import struct
 import sys
 
@@ -58,3 +59,19 @@ if len(sys.argv) > 2:
         f.write("source\tchunk\tscene\tindex\tsite\ttext\n")
         for src, chunk, scene, k, site, text in out:
             f.write(f"{src}\t{chunk}\t{scene}\t{k}\t{site:#x}\t{text.replace(chr(13), '').replace(chr(10), '\\n')}\n")
+
+
+def width(line):
+    line = re.sub(r"#[a-z](\[[^\]]*\])?", "", line)
+    return sum(1 if ord(c) < 0x80 or 0xFF61 <= ord(c) <= 0xFF9F else 2 for c in line)
+
+
+widths, line_counts, sizes = [], [], []
+for r in texts:
+    lines = r[5].split("\r\n")
+    line_counts.append(len(lines))
+    widths += [width(x) for x in lines]
+    sizes.append(len(r[5].encode("cp932", "replace")))
+widths.sort()
+print(f"line width (half-width units): max {widths[-1]}, p99 {widths[int(0.99 * len(widths))]}; "
+      f"most lines {max(line_counts)}; longest text {max(sizes)} bytes")
