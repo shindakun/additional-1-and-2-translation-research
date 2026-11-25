@@ -5,6 +5,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -18,7 +19,9 @@ import (
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/font"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/iso9660"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/maindat"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/sjis"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/subpatch"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/text"
 )
 
 // version is stamped at build time with -ldflags "-X main.version=...".
@@ -71,6 +74,10 @@ func run() error {
 		err = datPack(args[2:])
 	case "font vwf":
 		err = fontVWF(args[2:])
+	case "text export":
+		err = textExport(args[2:])
+	case "text import":
+		err = textImport(args[2:])
 	case "patch counter":
 		err = patchCounter(args[2:])
 	default:
@@ -107,6 +114,11 @@ Commands:
   font vwf IN.bnd OUT.bnd [GAP] [SPACE]
                                    Proportional ASCII metrics in every font
                                    inside IN (default gap 1, space 4)
+  text export GAMEDIR OUT.json     Write every translatable string of main.dat
+  text import GAMEDIR IN.json OUT.dat
+                                   Write translations in place into a copy of
+                                   main.dat; report those that do not fit
+                                   (GAMEDIR is an extracted PSP_GAME folder)
   patch counter BOOT.BIN OUT       Draw a frame counter over movies (test build)
   version                          Print the version and exit
 `)
@@ -461,5 +473,87 @@ func datPack(a []string) error {
 		return err
 	}
 	fmt.Printf("wrote %s (%d units)\n", a[3], len(units))
+	return nil
+}
+
+// gameText opens main.dat, its units, the codec and the text slots of an
+// extracted PSP_GAME folder.
+func gameText(dir string) (*maindat.File, []maindat.Plain, *sjis.Codec, []text.Slot, error) {
+	f, err := openDat(filepath.Join(dir, "SYSDIR", "BOOT.BIN"), filepath.Join(dir, "USRDIR", "GameData", "01_UmdTitle", "main.dat"))
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	_, units, err := f.Unpack()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	sys, err := readBND(filepath.Join(dir, "USRDIR", "Bnd", "AdvSys.bnd"))
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	var j, u []byte
+	for _, e := range sys.Entries {
+		switch e.Name {
+		case "jis2ucs.bin":
+			j = e.Data
+		case "ucs2jis.bin":
+			u = e.Data
+		}
+	}
+	c, err := sjis.New(j, u)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	slots, err := text.Extract(units, c)
+	return f, units, c, slots, err
+}
+
+func textExport(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	_, _, _, slots, err := gameText(a[0])
+	if err != nil {
+		return err
+	}
+	entries := text.Entries(slots)
+	b, err := json.MarshalIndent(entries, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(a[1], append(b, '\n'), 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %d entries from %d slots to %s\n", len(entries), len(slots), a[1])
+	return nil
+}
+
+func textImport(a []string) error {
+	if len(a) != 3 {
+		return errUsage
+	}
+	f, units, c, slots, err := gameText(a[0])
+	if err != nil {
+		return err
+	}
+	b, err := os.ReadFile(a[1])
+	if err != nil {
+		return err
+	}
+	var entries []text.Entry
+	if err := json.Unmarshal(b, &entries); err != nil {
+		return err
+	}
+	n, probs := text.Apply(units, slots, entries, c)
+	for _, p := range probs {
+		fmt.Fprintf(os.Stderr, "not written: %s: %s (%q)\n", p.Where, p.Reason, p.EN)
+	}
+	if err := f.Pack(units); err != nil {
+		return err
+	}
+	if err := os.WriteFile(a[2], f.Raw, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s: %d slots translated, %d not written\n", a[2], n, len(probs))
 	return nil
 }

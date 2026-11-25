@@ -1,0 +1,121 @@
+package text
+
+import (
+	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/bnd"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/maindat"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/sjis"
+)
+
+func setup(t *testing.T) ([]maindat.Plain, *sjis.Codec) {
+	t.Helper()
+	root := os.Getenv("KFA_DATA")
+	if root == "" {
+		t.Skip("KFA_DATA not set")
+	}
+	base := filepath.Join(root, "extract", "kfaI", "PSP_GAME")
+	read := func(p ...string) []byte {
+		b, err := os.ReadFile(filepath.Join(append([]string{base}, p...)...))
+		if err != nil {
+			t.Skip(err)
+		}
+		return b
+	}
+	sys, err := bnd.Read(read("USRDIR", "Bnd", "AdvSys.bnd"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var j, u []byte
+	for _, e := range sys.Entries {
+		if e.Name == "jis2ucs.bin" {
+			j = e.Data
+		}
+		if e.Name == "ucs2jis.bin" {
+			u = e.Data
+		}
+	}
+	c, err := sjis.New(j, u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ks, err := maindat.KeysFromBoot(read("SYSDIR", "BOOT.BIN"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	f, err := maindat.Open(read("USRDIR", "GameData", "01_UmdTitle", "main.dat"), ks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, units, err := f.Unpack()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return units, c
+}
+
+func TestExtractApply(t *testing.T) {
+	units, c := setup(t)
+	slots, err := Extract(units, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	kinds := map[string]int{}
+	for _, s := range slots {
+		kinds[s.Kind]++
+	}
+	entries := Entries(slots)
+	t.Logf("slots %v, unique entries %d", kinds, len(entries))
+	if kinds[KindText] < 2000 || kinds[KindName] < 1000 {
+		t.Fatalf("too few slots: %v", kinds)
+	}
+
+	orig := make([][]byte, len(units))
+	for i := range units {
+		orig[i] = bytes.Clone(units[i].Data)
+	}
+	if n, probs := Apply(units, slots, entries, c); n != 0 || len(probs) != 0 {
+		t.Fatalf("empty translations wrote %d slots, %d problems", n, len(probs))
+	}
+	for i := range units {
+		if !bytes.Equal(units[i].Data, orig[i]) {
+			t.Fatalf("unit %s changed with no translations", units[i].Name)
+		}
+	}
+
+	var target *Entry
+	for i := range entries {
+		if entries[i].JA == "特に変わったところはない" {
+			target = &entries[i]
+		}
+	}
+	if target == nil {
+		t.Fatal("known global text not found")
+	}
+	long := Entry{JA: target.JA, Kind: target.Kind, EN: strings.Repeat("x", target.Max+1)}
+	if n, probs := Apply(units, slots, []Entry{long}, c); n != 0 || len(probs) != target.Count {
+		t.Fatalf("overlong translation: wrote %d, %d problems", n, len(probs))
+	}
+	target.EN = "Nothing unusual."
+	n, probs := Apply(units, slots, []Entry{*target}, c)
+	if n != target.Count || len(probs) != 0 {
+		t.Fatalf("wrote %d of %d, problems %v", n, target.Count, probs)
+	}
+	again, err := Extract(units, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, s := range again {
+		if s.JA == "Nothing unusual." {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("translation not read back")
+	}
+}

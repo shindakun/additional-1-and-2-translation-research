@@ -54,3 +54,9 @@ What to check:
 A narrower gap confirms the engine applies CCM metrics, so English can be proportional without code patches.
 
 Result: the build boots and regular text looks unchanged. The game shows little ASCII text, so the spacing change is not yet seen on screen. A subtitle test build ([0010](0010-subtitle-patch.md)) draws ASCII text and gives the next check.
+
+## Text test
+
+`scripts/build_text_test.sh GAME TRANSLATION.json` writes translations into `main.dat` and builds `research/builds/GAME-text.iso` ([0004](0004-text.md)).
+
+Headless input: `--press=SECONDS:MASK[:DURATION],...` holds buttons at emulated times (default 0.15 s). Masks: Select `0x1`, Start `0x8`, Up `0x10`, Right `0x20`, Down `0x40`, Left `0x80`, Triangle `0x1000`, Circle `0x2000`, Cross `0x4000`, Square `0x8000`. From boot, Start at 5 and 7 s skips the opening, and Circle at 10 s and after starts a new game; the town shows at about 45 s.

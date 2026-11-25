@@ -48,8 +48,10 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa dat pack <boot> <main.dat> <dir> <out>` | Encrypt units from a directory and re-sign | Built for units of unchanged size; a new layout is not built |
 | `kfa font vwf <in.bnd> <out.bnd> [gap] [space]` | Proportional ASCII metrics in every font inside a BND | Built |
 | `kfa patch counter <boot> <out>` | Frame counter over movies ([0010](0010-subtitle-patch.md)) | Built |
+| `kfa text export <gamedir> <json>` | Translatable `main.dat` strings ([0004](0004-text.md)) | Built |
+| `kfa text import <gamedir> <json> <out>` | Translations into `main.dat`, in place | Built; strings must fit their original length |
 | `kfa fmg export`, `kfa fmg import` | FMG text out and in | Not built |
-| `kfa gim topng`, `kfa gim frompng` | Convert textures | Not built |
+| `kfa gim topng`, `kfa gim frompng` | Convert textures; town map labels and the title are images | Not built |
 | `kfa build <project>` | Build a finished ISO from translation files | Not built |
 
 ## Translation files
@@ -96,11 +98,11 @@ Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` ke
 |---|---|---|---|
 | 1 | Module setup, `iso extract`, round-trip test harness | | Built |
 | 2 | `bnd` unpack and pack, both variants | | Library built; CLI unpack built |
-| 3 | `sjis`, `fmg` export and import | 2 | Not built |
+| 3 | `sjis`, `fmg` export and import | 2 | `internal/sjis` built; FMG not built |
 | 4 | `iso build`; boot an unchanged build on PPSSPP | 1 | In-place `iso put` built; full build not built |
 | 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | | Built |
 | 6 | `dat unpack`, `dat pack` | 5 | Built; same-size units only |
-| 7 | Text export through text headers ([0004](0004-text.md)); action struct layouts ([0007](0007-adventure-player.md)) | 6 | Research scripts only |
+| 7 | Text export and in-place import ([0004](0004-text.md)) | 6 | Built and seen in game; strings longer than the source need a new layout |
 | 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 | Test build ready ([0009](0009-test-builds.md)) |
 | 9 | Executable patches: Latin text layout, movie subtitles ([0006](0006-movies.md)) | 7, 8 | Not built |
 | 10 | `kfa build` end to end | all | Not built |
