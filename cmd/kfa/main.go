@@ -18,6 +18,7 @@ import (
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/font"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/iso9660"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/maindat"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/subpatch"
 )
 
 // version is stamped at build time with -ldflags "-X main.version=...".
@@ -66,6 +67,8 @@ func run() error {
 		err = datVerify(args[2:])
 	case "font vwf":
 		err = fontVWF(args[2:])
+	case "patch counter":
+		err = patchCounter(args[2:])
 	default:
 		if args[0] == "version" {
 			fmt.Println("kfa", version)
@@ -96,6 +99,7 @@ Commands:
   font vwf IN.bnd OUT.bnd [GAP] [SPACE]
                                    Proportional ASCII metrics in every font
                                    inside IN (default gap 1, space 4)
+  patch counter BOOT.BIN OUT       Draw a frame counter over movies (test build)
   version                          Print the version and exit
 `)
 }
@@ -361,4 +365,23 @@ func proportional(f *bnd.File, gap, space int16) (int, error) {
 		}
 	}
 	return n, nil
+}
+
+func patchCounter(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	boot, err := os.ReadFile(a[0])
+	if err != nil {
+		return err
+	}
+	out, err := subpatch.Counter(boot, 16, 16)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(a[1], out, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s\n", a[1])
+	return nil
 }

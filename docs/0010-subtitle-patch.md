@@ -74,9 +74,19 @@ The narration appears at known times in the video ([0006](0006-movies.md)). The 
 
 | Build | Shows | State |
 |---|---|---|
-| Frame counter | Hook runs; counter rate | Not built |
+| Frame counter | Hook runs; counter rate | Built (`kfa patch counter`); not yet seen on screen |
 | One subtitle | Font, box and position | Not built |
 | Full table, movie000 | Timing against the narration | Not built |
+
+## Tools
+
+`internal/prx` reads and edits the relocation table. `internal/mips` encodes the instructions; its test compares the encodings with instructions in `BOOT.BIN`. `internal/subpatch` builds the patch and checks that the hooked word is the expected `jal` with an `R_MIPS_26` relocation. Its test checks that no relocation inside the code space stays active and that nothing outside the code space and the hook changes except the 61 relocation types.
+
+```sh
+./kfa patch counter research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/builds/kfaI-counter-BOOT.BIN
+cp research/iso/kfaI.iso research/builds/kfaI-counter.iso
+./kfa iso put research/builds/kfaI-counter.iso PSP_GAME/SYSDIR/EBOOT.BIN research/builds/kfaI-counter-BOOT.BIN
+```
 
 ## Other discs
 

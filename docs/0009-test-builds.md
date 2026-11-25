@@ -2,6 +2,13 @@
 
 Test builds are images for PPSSPP. They go to `research/builds`, which git ignores. Each build changes one thing so that a difference on screen has one cause.
 
+## PPSSPP use
+
+- Test runs use a copy of the app with its own bundle ID (`org.ppsspp.kfa-test`) and a memory stick folder under `research/ppsspp`, set in that bundle's preferences. The user's PPSSPP settings stay unchanged.
+- PPSSPP 1.20.4 rejects extra command-line arguments with an abort: only one file path is allowed.
+- In PPSSPP 1.20.4 the WebSocket debugger pauses the emulated CPU for every memory read and screenshot. Three test runs crashed after such requests. Do not use the debugger with 1.20.4.
+- The headless build (`PPSSPPHeadless`, built from source) saves screenshots with `--screenshot-save` and needs no window.
+
 Build `kfa` first:
 
 ```sh

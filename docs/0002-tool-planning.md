@@ -46,6 +46,7 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa dat verify <boot> <main.dat>` | Check keys and MD5; re-encrypt every unit | Built |
 | `kfa dat unpack`, `kfa dat pack` | Decrypt and split `main.dat`; encrypt, rebuild and re-sign it | Not built; `internal/maindat` encrypts units and signs |
 | `kfa font vwf <in.bnd> <out.bnd> [gap] [space]` | Proportional ASCII metrics in every font inside a BND | Built |
+| `kfa patch counter <boot> <out>` | Frame counter over movies ([0010](0010-subtitle-patch.md)) | Built |
 | `kfa fmg export`, `kfa fmg import` | FMG text out and in | Not built |
 | `kfa gim topng`, `kfa gim frompng` | Convert textures | Not built |
 | `kfa build <project>` | Build a finished ISO from translation files | Not built |
