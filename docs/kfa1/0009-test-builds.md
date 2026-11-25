@@ -61,6 +61,8 @@ Result: the build boots and regular text looks unchanged. The game shows little 
 
 `scripts/make_patch.sh GAME VERSION` builds the image and writes `dist/GAME-english-VERSION/`: an xdelta3 patch from the original ISO, a readme with the commit and SHA-256 sums. It applies the patch to a copy of the original and checks the result byte for byte. The encoder uses a 1 GB source window (`-B`); with the default window, the files that move to the end of the image go into the patch whole. The patch for Additional I is about 184 MB: chunks with new text re-encrypt, and AES output has no matches.
 
+`scripts/release.sh GAME VERSION [--publish]` releases a patch on GitHub. It needs a clean work tree with HEAD pushed, and a tag `GAME-vVERSION` that does not exist yet. It uses the `dist/` patch if its readme names HEAD, and builds it otherwise. Without `--publish` it only prints the tag, title and files. With `--publish` it pushes the tag and creates a pre-release with `gh`, with the readme as notes and the patch and readme as files.
+
 Test builds for one change go to `research/builds` under a name that says what they test, and are deleted after the test. Screenshots that show a result stay in `research/ppsspp/examples`.
 
 The headless memory stick (`research/ppsspp/headless-ms`) must hold no save for these input scripts: with a save, the title selects Load.
