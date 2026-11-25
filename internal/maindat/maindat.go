@@ -187,3 +187,35 @@ func (f *File) Units() (Header, []Unit, error) {
 	}
 	return h, units, nil
 }
+
+// Plain is the decrypted contents of one unit.
+type Plain struct {
+	Unit
+	Data []byte
+}
+
+// Unpack decrypts every unit.
+func (f *File) Unpack() (Header, []Plain, error) {
+	h, units, err := f.Units()
+	if err != nil {
+		return h, nil, err
+	}
+	out := make([]Plain, len(units))
+	for i, u := range units {
+		out[i] = Plain{u, f.Decrypt(u.Off, u.Len)}
+	}
+	return h, out, nil
+}
+
+// Pack encrypts units back in place and re-signs the file. A unit must keep
+// its size; resizing needs a new layout and is not supported.
+func (f *File) Pack(units []Plain) error {
+	for _, p := range units {
+		if len(p.Data) != p.Len {
+			return fmt.Errorf("maindat: %s is %d bytes, want %d", p.Name, len(p.Data), p.Len)
+		}
+		f.Encrypt(p.Off, p.Data)
+	}
+	f.Sign()
+	return nil
+}

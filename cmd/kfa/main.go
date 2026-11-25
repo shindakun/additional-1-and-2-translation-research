@@ -65,6 +65,10 @@ func run() error {
 		err = bndUnpack(args[2:])
 	case "dat verify":
 		err = datVerify(args[2:])
+	case "dat unpack":
+		err = datUnpack(args[2:])
+	case "dat pack":
+		err = datPack(args[2:])
 	case "font vwf":
 		err = fontVWF(args[2:])
 	case "patch counter":
@@ -96,6 +100,10 @@ Commands:
   bnd ls FILE.bnd                  List entries, nested BNDs included
   bnd unpack FILE.bnd DIR          Write top-level entries to DIR
   dat verify BOOT.BIN main.dat     Check keys, MD5 and every unit
+  dat unpack BOOT.BIN main.dat DIR Write every unit decrypted to DIR
+  dat pack BOOT.BIN main.dat DIR OUT
+                                   Encrypt units from DIR into a copy of
+                                   main.dat (same sizes) and re-sign it
   font vwf IN.bnd OUT.bnd [GAP] [SPACE]
                                    Proportional ASCII metrics in every font
                                    inside IN (default gap 1, space 4)
@@ -383,5 +391,75 @@ func patchCounter(a []string) error {
 		return err
 	}
 	fmt.Printf("wrote %s\n", a[1])
+	return nil
+}
+
+func openDat(bootPath, datPath string) (*maindat.File, error) {
+	boot, err := os.ReadFile(bootPath)
+	if err != nil {
+		return nil, err
+	}
+	raw, err := os.ReadFile(datPath)
+	if err != nil {
+		return nil, err
+	}
+	ks, err := maindat.KeysFromBoot(boot)
+	if err != nil {
+		return nil, err
+	}
+	return maindat.Open(raw, ks)
+}
+
+func datUnpack(a []string) error {
+	if len(a) != 3 {
+		return errUsage
+	}
+	f, err := openDat(a[0], a[1])
+	if err != nil {
+		return err
+	}
+	_, units, err := f.Unpack()
+	if err != nil {
+		return err
+	}
+	for _, u := range units {
+		out := filepath.Join(a[2], filepath.FromSlash(u.Name))
+		if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(out, u.Data, 0o644); err != nil {
+			return err
+		}
+	}
+	fmt.Printf("wrote %d units to %s\n", len(units), a[2])
+	return nil
+}
+
+func datPack(a []string) error {
+	if len(a) != 4 {
+		return errUsage
+	}
+	f, err := openDat(a[0], a[1])
+	if err != nil {
+		return err
+	}
+	_, units, err := f.Unpack()
+	if err != nil {
+		return err
+	}
+	for i := range units {
+		b, err := os.ReadFile(filepath.Join(a[2], filepath.FromSlash(units[i].Name)))
+		if err != nil {
+			return err
+		}
+		units[i].Data = b
+	}
+	if err := f.Pack(units); err != nil {
+		return err
+	}
+	if err := os.WriteFile(a[3], f.Raw, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s (%d units)\n", a[3], len(units))
 	return nil
 }

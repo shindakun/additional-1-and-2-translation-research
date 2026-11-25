@@ -44,7 +44,8 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa bnd unpack <bnd> <dir>` | Write entries | Built |
 | `kfa bnd pack <dir> <bnd>` | Build a BND from a directory and a manifest | Not built; `internal/bnd` writes BNDs |
 | `kfa dat verify <boot> <main.dat>` | Check keys and MD5; re-encrypt every unit | Built |
-| `kfa dat unpack`, `kfa dat pack` | Decrypt and split `main.dat`; encrypt, rebuild and re-sign it | Not built; `internal/maindat` encrypts units and signs |
+| `kfa dat unpack <boot> <main.dat> <dir>` | Write every unit decrypted | Built |
+| `kfa dat pack <boot> <main.dat> <dir> <out>` | Encrypt units from a directory and re-sign | Built for units of unchanged size; a new layout is not built |
 | `kfa font vwf <in.bnd> <out.bnd> [gap] [space]` | Proportional ASCII metrics in every font inside a BND | Built |
 | `kfa patch counter <boot> <out>` | Frame counter over movies ([0010](0010-subtitle-patch.md)) | Built |
 | `kfa fmg export`, `kfa fmg import` | FMG text out and in | Not built |
@@ -98,7 +99,7 @@ Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` ke
 | 3 | `sjis`, `fmg` export and import | 2 | Not built |
 | 4 | `iso build`; boot an unchanged build on PPSSPP | 1 | In-place `iso put` built; full build not built |
 | 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | | Built |
-| 6 | `dat unpack`, `dat pack` | 5 | Not built |
+| 6 | `dat unpack`, `dat pack` | 5 | Built; same-size units only |
 | 7 | Text export through text headers ([0004](0004-text.md)); action struct layouts ([0007](0007-adventure-player.md)) | 6 | Research scripts only |
 | 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 | Test build ready ([0009](0009-test-builds.md)) |
 | 9 | Executable patches: Latin text layout, movie subtitles ([0006](0006-movies.md)) | 7, 8 | Not built |
@@ -118,7 +119,7 @@ KFA_DATA=$PWD/research go test ./...
 | Package | Test on disc data |
 |---|---|
 | `internal/bnd` | 276 BNDs on all three discs, nested included, re-encode byte for byte |
-| `internal/maindat` | Every unit of both `main.dat` files decrypts, re-encrypts and re-signs to the original; a changed byte changes the MD5 |
+| `internal/maindat` | Every unit of both `main.dat` files decrypts, re-encrypts and re-signs to the original; unpack then pack gives the original; a changed byte changes the MD5 |
 | `internal/iso9660` | Every file of both images matches the 7-Zip extraction; in-place replacement reads back |
 | `internal/font` | CCM round trip; proportional metrics for all 95 ASCII glyphs |
 

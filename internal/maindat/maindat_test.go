@@ -91,3 +91,22 @@ func TestEditDetected(t *testing.T) {
 		t.Fatal("edited unit does not decrypt to the edit")
 	}
 }
+
+// TestUnpackPack unpacks every unit, packs them back unchanged and compares.
+func TestUnpackPack(t *testing.T) {
+	f, orig := load(t, games[0].dir, games[0].file)
+	_, units, err := f.Unpack()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Pack(units); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(f.Raw, orig) {
+		t.Fatal("pack of unchanged units differs")
+	}
+	units[0].Data = units[0].Data[:10]
+	if err := f.Pack(units); err == nil {
+		t.Fatal("resized unit accepted")
+	}
+}

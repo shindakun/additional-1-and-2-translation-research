@@ -100,7 +100,7 @@ func Counter(boot []byte, x, y float32) ([]byte, error) {
 	b.p.Emit(mips.Or(mips.S0, mips.RA, mips.Zero))
 
 	// Data follows the code; reserve its addresses first.
-	const codeWords = 96
+	const codeWords = 128
 	data := a.Cave + codeWords*4
 	counter, buf, format := data, data+4, data+36
 
@@ -119,14 +119,20 @@ func Counter(boot []byte, x, y float32) ([]byte, error) {
 	b.addr(mips.T1, a.FontPtr)
 	b.p.Emit(mips.Lw(mips.A0, mips.T1, 0))
 	b.call(a.SetCurrent)
-	b.p.LoadConst(mips.A0, 0xFFFFFFFF)
-	b.call(a.SetColor)
 	b.p.Emit(mips.Or(mips.A0, mips.Zero, mips.Zero))
 	b.call(a.SetAlign)
-	b.floatArg(12, x)
-	b.floatArg(13, y)
-	b.addr(mips.A0, buf)
-	b.call(a.DrawText)
+	// Shadow first, then the text: black one pixel down and right, white on top.
+	for _, pass := range []struct {
+		color uint32
+		dx    float32
+	}{{0xFF000000, 1}, {0xFFFFFFFF, 0}} {
+		b.p.LoadConst(mips.A0, pass.color)
+		b.call(a.SetColor)
+		b.floatArg(12, x+pass.dx)
+		b.floatArg(13, y+pass.dx)
+		b.addr(mips.A0, buf)
+		b.call(a.DrawText)
+	}
 
 	b.p.Emit(
 		mips.Lw(mips.RA, mips.SP, 32),

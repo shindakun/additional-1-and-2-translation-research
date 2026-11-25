@@ -29,7 +29,7 @@ The new code runs once per movie frame draw:
 1. Call `CAcffMovie::Draw` (`0xB35D0`) with the original `a0`.
 2. Add 1 to a frame counter.
 3. Find the subtitle whose frame range holds the counter.
-4. Draw a box, then the subtitle text.
+4. Draw the subtitle text: black at an offset of one pixel, then white on top.
 5. Return.
 
 Engine functions it calls:
@@ -40,10 +40,36 @@ Engine functions it calls:
 | `0x14EA0` | `FsFontSetBaseColor` | `a0` = color, `0xFFFFFFFF` is white |
 | `0x15168` | `FsFontSetAlignment` | `a0` = alignment |
 | `0x15288` | `FsFontDrawText` | `$f12` = x, `$f13` = y (float), `a0` = Shift-JIS string |
-| `0x13388` | Screen quad | `CAcffMovie::Draw` uses it to fill 480 × 272 with a color |
+| `0x13388` | `Gfx_FastSprite` | Sprite or plain quad; see below |
 | `0xFE6F0` | `sprintf` | Frame counter test only |
 
 `CAdvMenuPrinter::DrawText` (`0x2FB4C`) shows the font call sequence: `FsFontSetAlignment(align)`, then `FsFontDrawText(x, y, text)`.
+
+`CAcffMovie::Draw` calls `Gfx_FastSprite` with these registers:
+
+| Register | Video frame | No picture |
+|---|---|---|
+| `a0`, `a1` | 480, 272 | 480, 272 |
+| `a2` | 3 | 3 |
+| `a3` (color) | `0xFFFFFFFF` | `0xFF000000` |
+| `$f12`–`$f15` (x, y, w, h) | 0, 0, 480, 272 | 0, 0, 480, 272 |
+| `$f16`–`$f19` (u0, v0, u1, v1) | 0, 0, 512, 512 | 0, 0, 512, 512 |
+
+Before the plain black quad it calls `sceGuColorMaterial(7)`, `sceGuColor(0xFF000000)` and `sceGuDisable` for states 10, 5, 9 and 4 (lighting, cull, texture, blend). A box behind a subtitle uses the same sequence with blending on (`sceGuEnable(4)`, `sceGuBlendFunc`) and a color with alpha below `0xFF`.
+
+| Address | Function |
+|---|---|
+| `0xC4444` | `sceGuColorMaterial` |
+| `0xC5504` | `sceGuColor` |
+| `0xC4AF4` | `sceGuEnable` |
+| `0xC4B4C` | `sceGuDisable` |
+| `0xC5DE0` | `sceGuBlendFunc` |
+
+## Style
+
+Subtitles use white text with a black shadow, like film subtitles. The patch draws each line twice with `FsFontDrawText`: black at (x + 1, y + 1), then white at (x, y). A four-way black outline (offsets of one pixel left, right, up and down) is an option for bright backgrounds.
+
+Subtitles do not cover the burned-in Japanese text. Each subtitle has its own position, in screen space that the Japanese block does not use ([0011](0011-movie-script.md) gives the bounds). A translucent box (see the `Gfx_FastSprite` notes above) is a last resort for a block with no clear space.
 
 ## Code space
 
@@ -62,7 +88,8 @@ Stored in the code space after the code:
 | First frame | u16 |
 | Last frame | u16 |
 | Text offset in the table | u16 |
-| Position (top or bottom) | u16 |
+| Position: x, y in pixels | u16, u16 |
+| Style: shadow, outline or box | u16 |
 
 Text is Shift-JIS with ASCII. Frame numbers count calls of the patched draw function.
 
@@ -75,7 +102,7 @@ The narration appears at known times in the video. [0011](0011-movie-script.md) 
 | Build | Shows | State |
 |---|---|---|
 | Frame counter | Hook runs; counter rate | Built (`kfa patch counter`); not yet seen on screen |
-| One subtitle | Font, box and position | Not built |
+| One subtitle | Font, shadow and position | Not built |
 | Full table, movie000 | Timing against the narration | Not built |
 
 ## Tools
