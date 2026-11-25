@@ -11,6 +11,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 | Disc file system, BND, FMG | Parsed |
 | `main.dat` container and encryption | Decoded and verified for both games |
 | Text | Export and in-place import built; translated text seen in game |
+| Images | Export and in-place JPEG import built; English town map seen in game |
 | Fonts | Format known; ASCII glyphs present |
 | Movies | All have burned-in Japanese narration |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text export and import, fonts, movie patch |
@@ -64,7 +65,8 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/movie_sheets.sh` | Write movie contact sheets |
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
-| `scripts/build_text_test.sh` | Build an image with translations in `main.dat` |
+| `scripts/build_text_test.sh` | Build an image with translations and edited images in `main.dat` |
+| `scripts/relabel_jpeg.py` | Replace label text in a JPEG within a byte budget (Pillow) |
 | `scripts/prx_unreferenced.py` | List functions no relocation or branch refers to |
 | `scripts/headless_shots.sh` | Screenshots of an image at emulated times, no window |
 | `scripts/ghidra/analyze.sh` | Decompile the executables with Ghidra |

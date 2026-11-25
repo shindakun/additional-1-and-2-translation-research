@@ -141,7 +141,12 @@ func Decode(b []byte) (*Image, error) {
 	if len(b) < 16 || string(b[:12]) != string(magic) {
 		return nil, errors.New("gim: bad magic")
 	}
-	root, err := blocks(b, 16, len(b))
+	// The root block's size gives the end of the GIM; data can follow it.
+	end := len(b)
+	if len(b) >= 24 {
+		end = min(end, 16+int(binary.LittleEndian.Uint32(b[20:])))
+	}
+	root, err := blocks(b, 16, end)
 	if err != nil {
 		return nil, err
 	}

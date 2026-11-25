@@ -5,6 +5,8 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -14,11 +16,13 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/bnd"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/font"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/gim"
+	"github.com/shindakun/additional-1-and-2-translation-research/internal/images"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/iso9660"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/maindat"
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/sjis"
@@ -80,6 +84,10 @@ func run() error {
 		err = textExport(args[2:])
 	case "text import":
 		err = textImport(args[2:])
+	case "img export":
+		err = imgExport(args[2:])
+	case "img import":
+		err = imgImport(args[2:])
 	case "gim topng":
 		err = gimToPNG(args[2:])
 	case "gim scan":
@@ -125,6 +133,14 @@ Commands:
                                    Write translations in place into a copy of
                                    main.dat; report those that do not fit
                                    (GAMEDIR is an extracted PSP_GAME folder)
+  img export GAMEDIR DIR           Write every unique image of every main.dat
+                                   chunk (JPEG, BMP, GIM and a PNG of each GIM)
+                                   and DIR/index.tsv
+  img import GAMEDIR DIR OUT.dat [BASE.dat]
+                                   Write the images in DIR (names from img
+                                   export) into main.dat, or into BASE.dat
+                                   (for example the output of text import),
+                                   in place; each must fit the original size
   gim topng IN.gim OUT.png         Convert a GIM image to PNG
   gim scan FILE DIR                Write every GIM found inside FILE as
                                    DIR/<offset>.png
@@ -624,5 +640,130 @@ func gimScan(a []string) error {
 		off += 1 + next
 	}
 	fmt.Printf("%s: %d images written, %d not decoded\n", a[0], n, bad)
+	return nil
+}
+
+// imageRef is one image table entry with its export file name. Equal images
+// share the name of their first use.
+type imageRef struct {
+	unit  *maindat.Plain
+	entry images.Entry
+	name  string
+}
+
+// gameImages lists the images of dat, or of the game's main.dat if dat is
+// empty. Export names come from image contents, so dat must hold the original
+// images (a text import leaves them unchanged).
+func gameImages(gamedir, dat string) (*maindat.File, []maindat.Plain, []imageRef, error) {
+	if dat == "" {
+		dat = filepath.Join(gamedir, "USRDIR", "GameData", "01_UmdTitle", "main.dat")
+	}
+	f, err := openDat(filepath.Join(gamedir, "SYSDIR", "BOOT.BIN"), dat)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	_, units, err := f.Unpack()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	var refs []imageRef
+	names := map[[20]byte]string{}
+	for i := range units {
+		u := &units[i]
+		if !strings.HasPrefix(u.Name, "chunks/") {
+			continue
+		}
+		list, err := images.List(u.Data, uint32(u.Off))
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("%s: %w", u.Name, err)
+		}
+		chunk := strings.TrimPrefix(u.Name, "chunks/")[:3]
+		for _, e := range list {
+			sum := sha1.Sum(u.Data[e.Off : e.Off+e.Size])
+			name, ok := names[sum]
+			if !ok {
+				name = fmt.Sprintf("c%s_%02d.%s", chunk, e.Index, images.Ext(e.Type))
+				names[sum] = name
+			}
+			refs = append(refs, imageRef{u, e, name})
+		}
+	}
+	return f, units, refs, nil
+}
+
+func imgExport(a []string) error {
+	if len(a) != 2 {
+		return errUsage
+	}
+	_, _, refs, err := gameImages(a[0], "")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(a[1], 0o755); err != nil {
+		return err
+	}
+	var index strings.Builder
+	index.WriteString("chunk\tentry\ttype\twidth\theight\tsize\tsha1\tfile\n")
+	written := map[string]bool{}
+	for _, r := range refs {
+		data := r.unit.Data[r.entry.Off : r.entry.Off+r.entry.Size]
+		if !written[r.name] {
+			if err := os.WriteFile(filepath.Join(a[1], r.name), data, 0o644); err != nil {
+				return err
+			}
+			if r.entry.Type == images.TypeGIM {
+				if g, err := gim.Decode(data); err == nil {
+					if err := writePNG(filepath.Join(a[1], strings.TrimSuffix(r.name, ".gim")+".png"), g); err != nil {
+						return err
+					}
+				}
+			}
+			written[r.name] = true
+		}
+		sum := sha1.Sum(data)
+		fmt.Fprintf(&index, "%s\t%d\t%s\t%d\t%d\t%d\t%s\t%s\n", strings.TrimPrefix(r.unit.Name, "chunks/")[:3], r.entry.Index,
+			images.Ext(r.entry.Type), r.entry.Width, r.entry.Height, r.entry.Size, hex.EncodeToString(sum[:]), r.name)
+	}
+	if err := os.WriteFile(filepath.Join(a[1], "index.tsv"), []byte(index.String()), 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("%d images, %d unique, written to %s\n", len(refs), len(written), a[1])
+	return nil
+}
+
+func imgImport(a []string) error {
+	if len(a) != 3 && len(a) != 4 {
+		return errUsage
+	}
+	base := ""
+	if len(a) == 4 {
+		base = a[3]
+	}
+	f, units, refs, err := gameImages(a[0], base)
+	if err != nil {
+		return err
+	}
+	n, files := 0, map[string]bool{}
+	for _, r := range refs {
+		data, err := os.ReadFile(filepath.Join(a[1], r.name))
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if err := images.Replace(r.unit.Data, r.entry, data); err != nil {
+			return fmt.Errorf("%s in %s: %w", r.name, r.unit.Name, err)
+		}
+		files[r.name] = true
+		n++
+	}
+	if err := f.Pack(units); err != nil {
+		return err
+	}
+	if err := os.WriteFile(a[2], f.Raw, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s: %d files replaced %d images\n", a[2], len(files), n)
 	return nil
 }
