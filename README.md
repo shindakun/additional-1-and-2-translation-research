@@ -10,10 +10,10 @@ The repository holds no game data and no keys. The scripts read both from your o
 |---|---|
 | Disc file system, BND, FMG | Parsed |
 | `main.dat` container and encryption | Decoded and verified for both games |
-| Text | Export and in-place import built; translated text seen in game |
-| Images | Export and in-place JPEG and GIM import built; English town map and status overlay seen in game |
+| Text | Additional I: export and import built; translated text seen in game. Additional II: not started |
+| Images | Additional I: export and import built; edited images seen in game. Additional II: not started |
 | Fonts | Format known; ASCII glyphs present |
-| Movies | All have burned-in Japanese narration; English subtitles drawn over the boot opening (`movie000`) and the New Game opening (`movie001`) in game |
+| Movies | All have burned-in Japanese narration. Additional I: English subtitles over `movie000` and `movie001`. Additional II: not started |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
 
 ## Requirements
@@ -36,7 +36,7 @@ python3 -I scripts/maindat.py \
 python3 -I scripts/scene_text.py research/maindat/kfaI research/maindat/kfaI/text.tsv
 ```
 
-Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
+Output goes to `research/`, which git ignores.
 
 To build the translated image:
 
