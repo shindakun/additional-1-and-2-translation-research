@@ -57,7 +57,9 @@ Result: the build boots and regular text looks unchanged. The game shows little 
 
 ## Text test
 
-`scripts/build_text_test.sh GAME TRANSLATION.json [IMAGEDIR [FMG.json]]` writes translations and edited images into `main.dat`, FMG translations into `AdvSys.bnd`, and builds `research/builds/GAME-text.iso` ([0004](0004-text.md), [0012](0012-images.md), [0013](0013-fmg.md)).
+`scripts/build_english.sh [GAME]` builds `research/builds/GAME-english.iso` (default `kfaI`) with every current translation, in this order: images into `main.dat` (`research/img/edit/GAME`), text on top (`research/text/GAME-test.json`), FMG messages into `AdvSys.bnd` (`research/text/GAME-fmg-test.json`), and the subtitle patch with the boot font into `EBOOT.BIN` (every `research/subs/GAME-movieNNN.tsv`). It verifies `main.dat` and leaves no other files. This is the image to play.
+
+Test builds for one change go to `research/builds` under a name that says what they test, and are deleted after the test. Screenshots that show a result stay in `research/ppsspp/examples`.
 
 In town, Start opens the system menu; Down, Down, Circle opens the options screen.
 

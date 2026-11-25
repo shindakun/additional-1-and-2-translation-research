@@ -83,7 +83,7 @@ Specs in `research/img/edit`:
 | `shop.json` | Shop panels `c000_00` (PNG) | `Repair cost`, `Sell price`, `Buy price`, `Owned`, `Stock` |
 | `board.json`, `payout.json` | Roulette `c004_04`, `c004_06` | `Payout table`; bet types on the white boxes (`fill: box`) |
 
-`scripts/build_text_test.sh kfaI research/text/kfaI-test.json research/img/edit/kfaI` builds the image. Headless PPSSPP shows the English town map, the status overlay (Cross in town), the shop price panel, the equipment screen and the roulette board button. The payout table image is not yet seen in a run. The HUD atlas also holds moved header strings in its unused rows ([0004](0004-text.md)); the HUD draws without change. Camp, Equipment shows the full status screen (`c009_04`) with the English labels.
+`scripts/build_english.sh` builds the image ([0009](0009-test-builds.md)). Headless PPSSPP shows the English town map, the status overlay (Cross in town), the shop price panel, the equipment screen and the roulette board button. The payout table image is not yet seen in a run. The HUD atlas also holds moved header strings in its unused rows ([0004](0004-text.md)); the HUD draws without change. Camp, Equipment shows the full status screen (`c009_04`) with the English labels.
 
 ## Not built
 

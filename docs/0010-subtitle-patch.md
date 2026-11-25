@@ -204,10 +204,9 @@ Limits:
 `internal/prx` reads and edits the relocation table. `internal/mips` encodes the instructions; its test compares the encodings with instructions in `BOOT.BIN`. `internal/subpatch` builds the patch and checks that the hooked word is the expected `jal` with an `R_MIPS_26` relocation. Its test checks that no relocation inside the code space stays active and that nothing outside the code space and the hook changes except the 61 relocation types.
 
 ```sh
-./kfa patch subtitles --boot-font research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/builds/kfaI-sub-BOOT.BIN \
+./kfa patch subtitles --boot-font research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN OUT-BOOT.BIN \
   movie000.pmf=research/subs/kfaI-movie000.tsv movie001.pmf=research/subs/kfaI-movie001.tsv
-cp research/builds/kfaI-text.iso research/builds/kfaI-sub.iso
-./kfa iso put research/builds/kfaI-sub.iso PSP_GAME/SYSDIR/EBOOT.BIN research/builds/kfaI-sub-BOOT.BIN
+./kfa iso put IMAGE.iso PSP_GAME/SYSDIR/EBOOT.BIN OUT-BOOT.BIN
 ```
 
 `kfa patch counter` builds the counter test the same way.

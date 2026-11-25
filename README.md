@@ -38,6 +38,15 @@ python3 -I scripts/scene_text.py research/maindat/kfaI research/maindat/kfaI/tex
 
 Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
 
+To build the translated image:
+
+```sh
+go build -o kfa ./cmd/kfa
+scripts/build_english.sh
+```
+
+The result is `research/builds/kfaI-english.iso`. The translation files it reads stay in `research/` because they hold the Japanese source text ([0009](docs/0009-test-builds.md)).
+
 ### Go tools
 
 ```sh
@@ -65,7 +74,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/movie_sheets.sh` | Write movie contact sheets |
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
-| `scripts/build_text_test.sh` | Build an image with translations and edited images in `main.dat` |
+| `scripts/build_english.sh` | Build `research/builds/kfaI-english.iso` with every current translation |
 | `scripts/text_merge.py` | Carry translations into a new text export |
 | `scripts/text_apply_tsv.py` | Set translations from an index-to-English TSV |
 | `scripts/text_center.py` | Center English like its space-padded source |
