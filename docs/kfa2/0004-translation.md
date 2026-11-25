@@ -10,9 +10,9 @@ Headless PPSSPP: the town and the status overlay. Menu text from the carried-ove
 
 ## New entries
 
-`scripts/gen_items.py` fills the found, used, priced and description entries from the item tables (165 entries, with 17 names and 15 description lines added to the tables). The new command, person and area names are done. The dialogue and message entries (1,298) go in batches of index-to-English TSV files, `research/text/kfaII-bN.tsv`. Many sources end in extra line breaks; `scripts/tail_breaks.py` copies the same number onto each English line. Batches 1 and 2 (town people, merchants, guards, tavern, casino and the verse that retells Additional I) set 330 entries; 968 remain.
+`scripts/gen_items.py` fills the found, used, priced and description entries from the item tables (165 entries, with 17 names and 15 description lines added to the tables). The new command, person and area names are done. The dialogue and message entries (1,298) go in batches of index-to-English TSV files, `research/text/kfaII-bN.tsv`. Many sources end in extra line breaks; `scripts/tail_breaks.py` copies the same number onto each English line. Batches 1 to 4 set 672 entries: town people, merchants, guards, the tavern, the casino rules (including Memory and Slots), the bard's songs and verses, the survey team, the scholar, the shop, and the first labyrinth scenes. 618 remain.
 
-Test after batch 2: 41,626 slots in place, 1,306 strings moved, 63 chunks relocated, nothing refused. Headless PPSSPP shows the tavern owner's lines and the tavern menu (`Talk to the dealer`) in English.
+Test after batch 4: nothing refused. Headless PPSSPP shows the tavern owner's lines and the tavern menu (`Talk to the dealer`) in English.
 
 ## Open work
 
