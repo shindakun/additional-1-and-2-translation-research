@@ -3804,7 +3804,7 @@
    "c000/s00039/t0033"
   ],
   "max": 56,
-  "en": "Quiet returned to the ruins.\nThe labyrinth was sealed in Traujito, famed as the Holy Land"
+  "en": "Quiet returned to the ruins.\nThe labyrinth was sealed in\nTraujito, famed as the Holy Land"
  },
  {
   "key": "c8763a1ea5b4",
@@ -4596,7 +4596,7 @@
    "c000/s00042/t0007"
   ],
   "max": 68,
-  "en": "\"Long ago he drove the king into the labyrinth himself,\nand now he'll take his place?\"\n\n"
+  "en": "\"Long ago he drove the king\ninto the labyrinth himself,\nand now he'll take his place?\"\n\n"
  },
  {
   "key": "d1d11e5bfc58",
@@ -4929,7 +4929,7 @@
    "c000/s00044/t0007"
   ],
   "max": 42,
-  "en": "\"Someone calling himself the black dragon has appeared...\""
+  "en": "\"Someone calling himself the\nblack dragon has appeared...\""
  },
  {
   "key": "a326c4e96eb7",
@@ -4947,7 +4947,7 @@
    "c000/s00044/t0009"
   ],
   "max": 58,
-  "en": "\"Until I come back,\ndo not fight the black dragon, even if you meet him.\""
+  "en": "\"Until I come back,\ndo not fight the black\ndragon, even if you meet him.\""
  },
  {
   "key": "eae99882c8c1",
@@ -5046,7 +5046,7 @@
    "c000/s00047/t0007"
   ],
   "max": 64,
-  "en": "\"Long ago he drove the king into the labyrinth himself,\nand now he'll take his place?\""
+  "en": "\"Long ago he drove the king\ninto the labyrinth himself,\nand now he'll take his place?\""
  },
  {
   "key": "c765f5b0a595",
@@ -12516,7 +12516,7 @@
    "c028/s00715/t0000"
   ],
   "max": 42,
-  "en": "\"The labyrinth where the king, driven out by his people, fled.\""
+  "en": "\"The labyrinth where the king,\ndriven out by his people, fled.\""
  },
  {
   "key": "608f947e3551",
@@ -12525,7 +12525,7 @@
    "c028/s00715/t0001"
   ],
   "max": 74,
-  "en": "\"After a nameless mercenary slew him over ten years ago,\nit was sealed for a long time.\""
+  "en": "\"After a nameless mercenary\nslew him over ten years ago,\nit was sealed for a long time.\""
  },
  {
   "key": "bbd30bba749c",
@@ -12822,7 +12822,7 @@
    "c040/s00793/t0001"
   ],
   "max": 36,
-  "en": "\"That was the monster the survey leader had with him.\""
+  "en": "\"That was the monster the\nsurvey leader had with him.\""
  },
  {
   "key": "4c956a91e74a",
@@ -14559,7 +14559,7 @@
    "c066/s01901/t0021"
   ],
   "max": 102,
-  "en": "\"But there seem to be stone discs charged with magic.\nUse one on the device\nand the total magic goes up.\""
+  "en": "\"But stone discs charged with magic seem to exist.\nUse one on the device\nand the total magic goes up.\""
  },
  {
   "key": "93090ffae525",
@@ -16593,7 +16593,7 @@
    "c075/s05680/t0004"
   ],
   "max": 42,
-  "en": "\"They don't seem to want to attack... but it's eerie.\""
+  "en": "\"They don't seem to want to\nattack... but it's eerie.\""
  },
  {
   "key": "1a0f8a09100e",
@@ -16890,7 +16890,7 @@
    "c076/s06153/t0001"
   ],
   "max": 118,
-  "en": "\"The magic this court rules is sealed in the statues,\nto punish those who turn their blades on us.\nYour republic could never make such a thing.\""
+  "en": "\"Court magic sealed in these statues punishes\nthose who turn their blades on us.\nYour republic could never make such a thing.\""
  },
  {
   "key": "173bd3df9e20",
@@ -17205,7 +17205,7 @@
    "c076/s06153/t0040"
   ],
   "max": 92,
-  "en": "\"But building such a system is remarkable.\nIt may be why this labyrinth is called a holy place.\""
+  "en": "\"But building such a system is remarkable.\nIt may be why this labyrinth\nis called a holy place.\""
  },
  {
   "key": "324a1bbe739c",
@@ -17655,7 +17655,7 @@
    "c078/s06966/t0015"
   ],
   "max": 110,
-  "en": "\"The king won over enemies who came to the labyrinth,\nand sometimes they joined him.\nThey must have admired his breadth of vision.\""
+  "en": "\"The king won over enemies in the labyrinth,\nand some joined him. They must have\nadmired his breadth of vision.\""
  },
  {
   "key": "4af6d2fff13c",
@@ -18969,7 +18969,7 @@
    "c086/s09978/t0052"
   ],
   "max": 112,
-  "en": "\"There's something like a release switch behind the door,\nbut there are fakes too,\nso not every one works the device.\""
+  "en": "\"There's a release switch behind the door,\nbut there are fakes too, so not every\none works the device.\""
  },
  {
   "key": "103251a784a9",
@@ -19086,7 +19086,7 @@
    "c086/s09978/t0068"
   ],
   "max": 58,
-  "en": "\"If you find the cause of the quakes deeper in, tell me.\nThanks.\""
+  "en": "\"If you find the cause of the\nquakes deeper in, tell me.\nThanks.\""
  },
  {
   "key": "40cbdd986ed5",
@@ -19680,7 +19680,7 @@
    "c092/s13083/t0000"
   ],
   "max": 56,
-  "en": "The strength I forged lies in this land.\nThe longing of one who struggles shall become the way"
+  "en": "The strength I forged lies in this land.\nThe longing of one who\nstruggles shall become the way"
  },
  {
   "key": "71c7e7c0d471",

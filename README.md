@@ -74,6 +74,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/movie_sheets.sh` | Write movie contact sheets |
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
+| `scripts/make_patch.sh` | Build an xdelta3 patch and readme in `dist/` |
 | `scripts/build_english.sh` | Build `research/builds/kfaI-english.iso` with every current translation |
 | `scripts/map_boot.py` | Map `BOOT.BIN` addresses from one game to the other |
 | `scripts/translation.py` | Convert between English-only translation files and full ones |

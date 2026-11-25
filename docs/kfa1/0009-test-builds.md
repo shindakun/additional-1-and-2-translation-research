@@ -59,6 +59,8 @@ Result: the build boots and regular text looks unchanged. The game shows little 
 
 `scripts/build_english.sh [GAME]` builds `research/builds/GAME-english.iso` (default `kfaI`) from `translations/GAME` ([0004](0004-text.md#translation-files)). It builds `bin/kfa`, exports the Japanese from the extracted disc and fills in the English, redraws the image labels from the specs (Pillow and the fonts in the specs), writes the images, then the text, into `main.dat`, writes the FMG messages into `AdvSys.bnd`, applies the subtitle and chunk base patches to `EBOOT.BIN` (with no subtitle tables, only the chunk base patch), and pads the fonts. It verifies `main.dat` and leaves no other files. The same input gives the same image byte for byte. This is the image to play.
 
+`scripts/make_patch.sh GAME VERSION` builds the image and writes `dist/GAME-english-VERSION/`: an xdelta3 patch from the original ISO, a readme with the commit and SHA-256 sums. It applies the patch to a copy of the original and checks the result byte for byte. The encoder uses a 1 GB source window (`-B`); with the default window, the files that move to the end of the image go into the patch whole. The patch for Additional I is about 184 MB: chunks with new text re-encrypt, and AES output has no matches.
+
 Test builds for one change go to `research/builds` under a name that says what they test, and are deleted after the test. Screenshots that show a result stay in `research/ppsspp/examples`.
 
 The headless memory stick (`research/ppsspp/headless-ms`) must hold no save for these input scripts: with a save, the title selects Load.
