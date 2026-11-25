@@ -56,6 +56,9 @@ func Lbu(rt, base uint32, off int32) uint32 { return itype(0x24, base, rt, off) 
 // Sll encodes sll rd, rt, sa.
 func Sll(rd, rt, sa uint32) uint32 { return rt<<16 | rd<<11 | (sa&31)<<6 }
 
+// Subu encodes subu rd, rs, rt.
+func Subu(rd, rs, rt uint32) uint32 { return rtype(rs, rt, rd, 0x23) }
+
 // Sltu encodes sltu rd, rs, rt: rd = 1 if rs < rt (unsigned), else 0.
 func Sltu(rd, rs, rt uint32) uint32 { return rtype(rs, rt, rd, 0x2B) }
 

@@ -5,7 +5,7 @@ Narration text of the movies, with draft English and timing. The text is burned 
 ## Method
 
 - Text: one full-resolution frame per narration block, read by eye.
-- Timing: the counter build ([0010](0010-subtitle-patch.md)) in headless PPSSPP, one screenshot each emulated second. The counter maps emulated time to video frames; a block starts at the first frame with its text and ends at the first frame without it. Times are seconds from the start of the video, ±1 s. An earlier pixel-count method gave times up to 6 s late for blocks 4 to 11.
+- Timing: the counter build ([0010](0010-subtitle-patch.md)) in headless PPSSPP, one screenshot each emulated second. The counter maps emulated time to video frames; a block starts at the first frame with its text and ends at the first frame without it. Times are seconds from the start of the video, ±1 s. An earlier pixel-count method gave times up to 6 s late for blocks 4 to 11. The subtitle tables in `research/subs` start each block 0.3 s before the times below.
 
 The English is a draft. Names are not final: `ヴァータイト` is Verdite, `リキストリア` is Rikistria, `略奪王` is the Plunderer King.
 

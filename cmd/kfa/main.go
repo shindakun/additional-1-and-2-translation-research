@@ -167,7 +167,8 @@ Commands:
                                    Draw subtitle lines over movies. MOVIE is
                                    a movie file name (movie000.pmf) or "all".
                                    IN.tsv lines: START END ROW ALIGN X TEXT;
-                                   times in seconds, row 0 at the bottom,
+                                   times in seconds, row 0 at the bottom
+                                   (rows count up), -1 at the top (down),
                                    ALIGN l, c or r at X pixels. --boot-font
                                    loads the game font for the movie at boot
                                    (docs/0010)
@@ -1106,13 +1107,21 @@ func fmgImport(a []string) error {
 	return nil
 }
 
-// Subtitle layout: the movie runs at 29.97 frames per second; rows stack up
-// from y 256 in steps of 14 pixels.
+// Subtitle layout: rows are 17 pixels apart (the font is about 15 pixels
+// tall). Row 0 is the bottom row at y 244 and rows count up; row -1 is the
+// top row at y 6 and negative rows count down.
 const (
-	subFPS     = 29.97
-	subBottom  = 256
-	subRowStep = 14
+	subBottom  = 244
+	subTop     = 6
+	subRowStep = 17
 )
+
+func subRowY(row int) float32 {
+	if row < 0 {
+		return float32(subTop + (-row-1)*subRowStep)
+	}
+	return float32(subBottom - row*subRowStep)
+}
 
 var subAlign = map[string]uint32{"l": subpatch.AlignLeft, "c": subpatch.AlignCenter, "r": subpatch.AlignRight}
 
@@ -1180,8 +1189,8 @@ func readSubtitles(path string, key uint32) ([]subpatch.Line, error) {
 			return nil, fmt.Errorf("%s:%d: %w", path, n+1, err)
 		}
 		lines = append(lines, subpatch.Line{
-			Start: uint32(math.Round(start * subFPS)), End: uint32(math.Round(end * subFPS)),
-			X: float32(x), Y: float32(subBottom - row*subRowStep), Align: align, Movie: key, Text: f[5],
+			Start: uint32(math.Round(start * 1e6)), End: uint32(math.Round(end * 1e6)),
+			X: float32(x), Y: subRowY(row), Align: align, Movie: key, Text: f[5],
 		})
 	}
 	return lines, nil

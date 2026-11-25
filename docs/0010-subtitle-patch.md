@@ -149,8 +149,8 @@ The counter counts video frames at 29.97 per second, from 0 at the start of each
 
 | Column | Content |
 |---|---|
-| `START`, `END` | Seconds from the start of the movie; × 29.97 gives frames |
-| `ROW` | 0 is the bottom row (y 256); each row is 14 pixels higher |
+| `START`, `END` | Seconds from the first frame of the movie |
+| `ROW` | 0 is the bottom row (y 244), rows count up; -1 is the top row (y 6), negative rows count down. Rows are 17 pixels apart |
 | `ALIGN` | `l`, `c` or `r` |
 | `X` | The pixel column that the alignment refers to |
 | `TEXT` | ASCII, no `%` |
@@ -160,11 +160,13 @@ The patch has three entries, four with `--boot-font`:
 | Entry | Hook | Action |
 |---|---|---|
 | Boot (`--boot-font`) | `jal` at `0x688C4` in `FUN_00068820` | Loads the game font, then starts `movie000` |
-| Draw | `jal` at `0x3EB30` in `CSimpleMovieScene::Draw` | Calls the movie draw, adds 1 to the counter, draws the active lines |
-| Exit | `jal` at `0x3EB58` in `CSimpleMovieScene::Exit` | Calls the original function, sets the counter to 0, removes the boot font once |
+| Draw | `jal` at `0x3EB30` in `CSimpleMovieScene::Draw` | Calls the movie draw, reads the clock, draws the active lines |
+| Exit | `jal` at `0x3EB58` in `CSimpleMovieScene::Exit` | Calls the original function, clears the clock, removes the boot font once |
 | File | `jal` at `0x3E998` in `CSimpleMovieScene::SetMovieFile` (target `0xAFCC`) | Stores the movie key of the path in `a2`, then jumps to the original target |
 
-The movie key is the three characters before the last `.` of the path: `movie001.pmf` gives `001`. The draw entry walks a table of 9-word records: start, end, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 320 words; the font path, the table and the text follow it in the same code space. Equal texts share one copy. The code space (6,552 bytes) holds about 70 records with their texts.
+The movie key is the three characters before the last `.` of the path: `movie001.pmf` gives `001`. The clock: on the first draw of a movie the patch stores the low word of `sceKernelGetSystemTimeWide` (import stub `0x11C444`); every draw computes the elapsed microseconds. A draw counter falls behind the video when the emulator skips frames; system time follows the emulated clock and the movie audio.
+
+The draw entry walks a table of 9-word records: start and end in microseconds, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 352 words; the font path, the table and the text follow it in the same code space. Equal texts share one copy. The code space (6,552 bytes) holds about 70 records with their texts.
 
 To read the current key on screen, point a line's text offset at the key word: the bytes are the three characters in reverse order, then a zero.
 
@@ -177,11 +179,11 @@ To read the current key on screen, point a line's text offset at the key word: t
 | `0x20` | Text is centered on x |
 | `0x30` | Same as `0x00` |
 
-The ASCII glyphs of the game font are about 8 pixels wide: a 60-character line is 480 pixels, the full screen.
+The ASCII glyphs of the game font are about 8 pixels wide: a 60-character line is 480 pixels, the full screen. A line is about 15 pixels tall with descenders: at 14-pixel rows the lines overlap and look doubled, and a row at y 256 loses its descenders at the screen edge.
 
 ## Subtitle results
 
-`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. `movie000` is the same video 5.0 s later (the logo part): frame matching at 2 frames per second gives the best fit at 5.0 s. `research/subs/kfaI-movie000.tsv` is the `movie001` table with 5 s added. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 at the right.
+`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. `movie000` is the same video 5.0 s later (the logo part): frame matching at 2 frames per second gives the best fit at 5.0 s. `research/subs/kfaI-movie000.tsv` is the `movie001` table with 5 s added. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 in three short lines at the upper right. Each block starts 0.3 s before the Japanese is fully visible; a 10 fps measurement of the video shows the Japanese fade-in starts 0.5 to 1 s after those times.
 
 The New Game opening plays `movie001` (the key on screen reads `001`), after the title, with the font loaded. `movie000` is the same narration after the FromSoftware logo; it plays at boot. Which movie the attract loop plays is not yet checked. Headless runs show every block in English at the planned position, and the game continues to the town map after the movie.
 

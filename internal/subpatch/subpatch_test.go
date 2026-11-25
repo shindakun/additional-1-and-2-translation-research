@@ -94,7 +94,7 @@ func TestSubtitles(t *testing.T) {
 		t.Fatal("boot hook not set")
 	}
 	// The table follows the code and the counter.
-	rec := a.Cave + 320*4 + 16
+	rec := a.Cave + 352*4 + 24
 	if img.Word(rec) != 10 || img.Word(rec+4) != 20 || img.Word(rec+28) != AlignCenter {
 		t.Fatalf("first record: %d %d %#x", img.Word(rec), img.Word(rec+4), img.Word(rec+28))
 	}

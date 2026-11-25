@@ -9,8 +9,8 @@ import (
 	"github.com/shindakun/additional-1-and-2-translation-research/internal/prx"
 )
 
-// Line is one subtitle line: ASCII text drawn from frame Start up to, but
-// not including, frame End of a movie. X and Y are screen pixels; Align
+// Line is one subtitle line: ASCII text drawn from Start up to, but not
+// including, End: microseconds since the first frame of the movie. X and Y are screen pixels; Align
 // says which part of the line X marks.
 type Line struct {
 	Start, End uint32
@@ -90,10 +90,11 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 		return nil, fmt.Errorf("subpatch: unexpected instruction at %#x", a.BootCall)
 	}
 
-	const codeWords = 320
+	const codeWords = 352
 	const frame = 56
 	data := a.Cave + codeWords*4
-	counter, curKey, loaded, bndPtr, table := data, data+4, data+8, data+12, data+16
+	counter, curKey, loaded, bndPtr, startT, elapsed := data, data+4, data+8, data+12, data+16, data+20
+	table := data + 24
 	fontPath := table + uint32(len(lines)*recordWords*4)
 	const fontName = "$(AppDataRoot)Font/BitFont_Game12.bnd\x00"
 
@@ -111,12 +112,24 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	b.p.Emit(mips.Or(mips.S0, mips.RA, mips.Zero))
 	b.call(a.MovieDraw) // a0 still holds the movie object
 
+	// Clock: the counter word is 0 until the first frame of a movie; then
+	// the start time is stored and elapsed = now - start, in microseconds.
+	// System time follows the emulated clock and the movie audio, so the
+	// lines stay in step when frames are dropped.
 	b.addr(mips.T1, counter)
-	b.p.Emit(
-		mips.Lw(mips.T2, mips.T1, 0),
-		mips.Addiu(mips.T2, mips.T2, 1),
-		mips.Sw(mips.T2, mips.T1, 0),
-	)
+	b.p.Emit(mips.Lw(mips.T2, mips.T1, 0))
+	started := b.p.Branch(mips.Bne, mips.T2, mips.Zero)
+	b.call(a.SysTime)
+	b.addr(mips.T1, startT)
+	b.p.Emit(mips.Sw(mips.V0, mips.T1, 0))
+	b.addr(mips.T1, counter)
+	b.p.Emit(mips.Addiu(mips.T2, mips.Zero, 1), mips.Sw(mips.T2, mips.T1, 0))
+	started()
+	b.call(a.SysTime)
+	b.addr(mips.T1, startT)
+	b.p.Emit(mips.Lw(mips.T2, mips.T1, 0), mips.Subu(mips.T2, mips.V0, mips.T2))
+	b.addr(mips.T1, elapsed)
+	b.p.Emit(mips.Sw(mips.T2, mips.T1, 0))
 	// No font yet (the opening at boot): draw nothing.
 	b.addr(mips.T1, a.DrawState)
 	b.p.Emit(mips.Lw(mips.T0, mips.T1, 0))
@@ -134,7 +147,7 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	b.p.LoadConst(mips.S2, uint32(len(lines)))
 	loop := len(b.p.Words)
 	done := b.p.Branch(mips.Beq, mips.S2, mips.Zero)
-	b.addr(mips.T2, counter)
+	b.addr(mips.T2, elapsed)
 	b.p.Emit(
 		mips.Lw(mips.T2, mips.T2, 0),
 		mips.Lw(mips.T0, mips.S1, 0),
@@ -344,7 +357,7 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 		b.p.Emit(mips.Nop())
 	}
 
-	b.p.Emit(0, 0, 0, 0) // counter, movie key, boot font state, font BND pointer
+	b.p.Emit(0, 0, 0, 0, 0, 0) // started, movie key, boot font state, font BND pointer, start time, elapsed
 	text := []byte(fontName)
 	at := map[string]uint32{} // equal texts share one copy
 	for _, l := range lines {
