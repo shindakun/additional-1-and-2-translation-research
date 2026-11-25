@@ -78,6 +78,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/map_boot.py` | Map `BOOT.BIN` addresses from one game to the other |
 | `scripts/text_merge.py` | Carry translations into a new text export |
 | `scripts/text_apply_tsv.py` | Set translations from an index-to-English TSV |
+| `scripts/tail_breaks.py` | Give English lines the same trailing line breaks as their source |
 | `scripts/text_center.py` | Center English like its space-padded source |
 | `scripts/gen_items.py` | Fill found, used, priced and description entries of a translation file from the item tables |
 | `scripts/item_desc.py` | Build English item and spell descriptions |

@@ -88,7 +88,7 @@ Headless PPSSPP: the town and the status overlay. Menu text from the carried-ove
 
 ## Next steps
 
-1. Translate the new entries. `scripts/gen_items.py` fills the found, used, priced and description entries from the item tables (165 entries, with 17 names and 15 description lines added to the tables). The new command, person and area names are done. 1,284 dialogue and message entries remain.
+1. Translate the new entries. `scripts/gen_items.py` fills the found, used, priced and description entries from the item tables (165 entries, with 17 names and 15 description lines added to the tables). The new command, person and area names are done. The dialogue and message entries (1,298) go in batches of index-to-English TSV files, `research/text/kfaII-bN.tsv`. Many sources end in extra line breaks; `scripts/tail_breaks.py` copies the same number onto each English line. Batches 1 and 2 (town people, merchants, guards, tavern, casino and the verse that retells Additional I) set 330 entries; 968 remain.
 2. Find image text that Additional I does not have, for example the new casino games.
 3. Transcribe the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
 4. A build script for Additional II and a headless test.
