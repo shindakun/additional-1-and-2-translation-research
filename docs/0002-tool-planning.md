@@ -48,7 +48,7 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 | `kfa dat pack <boot> <main.dat> <dir> <out>` | Encrypt units from a directory and re-sign | Built for units of unchanged size; a new layout is not built |
 | `kfa font vwf <in.bnd> <out.bnd> [gap] [space]` | Proportional ASCII metrics in every font inside a BND | Built |
 | `kfa patch counter <boot> <out>` | Frame counter over movies ([0010](0010-subtitle-patch.md)) | Built |
-| `kfa patch subtitles <boot> <tsv> <out>` | Subtitle lines over movies ([0010](0010-subtitle-patch.md)) | Built; one table for all movies |
+| `kfa patch subtitles <boot> <out> <movie>=<tsv>...` | Subtitle lines over movies ([0010](0010-subtitle-patch.md)) | Built; a table for each movie |
 | `kfa text export <gamedir> <json>` | Translatable `main.dat` strings ([0004](0004-text.md)) | Built |
 | `kfa text import <gamedir> <json> <out> [base]` | Translations into `main.dat` | Built; long text strings move into space freed in their chunk |
 | `kfa fmg export`, `kfa fmg import` | FMG text out and in ([0013](0013-fmg.md)) | Built; byte-exact rebuild, seen in game |
@@ -107,7 +107,7 @@ Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` ke
 | 6 | `dat unpack`, `dat pack` | 5 | Built; same-size units only |
 | 7 | Text export and import ([0004](0004-text.md)) | 6 | Built and seen in game; long text strings move within the chunk |
 | 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 | Test build ready ([0009](0009-test-builds.md)) |
-| 9 | Executable patches: Latin text layout, movie subtitles ([0006](0006-movies.md)) | 7, 8 | Subtitles built and seen in game for `movie000`; tables for each movie not built |
+| 9 | Executable patches: Latin text layout, movie subtitles ([0006](0006-movies.md)) | 7, 8 | Subtitles built and seen in game for `movie001`; other movie tables not written |
 | 10 | `kfa build` end to end | all | Not built |
 
 Steps 7 and 8 hold most of the open questions ([0008](0008-open-questions.md)).

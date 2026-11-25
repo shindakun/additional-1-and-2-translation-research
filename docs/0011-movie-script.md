@@ -9,9 +9,9 @@ Narration text of the movies, with draft English and timing. The text is burned 
 
 The English is a draft. Names are not final: `ヴァータイト` is Verdite, `リキストリア` is Rikistria, `略奪王` is the Plunderer King.
 
-## Additional I, movie000 (opening)
+## Additional I, movie001 (New Game opening)
 
-The FromSoftware logo shows from 1.0 to 4.0 s.
+`movie000` has the same narration after the FromSoftware logo (1.0 to 4.0 s); its times are later by the length of the logo part. The times below are for `movie001`, measured in game.
 
 | # | Start | End | Japanese | English draft |
 |---|---|---|---|---|

@@ -50,6 +50,12 @@ func Sw(rt, base uint32, off int32) uint32 { return itype(0x2B, base, rt, off) }
 // Addu encodes addu rd, rs, rt.
 func Addu(rd, rs, rt uint32) uint32 { return rtype(rs, rt, rd, 0x21) }
 
+// Lbu encodes lbu rt, off(base).
+func Lbu(rt, base uint32, off int32) uint32 { return itype(0x24, base, rt, off) }
+
+// Sll encodes sll rd, rt, sa.
+func Sll(rd, rt, sa uint32) uint32 { return rt<<16 | rd<<11 | (sa&31)<<6 }
+
 // Sltu encodes sltu rd, rs, rt: rd = 1 if rs < rt (unsigned), else 0.
 func Sltu(rd, rs, rt uint32) uint32 { return rtype(rs, rt, rd, 0x2B) }
 

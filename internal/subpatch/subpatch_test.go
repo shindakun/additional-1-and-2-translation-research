@@ -91,11 +91,11 @@ func TestSubtitles(t *testing.T) {
 		t.Fatal("draw hook not set")
 	}
 	// The table follows the code and the counter.
-	rec := a.Cave + 192*4 + 4
+	rec := a.Cave + 224*4 + 8
 	if img.Word(rec) != 10 || img.Word(rec+4) != 20 || img.Word(rec+28) != AlignCenter {
 		t.Fatalf("first record: %d %d %#x", img.Word(rec), img.Word(rec+4), img.Word(rec+28))
 	}
-	if img.Word(rec+32) != 15 || img.Word(rec+32+28) != AlignLeft {
+	if img.Word(rec+36) != 15 || img.Word(rec+36+28) != AlignLeft {
 		t.Fatal("second record wrong")
 	}
 	for i := uint32(0); i < 64; i++ { // a long list still fits the code space
@@ -103,5 +103,21 @@ func TestSubtitles(t *testing.T) {
 	}
 	if _, err := Subtitles(boot, lines); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestMovieKey(t *testing.T) {
+	for _, c := range []struct {
+		name string
+		want uint32
+	}{
+		{"disc0:/PSP_GAME/USRDIR/Movie/movie000.pmf", 0x303030},
+		{"movie011.pmf", 0x303131},
+		{"x.pmf", 0},
+		{"none", 0},
+	} {
+		if got := MovieKey(c.name); got != c.want {
+			t.Errorf("%s: got %#x, want %#x", c.name, got, c.want)
+		}
 	}
 }

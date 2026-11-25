@@ -163,11 +163,12 @@ Commands:
   gim topng IN.gim OUT.png         Convert a GIM image to PNG
   gim scan FILE DIR                Write every GIM found inside FILE as
                                    DIR/<offset>.png
-  patch subtitles BOOT.BIN IN.tsv OUT
-                                   Draw subtitle lines over movies. IN.tsv
-                                   lines: START END ROW ALIGN X TEXT; times
-                                   in seconds, row 0 at the bottom, ALIGN l,
-                                   c or r at X pixels (docs/0010)
+  patch subtitles BOOT.BIN OUT MOVIE=IN.tsv...
+                                   Draw subtitle lines over movies. MOVIE is
+                                   a movie file name (movie000.pmf) or "all".
+                                   IN.tsv lines: START END ROW ALIGN X TEXT;
+                                   times in seconds, row 0 at the bottom,
+                                   ALIGN l, c or r at X pixels (docs/0010)
   patch counter BOOT.BIN OUT       Draw a frame counter over movies (test build)
   version                          Print the version and exit
 `)
@@ -1114,22 +1115,52 @@ const (
 var subAlign = map[string]uint32{"l": subpatch.AlignLeft, "c": subpatch.AlignCenter, "r": subpatch.AlignRight}
 
 func patchSubtitles(a []string) error {
-	if len(a) != 3 {
+	if len(a) < 3 {
 		return errUsage
 	}
 	boot, err := os.ReadFile(a[0])
 	if err != nil {
 		return err
 	}
-	tsv, err := os.ReadFile(a[1])
+	var lines []subpatch.Line
+	for _, arg := range a[2:] {
+		movie, path, ok := strings.Cut(arg, "=")
+		if !ok {
+			return fmt.Errorf("%s: want MOVIE=IN.tsv", arg)
+		}
+		key := uint32(0)
+		if movie != "all" {
+			if key = subpatch.MovieKey(movie); key == 0 {
+				return fmt.Errorf("%s: want a file name such as movie000.pmf", movie)
+			}
+		}
+		l, err := readSubtitles(path, key)
+		if err != nil {
+			return err
+		}
+		lines = append(lines, l...)
+	}
+	out, err := subpatch.Subtitles(boot, lines)
 	if err != nil {
 		return err
+	}
+	if err := os.WriteFile(a[1], out, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s: %d subtitle lines\n", a[1], len(lines))
+	return nil
+}
+
+func readSubtitles(path string, key uint32) ([]subpatch.Line, error) {
+	tsv, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
 	}
 	var lines []subpatch.Line
 	for n, ln := range strings.Split(strings.TrimSpace(string(tsv)), "\n") {
 		f := strings.SplitN(ln, "\t", 6)
 		if len(f) != 6 {
-			return fmt.Errorf("%s:%d: want START END ROW ALIGN X TEXT", a[1], n+1)
+			return nil, fmt.Errorf("%s:%d: want START END ROW ALIGN X TEXT", path, n+1)
 		}
 		start, err1 := strconv.ParseFloat(f[0], 64)
 		end, err2 := strconv.ParseFloat(f[1], 64)
@@ -1140,20 +1171,12 @@ func patchSubtitles(a []string) error {
 			err4 = errors.Join(err4, fmt.Errorf("align %q: want l, c or r", f[3]))
 		}
 		if err := errors.Join(err1, err2, err3, err4); err != nil {
-			return fmt.Errorf("%s:%d: %w", a[1], n+1, err)
+			return nil, fmt.Errorf("%s:%d: %w", path, n+1, err)
 		}
 		lines = append(lines, subpatch.Line{
 			Start: uint32(math.Round(start * subFPS)), End: uint32(math.Round(end * subFPS)),
-			X: float32(x), Y: float32(subBottom - row*subRowStep), Align: align, Text: f[5],
+			X: float32(x), Y: float32(subBottom - row*subRowStep), Align: align, Movie: key, Text: f[5],
 		})
 	}
-	out, err := subpatch.Subtitles(boot, lines)
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(a[2], out, 0o644); err != nil {
-		return err
-	}
-	fmt.Printf("wrote %s: %d subtitle lines\n", a[2], len(lines))
-	return nil
+	return lines, nil
 }

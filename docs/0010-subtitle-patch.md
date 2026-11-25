@@ -143,7 +143,7 @@ The counter counts video frames at 29.97 per second, from 0 at the start of each
 
 ## Subtitle build
 
-`kfa patch subtitles BOOT.BIN IN.tsv OUT` builds the patch from a table. Each TSV line is one screen line:
+`kfa patch subtitles BOOT.BIN OUT MOVIE=IN.tsv...` builds the patch from one table for each movie. `MOVIE` is a movie file name (`movie001.pmf`) or `all`. Each TSV line is one screen line:
 
 | Column | Content |
 |---|---|
@@ -153,7 +153,17 @@ The counter counts video frames at 29.97 per second, from 0 at the start of each
 | `X` | The pixel column that the alignment refers to |
 | `TEXT` | ASCII, no `%` |
 
-The hook keeps the counter, the exit hook resets it, and the frame code walks a table of 8-word records: start, end, x, y, shadow x, shadow y, text offset, alignment. For each record whose range holds the counter, it sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 192 words; the table and the text follow it in the same code space.
+The patch has three entries:
+
+| Entry | Hook | Action |
+|---|---|---|
+| Draw | `jal` at `0x3EB30` in `CSimpleMovieScene::Draw` | Calls the movie draw, adds 1 to the counter, draws the active lines |
+| Exit | `jal` at `0x3EB58` in `CSimpleMovieScene::Exit` | Calls the original function, sets the counter to 0 |
+| File | `jal` at `0x3E998` in `CSimpleMovieScene::SetMovieFile` (target `0xAFCC`) | Stores the movie key of the path in `a2`, then jumps to the original target |
+
+The movie key is the three characters before the last `.` of the path: `movie001.pmf` gives `001`. The draw entry walks a table of 9-word records: start, end, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 224 words; the table and the text follow it in the same code space.
+
+To read the current key on screen, point a line's text offset at the key word: the bytes are the three characters in reverse order, then a zero.
 
 `FsFontSetAlignment` (`0x15168`) values for the horizontal position, from a headless test with four lines at x 240:
 
@@ -168,14 +178,14 @@ The ASCII glyphs of the game font are about 8 pixels wide: a 60-character line i
 
 ## Subtitle results
 
-`research/subs/kfaI-movie000.tsv` holds 33 lines for the 11 narration blocks of `movie000`. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 at the right.
+`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 at the right.
 
-The New Game opening plays `movie000` after the title, with the font loaded. Headless runs show every block in English at the planned position, and the game continues to the town map after the movie.
+The New Game opening plays `movie001` (the key on screen reads `001`), after the title, with the font loaded. `movie000` is the same narration after the FromSoftware logo; it plays at boot. Which movie the attract loop plays is not yet checked. Headless runs show every block in English at the planned position, and the game continues to the town map after the movie.
 
 Limits:
 
-- The first play at boot has no font, so it shows no subtitles ([Font at boot](#font-at-boot)). The attract replays and the New Game opening show them.
-- One table serves every movie. The other movies (`movie001`, `movie010`, `movie011`) need their own tables and a way to tell the movies apart, for example a hook on `CSimpleMovieScene::SetMovieFile` (`0x3E984`).
+- The first play at boot has no font, so it shows no subtitles ([Font at boot](#font-at-boot)).
+- `movie000`, `movie010` and `movie011` have no tables yet.
 
 ## Test builds
 
@@ -183,15 +193,15 @@ Limits:
 |---|---|---|
 | Frame counter | Hook runs; counter rate | Done; see results |
 | Alignment test | `FsFontSetAlignment` values | Done |
-| Full table, movie000 | Timing and position against the narration | Done; see results |
-| Tables for each movie | Correct lines for each movie | Not built |
+| Full table, movie001 | Timing and position against the narration | Done; see results |
+| Tables for each movie | Correct lines for each movie | Built; `movie001` table done |
 
 ## Tools
 
 `internal/prx` reads and edits the relocation table. `internal/mips` encodes the instructions; its test compares the encodings with instructions in `BOOT.BIN`. `internal/subpatch` builds the patch and checks that the hooked word is the expected `jal` with an `R_MIPS_26` relocation. Its test checks that no relocation inside the code space stays active and that nothing outside the code space and the hook changes except the 61 relocation types.
 
 ```sh
-./kfa patch subtitles research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/subs/kfaI-movie000.tsv research/builds/kfaI-sub-BOOT.BIN
+./kfa patch subtitles research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/builds/kfaI-sub-BOOT.BIN movie001.pmf=research/subs/kfaI-movie001.tsv
 cp research/builds/kfaI-text.iso research/builds/kfaI-sub.iso
 ./kfa iso put research/builds/kfaI-sub.iso PSP_GAME/SYSDIR/EBOOT.BIN research/builds/kfaI-sub-BOOT.BIN
 ```

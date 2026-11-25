@@ -33,6 +33,8 @@ type Addrs struct {
 	BinderDelete  uint32 // CBinder::Delete; frees the buffer the binder owns
 	ExitCall      uint32 // the first jal in CSimpleMovieScene::Exit
 	ExitTarget    uint32 // its target
+	FileCall      uint32 // the jal in CSimpleMovieScene::SetMovieFile; a2 is the path
+	FileTarget    uint32 // its target
 	GuDisable     uint32 // sceGuDisable
 	Sprintf       uint32 // sprintf
 }
@@ -47,6 +49,7 @@ var known = map[string]Addrs{
 		Begin: 0x168F4, End: 0x16958, GuDisable: 0xC4B4C, Sprintf: 0xFE6F0,
 		DrawState: 0x1415FC, FileSystem: 0x1529E8, AllocRead: 0xACA8, SetFont: 0x107FC,
 		DelFont: 0x10910, BinderDelete: 0x257C0, ExitCall: 0x3EB58, ExitTarget: 0xB33FC,
+		FileCall: 0x3E998, FileTarget: 0xAFCC,
 	},
 }
 
