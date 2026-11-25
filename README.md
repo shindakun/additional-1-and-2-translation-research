@@ -10,10 +10,10 @@ The repository holds no game data and no keys. The scripts read both from your o
 |---|---|
 | Disc file system, BND, FMG | Parsed |
 | `main.dat` container and encryption | Decoded and verified for both games |
-| Text | Additional I: all `main.dat` text translated (first draft); chunks grow and relocate for longer English; seen in game. Additional II: not started |
-| Images | Additional I: export and import built; edited images seen in game. Additional II: not started |
+| Text | Both games: all `main.dat` and FMG text a player sees has a first-draft English; chunks grow and relocate for longer English; seen in game |
+| Images | Both games: the town map, status screen, HUD, shop panels and roulette images edited; seen in game |
 | Fonts | Format known; ASCII glyphs padded against filtering slivers (`kfa font pad`) |
-| Movies | All have burned-in Japanese narration. Additional I: English subtitle tables for all four movies; the openings are seen in game. Additional II: not started |
+| Movies | All have burned-in Japanese narration. Additional I: English subtitle tables for all four movies. Additional II: tables for all seven. The openings are seen in game |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
 
 ## Requirements
@@ -120,3 +120,4 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | [0002](docs/kfa2/0002-boot-addresses.md) | `BOOT.BIN` addresses for the patches |
 | [0003](docs/kfa2/0003-images.md) | Image text |
 | [0004](docs/kfa2/0004-translation.md) | Translation and builds |
+| [0005](docs/kfa2/0005-movies.md) | Movies and subtitles |

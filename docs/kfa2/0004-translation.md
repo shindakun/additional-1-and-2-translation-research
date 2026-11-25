@@ -16,4 +16,4 @@ Test with all batches: 43,799 slots in place, 3,277 strings moved, 77 chunks rel
 
 ## Open work
 
-1. Transcribe and subtitle the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
+1. Check the movie subtitles past the opening in game ([0005](0005-movies.md)).

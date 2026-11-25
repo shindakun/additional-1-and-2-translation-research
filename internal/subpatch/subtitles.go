@@ -45,6 +45,10 @@ const (
 	AlignCenter = 0x20
 )
 
+// overflowStart is where subtitle text may start in code space 2: after
+// the chunk base stubs and their data word (ChunkBase uses 33 words).
+const overflowStart = 0x100
+
 // outline lists the draw passes: black at the eight one-pixel offsets, then
 // white. A single offset shadow shows as a second, shifted font.
 var outline = func() []struct {
@@ -394,15 +398,32 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	for _, o := range outline {
 		b.p.Emit(o.color, math.Float32bits(o.dx), math.Float32bits(o.dy))
 	}
+	// Texts go after the table in code space 1; the rest go to code space 2
+	// from Cave2 + overflowStart (the chunk base stubs use the start of it).
 	text := []byte(fontName)
+	var over []byte
+	textStart := fontPath
+	room1 := int(a.CaveEnd - textStart)
+	o2 := a.Cave2 + overflowStart
+	room2 := int(a.Cave2End - o2)
 	at := map[string]uint32{} // equal texts share one copy
 	for _, l := range lines {
 		off, ok := at[l.Text]
 		if !ok {
-			off = fontPath + uint32(len(text)) - mainBase
+			n := len(l.Text) + 1
+			switch {
+			case len(text)+n <= room1:
+				off = textStart + uint32(len(text)) - mainBase
+				text = append(text, l.Text...)
+				text = append(text, 0)
+			case len(over)+n <= room2:
+				off = o2 + uint32(len(over)) - mainBase
+				over = append(over, l.Text...)
+				over = append(over, 0)
+			default:
+				return nil, fmt.Errorf("subpatch: subtitle text does not fit (%d lines)", len(lines))
+			}
 			at[l.Text] = off
-			text = append(text, l.Text...)
-			text = append(text, 0)
 		}
 		b.p.Emit(l.Start, l.End,
 			math.Float32bits(l.X), math.Float32bits(l.Y),
@@ -417,6 +438,10 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	}
 	img.Neutralize(a.Cave, a.CaveEnd)
 	img.Write(a.Cave, code)
+	if len(over) > 0 {
+		img.Neutralize(o2, a.Cave2End)
+		img.Write(o2, over)
+	}
 	img.SetWord(a.DrawCall, mips.Jal(a.Cave))
 	img.SetWord(a.ExitCall, mips.Jal(exitEntry))
 	img.SetWord(a.FileCall, mips.Jal(fileEntry))

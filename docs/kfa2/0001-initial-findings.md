@@ -62,3 +62,4 @@ The title menu has a third item, `DATA CONVERT`. Additional I offers to save cle
 | [0002](0002-boot-addresses.md) | `BOOT.BIN` addresses for the patches |
 | [0003](0003-images.md) | Image text |
 | [0004](0004-translation.md) | Translation and builds |
+| [0005](0005-movies.md) | Movies and subtitles |
