@@ -62,10 +62,9 @@ var outline = func() []struct {
 	return append(p, pass{0xFFFFFFFF, 0, 0})
 }()
 
-// recordWords is the size of one line record: start, end, x, y, shadow x,
-// shadow y, the text offset from the code base, the alignment and the movie
-// key.
-const recordWords = 9
+// recordWords is the size of one line record: start, end, x, y, the text
+// offset from the code base, the alignment and the movie key.
+const recordWords = 7
 
 // Subtitles patches boot to draw lines over movies. A frame counter starts
 // at 0 for each movie (the exit hook resets it). Every frame, each line
@@ -177,13 +176,13 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	early := b.p.Branch(mips.Bne, mips.T3, mips.Zero)
 	b.p.Emit(mips.Sltu(mips.T3, mips.T2, mips.T1)) // counter < end
 	late := b.p.Branch(mips.Beq, mips.T3, mips.Zero)
-	b.p.Emit(mips.Lw(mips.T0, mips.S1, 32))
+	b.p.Emit(mips.Lw(mips.T0, mips.S1, 24))
 	anyMovie := b.p.Branch(mips.Beq, mips.T0, mips.Zero)
 	b.addr(mips.T1, curKey)
 	b.p.Emit(mips.Lw(mips.T1, mips.T1, 0))
 	other := b.p.Branch(mips.Bne, mips.T0, mips.T1)
 	anyMovie()
-	b.p.Emit(mips.Lw(mips.A0, mips.S1, 28))
+	b.p.Emit(mips.Lw(mips.A0, mips.S1, 20))
 	b.call(a.SetAlign)
 	// Outline: black at the eight one-pixel offsets, then white at the
 	// position. The passes table holds color, dx, dy (floats) for each pass.
@@ -203,7 +202,7 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 		mips.Lw(mips.T0, mips.S3, 8),
 		mips.Mtc1(mips.T0, 14),
 		mips.AddS(13, 13, 14),
-		mips.Lw(mips.A0, mips.S1, 24),
+		mips.Lw(mips.A0, mips.S1, 16),
 		mips.Addu(mips.A0, mips.A0, mips.S0),
 	)
 	b.call(a.DrawText)
@@ -407,7 +406,6 @@ func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 		}
 		b.p.Emit(l.Start, l.End,
 			math.Float32bits(l.X), math.Float32bits(l.Y),
-			math.Float32bits(l.X+1), math.Float32bits(l.Y+1),
 			off, l.Align, l.Movie)
 	}
 	code := append(b.p.Bytes(), text...)

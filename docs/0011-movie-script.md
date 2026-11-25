@@ -29,6 +29,27 @@ The English is a draft. Names follow the table in [0004](0004-text.md#proper-nam
 
 `/` marks a line break in the video. Block 8 appears while block 7 is still on screen.
 
+## Additional I, movie010 and movie011 (endings)
+
+Times are read by eye from one frame per second of the video file, ±1 s. The credits that follow are in English already.
+
+`movie010`:
+
+| # | Start | End | Japanese | English draft |
+|---|---|---|---|---|
+| 1 | 6.5 | 15 | 雲間から差し込む光が町を照らし出す。 / やがて大地の底から沸き起こる鳴動も止んだ。 | Light through the clouds shines on the town. / Soon the rumbling from deep in the earth stopped. |
+| 2 | 15.5 | 28 | ギーラを討った聖剣ムーンライトソードは、 / その後ヴァータイト王国へと届けられた。 / 輝きを持たない聖剣は三度ヴァータイト王家の / 宝物庫に封印された。 | The holy sword Moonlight Sword, which slew Gila, / was later delivered to the kingdom of Verdite. / Its light gone, the holy sword was sealed in the / Verdite royal vault for the third time. |
+| 3 | 32 | 42.5 | 地下迷宮に残された傭兵団の墓標は / 変わらぬ姿でそこに在った。 | The graves of the mercenary band in the labyrinth / stood there, unchanged. |
+| 4 | 45.5 | 60 | 訪れた墓標に背を向け、青年は町への帰路についた。 | Turning from the graves he had visited, / the young man set out back to town. |
+
+`movie011` (times from the 10 fps edge count, ±0.5 s; the subtitle table adds 1 s at each end):
+
+| # | Start | End | Japanese | English draft |
+|---|---|---|---|---|
+| 1 | 5.6 | 16.1 | 災いの元凶が討たれ、すべては終わった。 / だが聖地に吹く暗い風が止むことはなかった。 | The source of the calamity was slain, and all was over. / But the dark wind over the Holy Land never stopped. |
+| 2 | 22.6 | 32.2 | 聖剣は未だヴァータイト王国に / 戻っていないと伝えられている。 / 今なお多くの騎士が聖剣を探し求めているが、 / 命を落とした者も少なくないという。 | It is said the holy sword has not yet returned to Verdite. / Many knights still search for it, / and not a few have lost their lives. |
+| 3 | 40.7 | 47.7 | 傭兵団の生き残りであった青年も町から姿を消した。 / その行き先は誰にも伝えられていない。 | The young man, survivor of the mercenary band, / also left the town. / No one knows where he went. |
+
 ## Other movies
 
-Not yet transcribed: Additional I `movie001`, `movie010`, `movie011`; all seven Additional II movies.
+Not yet transcribed: all seven Additional II movies.

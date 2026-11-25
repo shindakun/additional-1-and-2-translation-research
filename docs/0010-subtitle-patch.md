@@ -168,7 +168,7 @@ The patch has three entries, four with `--boot-font`:
 
 The movie key is the three characters before the last `.` of the path: `movie001.pmf` gives `001`. The clock: on the first draw of a movie the patch stores the low word of `sceKernelGetSystemTimeWide` (import stub `0x11C444`); every draw computes the elapsed microseconds. A draw counter falls behind the video when the emulator skips frames; system time follows the emulated clock and the movie audio.
 
-The draw entry walks a table of 9-word records: start and end in microseconds, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the passes of a 9-entry table (color, dx, dy): black at the eight one-pixel offsets, then white. The code uses 352 words; the font path, the table and the text follow it in the same code space. Equal texts share one copy. The code space (6,552 bytes) holds about 70 records with their texts.
+The draw entry walks a table of 7-word records: start and end in microseconds, x, y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the passes of a 9-entry table (color, dx, dy): black at the eight one-pixel offsets, then white. The code uses 352 words; the font path, the table and the text follow it in the same code space. Equal texts share one copy. The code space (6,552 bytes) holds the 86 lines of the four Additional I movies with room to spare.
 
 To read the current key on screen, point a line's text offset at the key word: the bytes are the three characters in reverse order, then a zero.
 
@@ -191,7 +191,7 @@ The New Game opening plays `movie001` (the key on screen reads `001`), after the
 
 Limits:
 
-- `movie010` and `movie011` have no tables yet.
+- `movie010` and `movie011` (endings) have tables ([0011](0011-movie-script.md)). The headless runs do not reach the endings: a check of each line's box against frames of the video shows no overlap with the Japanese, but the tables are not seen in game.
 - Which movie the attract loop plays is not yet checked.
 
 ## Test builds
@@ -201,7 +201,7 @@ Limits:
 | Frame counter | Hook runs; counter rate | Done; see results |
 | Alignment test | `FsFontSetAlignment` values | Done |
 | Full table, movie001 | Timing and position against the narration | Done; see results |
-| Tables for each movie | Correct lines for each movie | Built; `movie001` table done |
+| Tables for each movie | Correct lines for each movie | All four Additional I movies; endings not seen in game |
 
 ## Tools
 

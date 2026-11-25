@@ -95,10 +95,10 @@ func TestSubtitles(t *testing.T) {
 	}
 	// The table follows the code and the counter.
 	rec := a.Cave + 352*4 + 24 + 9*12
-	if img.Word(rec) != 10 || img.Word(rec+4) != 20 || img.Word(rec+28) != AlignCenter {
-		t.Fatalf("first record: %d %d %#x", img.Word(rec), img.Word(rec+4), img.Word(rec+28))
+	if img.Word(rec) != 10 || img.Word(rec+4) != 20 || img.Word(rec+20) != AlignCenter {
+		t.Fatalf("first record: %d %d %#x", img.Word(rec), img.Word(rec+4), img.Word(rec+20))
 	}
-	if img.Word(rec+36) != 15 || img.Word(rec+36+28) != AlignLeft {
+	if img.Word(rec+28) != 15 || img.Word(rec+28+20) != AlignLeft {
 		t.Fatal("second record wrong")
 	}
 	for i := uint32(0); i < 40; i++ { // a long list still fits the code space

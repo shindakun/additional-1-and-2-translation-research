@@ -13,7 +13,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 | Text | Additional I: all `main.dat` text translated (first draft); chunks grow and relocate for longer English; seen in game. Additional II: not started |
 | Images | Additional I: export and import built; edited images seen in game. Additional II: not started |
 | Fonts | Format known; ASCII glyphs padded against filtering slivers (`kfa font pad`) |
-| Movies | All have burned-in Japanese narration. Additional I: English subtitles over `movie000` and `movie001`. Additional II: not started |
+| Movies | All have burned-in Japanese narration. Additional I: English subtitle tables for all four movies; the openings are seen in game. Additional II: not started |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
 
 ## Requirements
