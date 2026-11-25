@@ -46,9 +46,10 @@ Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
 | `scripts/text_survey.py` | Count text by kind (scan) |
 | `scripts/chunk_commands.py` | Walk events and actions |
 | `scripts/match_functions.py` | Carry function names from Adventure Player |
-| `scripts/bnd_list.py` | List BND entries |
+| `scripts/bnd_list.py` | List BND entries; `--out` unpacks one BND |
 | `scripts/fmg_dump.py` | Print FMG strings |
 | `scripts/font_render.py` | Render font glyph layers to PNG |
+| `scripts/font_pages.py` | Check glyph pages against textures |
 | `scripts/movie_sheets.sh` | Write movie contact sheets |
 | `scripts/ghidra/analyze.sh` | Decompile the executables with Ghidra |
 | `scripts/boot_info.py`, `gameinfo_dump.py`, `maindat_survey.py` | Early survey tools |

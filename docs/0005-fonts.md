@@ -1,6 +1,6 @@
 # 0005: Fonts
 
-`USRDIR/Font` holds 21 game fonts (`BitFont_Game00`–`20`) and `Debug.bnd`. `AdvMenu.bnd` holds a font BND also named `BitFont_Game12.bnd`. It differs from the file in `USRDIR/Font` in 1,542 bytes, all in `Tex01`. `scripts/font_render.py` renders the glyph layers to PNG.
+`USRDIR/Font` holds 21 game fonts (`BitFont_Game00`–`20`) and `Debug.bnd`. `AdvMenu.bnd` holds a font BND also named `BitFont_Game12.bnd`. It differs from the file in `USRDIR/Font` in 1,542 bytes, all in `Tex01`. `scripts/bnd_list.py --out` unpacks a font BND. `scripts/font_render.py` renders its glyph layers to PNG.
 
 ## Font BND
 
@@ -29,18 +29,29 @@ Glyph, 24 bytes:
 | Offset | Field |
 |---|---|
 | `0x00` | u0, v0, u1, v1 (float32, 0–1 on a 512 × 512 texture) |
-| `0x10` | u16 a |
-| `0x12` | u16 b |
-| `0x14` | u16 c |
-| `0x16` | u16, 0 |
+| `0x10` | Left offset (s16) |
+| `0x12` | Drawn width (s16) |
+| `0x14` | Advance (s16) |
+| `0x16` | Page (s16): texture = page ÷ 4, layer = page mod 4 |
 
-In all game fonts, the 95 ASCII glyphs have a = 0, b = 8, c = 8. In `Debug.bnd` the ASCII glyphs have varied values, for example (2, 1, 4) and (0, 5, 6). These values match left offset, glyph width and advance. The engine's use of them is not verified.
+`FUN_00015F00` (Additional I, `FontDrawChar` in Adventure Player) adds the left offset to the pen position, draws the glyph at the drawn width, and adds the advance. `FUN_00016EA0` (`FontGetLineSize`) sums left offset and advance to measure a line. Per-glyph widths in the CCM therefore change text layout without code changes. This is not yet confirmed on screen.
+
+In all game fonts, the 95 ASCII glyphs have offset 0, width 8, advance 8, page 0. In `Debug.bnd` the ASCII glyphs have varied values, for example (2, 1, 4) and (0, 5, 6).
+
+Pages in `BitFont_Game00`:
+
+| Page | Glyphs |
+|---|---|
+| 0 | 1,072 (ASCII and 976 more) |
+| 1–6 | 1,024 each |
+| 7 | 269 |
+
+`scripts/font_pages.py` tests 400 sampled glyphs: 399 have ink in the predicted texture and layer. The exception is the space glyph, whose cell is blank in its own layer.
 
 ## Textures
 
 GIM, 512 × 512, 8-bit index, PSP swizzle (16-byte × 8-row tiles). Each pixel index holds four glyph layers. Palettes 0–3 of `Plt00.plt` each map the index to one layer's alpha (0, 85, 170 or 255). Palettes 4–15 map every index to alpha 0.
 
-The glyph table does not show how a glyph selects its texture and layer.
 
 ## Latin coverage
 
