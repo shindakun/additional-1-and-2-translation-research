@@ -25,3 +25,4 @@
 *.swp
 .idea/
 .vscode/
+*-sheet.csv
