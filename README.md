@@ -88,7 +88,7 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 
 ## Documents
 
-`docs/kfa1` covers Additional I and the shared formats.
+`docs/kfa1` covers Additional I and the shared formats. `docs/kfa2` covers Additional II and links to `docs/kfa1` where the games share a format.
 
 ### Additional I
 
@@ -107,3 +107,9 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | [0011](docs/kfa1/0011-movie-script.md) | Movie script and draft English |
 | [0012](docs/kfa1/0012-images.md) | Images and image text |
 | [0013](docs/kfa1/0013-fmg.md) | FMG messages |
+
+### Additional II
+
+| Document | Subject |
+|---|---|
+| [0001](docs/kfa2/0001-initial-findings.md) | Disc, differences from Additional I, tool results |
