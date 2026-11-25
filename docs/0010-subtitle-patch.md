@@ -117,7 +117,7 @@ Test: `kfa patch counter`, run headless for 300 emulated seconds.
 
 A second hook replaces the first `jal` in `CSimpleMovieScene::Exit` (`0x3EB58`, target `0xB33FC`). It calls the original function and sets the counter to 0, so every movie starts at frame 0. Headless runs confirm the reset.
 
-Remaining problem: the first play at boot has no font.
+The first play at boot has no font unless the patch loads one ([Font at boot](#font-at-boot)).
 
 ## Font at boot
 
@@ -135,7 +135,9 @@ Options for the first play:
 | A. Load the font in the hook | On the first frame with no font, repeat the title steps: load `AdvMenu.bnd`, take `BitFont_Game12.bnd`, call `CFontMng::SetFont`. Needs a binder object and memory for it. |
 | B. Own glyph drawing | Read prepared subtitle images from a file on the disc (`sceIo` imports exist), draw them with `sceGuTexImage` and `Gfx_FastSprite`. Independent of the boot order. |
 
-Option A test (`subpatch.Counter` with `loadFont`): the hook loads `Font/BitFont_Game12.bnd` with `CFileSystem::AllocRead` (`0xACA8`, object `0x1529E8`) and calls `CFontMng::SetFont`. The counter then shows from the first frame at boot. After the movie the game shows its fatal-error screen (ゲーム実行中に致命的なエラーが発生しました) and stays on "Now loading". Removing the font in the exit hook (`CFontMng::DelFont`, `0x10910`, and `CBinder::Delete`, `0x257C0`, on the binder at `CFontMng + 0x401C0`) does not stop the error. The cause is not known. The default build does not load a font: the first play at boot has no subtitles, and the game runs normally.
+First option A test (`subpatch.Counter` with `loadFont`): the draw hook loads `Font/BitFont_Game12.bnd` with `CFileSystem::AllocRead` (`0xACA8`, object `0x1529E8`) on the first movie frame and calls `CFontMng::SetFont`. The counter shows at boot, but after the movie the game shows its fatal-error screen (ゲーム実行中に致命的なエラーが発生しました, FMG 505013). The error screen opens when the error object at `+0x46C` is set; the `main.dat` chunk loader sets it, for example, when it cannot allocate its 0x500000-byte buffer.
+
+Working option A (`kfa patch subtitles --boot-font`): a fourth hook replaces the `jal` at `0x688C4` in the boot function (`FUN_00068820`, target `0x689A4`, which starts `movie000`). It loads the font the same way before the movie starts, then calls the original target. `SetFont` hands the buffer to the slot 0 binder with the own flag, so the exit hook frees it: after `movie000`, it calls `CFontMng::DelFont` and `CBinder::Delete` on the binder at `CFontMng + 0x401C0`, once. The title then loads its own font as before. Headless runs from boot: `movie000` shows subtitles, the title follows, New Game plays `movie001` with subtitles, and the town map loads at 320 s. No fatal error.
 
 ## Timing
 
@@ -153,15 +155,16 @@ The counter counts video frames at 29.97 per second, from 0 at the start of each
 | `X` | The pixel column that the alignment refers to |
 | `TEXT` | ASCII, no `%` |
 
-The patch has three entries:
+The patch has three entries, four with `--boot-font`:
 
 | Entry | Hook | Action |
 |---|---|---|
+| Boot (`--boot-font`) | `jal` at `0x688C4` in `FUN_00068820` | Loads the game font, then starts `movie000` |
 | Draw | `jal` at `0x3EB30` in `CSimpleMovieScene::Draw` | Calls the movie draw, adds 1 to the counter, draws the active lines |
-| Exit | `jal` at `0x3EB58` in `CSimpleMovieScene::Exit` | Calls the original function, sets the counter to 0 |
+| Exit | `jal` at `0x3EB58` in `CSimpleMovieScene::Exit` | Calls the original function, sets the counter to 0, removes the boot font once |
 | File | `jal` at `0x3E998` in `CSimpleMovieScene::SetMovieFile` (target `0xAFCC`) | Stores the movie key of the path in `a2`, then jumps to the original target |
 
-The movie key is the three characters before the last `.` of the path: `movie001.pmf` gives `001`. The draw entry walks a table of 9-word records: start, end, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 224 words; the table and the text follow it in the same code space.
+The movie key is the three characters before the last `.` of the path: `movie001.pmf` gives `001`. The draw entry walks a table of 9-word records: start, end, x, y, shadow x, shadow y, text offset, alignment, movie key. A record draws if its range holds the counter and its key is 0 or the current key. It sets the alignment and draws the black shadow one pixel down and right, then the white text. The code uses 320 words; the font path, the table and the text follow it in the same code space. Equal texts share one copy. The code space (6,552 bytes) holds about 70 records with their texts.
 
 To read the current key on screen, point a line's text offset at the key word: the bytes are the three characters in reverse order, then a zero.
 
@@ -178,14 +181,14 @@ The ASCII glyphs of the game font are about 8 pixels wide: a 60-character line i
 
 ## Subtitle results
 
-`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 at the right.
+`research/subs/kfaI-movie001.tsv` holds 33 lines for the 11 narration blocks of `movie001`. `movie000` is the same video 5.0 s later (the logo part): frame matching at 2 frames per second gives the best fit at 5.0 s. `research/subs/kfaI-movie000.tsv` is the `movie001` table with 5 s added. Each block sits clear of its Japanese text: at the bottom when the Japanese is high, at the top when the Japanese is low. Blocks 7 and 8 share the screen: block 7 at the left of the middle band, block 8 at the right.
 
 The New Game opening plays `movie001` (the key on screen reads `001`), after the title, with the font loaded. `movie000` is the same narration after the FromSoftware logo; it plays at boot. Which movie the attract loop plays is not yet checked. Headless runs show every block in English at the planned position, and the game continues to the town map after the movie.
 
 Limits:
 
-- The first play at boot has no font, so it shows no subtitles ([Font at boot](#font-at-boot)).
-- `movie000`, `movie010` and `movie011` have no tables yet.
+- `movie010` and `movie011` have no tables yet.
+- Which movie the attract loop plays is not yet checked.
 
 ## Test builds
 
@@ -201,7 +204,8 @@ Limits:
 `internal/prx` reads and edits the relocation table. `internal/mips` encodes the instructions; its test compares the encodings with instructions in `BOOT.BIN`. `internal/subpatch` builds the patch and checks that the hooked word is the expected `jal` with an `R_MIPS_26` relocation. Its test checks that no relocation inside the code space stays active and that nothing outside the code space and the hook changes except the 61 relocation types.
 
 ```sh
-./kfa patch subtitles research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/builds/kfaI-sub-BOOT.BIN movie001.pmf=research/subs/kfaI-movie001.tsv
+./kfa patch subtitles --boot-font research/extract/kfaI/PSP_GAME/SYSDIR/BOOT.BIN research/builds/kfaI-sub-BOOT.BIN \
+  movie000.pmf=research/subs/kfaI-movie000.tsv movie001.pmf=research/subs/kfaI-movie001.tsv
 cp research/builds/kfaI-text.iso research/builds/kfaI-sub.iso
 ./kfa iso put research/builds/kfaI-sub.iso PSP_GAME/SYSDIR/EBOOT.BIN research/builds/kfaI-sub-BOOT.BIN
 ```

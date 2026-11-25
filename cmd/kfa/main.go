@@ -163,12 +163,14 @@ Commands:
   gim topng IN.gim OUT.png         Convert a GIM image to PNG
   gim scan FILE DIR                Write every GIM found inside FILE as
                                    DIR/<offset>.png
-  patch subtitles BOOT.BIN OUT MOVIE=IN.tsv...
+  patch subtitles [--boot-font] BOOT.BIN OUT MOVIE=IN.tsv...
                                    Draw subtitle lines over movies. MOVIE is
                                    a movie file name (movie000.pmf) or "all".
                                    IN.tsv lines: START END ROW ALIGN X TEXT;
                                    times in seconds, row 0 at the bottom,
-                                   ALIGN l, c or r at X pixels (docs/0010)
+                                   ALIGN l, c or r at X pixels. --boot-font
+                                   loads the game font for the movie at boot
+                                   (docs/0010)
   patch counter BOOT.BIN OUT       Draw a frame counter over movies (test build)
   version                          Print the version and exit
 `)
@@ -1115,6 +1117,10 @@ const (
 var subAlign = map[string]uint32{"l": subpatch.AlignLeft, "c": subpatch.AlignCenter, "r": subpatch.AlignRight}
 
 func patchSubtitles(a []string) error {
+	bootFont := len(a) > 0 && a[0] == "--boot-font"
+	if bootFont {
+		a = a[1:]
+	}
 	if len(a) < 3 {
 		return errUsage
 	}
@@ -1140,7 +1146,7 @@ func patchSubtitles(a []string) error {
 		}
 		lines = append(lines, l...)
 	}
-	out, err := subpatch.Subtitles(boot, lines)
+	out, err := subpatch.Subtitles(boot, lines, bootFont)
 	if err != nil {
 		return err
 	}

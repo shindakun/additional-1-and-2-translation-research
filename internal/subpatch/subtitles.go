@@ -56,7 +56,11 @@ const recordWords = 9
 // pixel down and right. A line with a Movie key shows only over that movie.
 // The opening
 // at boot has no font, so it shows nothing (docs/0010).
-func Subtitles(boot []byte, lines []Line) ([]byte, error) {
+//
+// With bootFont, a fourth hook loads Font/BitFont_Game12.bnd before the
+// opening at boot starts, and the exit hook removes it after that movie, so
+// the title loads its own font as before (docs/0010).
+func Subtitles(boot []byte, lines []Line, bootFont bool) ([]byte, error) {
 	a, err := AddrsFor(boot)
 	if err != nil {
 		return nil, err
@@ -82,12 +86,16 @@ func Subtitles(boot []byte, lines []Line) ([]byte, error) {
 	if img.Word(a.FileCall) != mips.Jal(a.FileTarget) || img.RelocAt(a.FileCall) != prx.R26 {
 		return nil, fmt.Errorf("subpatch: unexpected instruction at %#x", a.FileCall)
 	}
+	if bootFont && (img.Word(a.BootCall) != mips.Jal(a.BootTarget) || img.RelocAt(a.BootCall) != prx.R26) {
+		return nil, fmt.Errorf("subpatch: unexpected instruction at %#x", a.BootCall)
+	}
 
-	const codeWords = 224
+	const codeWords = 320
 	const frame = 56
 	data := a.Cave + codeWords*4
-	counter, curKey, table := data, data+4, data+8
-	strings := table + uint32(len(lines)*recordWords*4)
+	counter, curKey, loaded, bndPtr, table := data, data+4, data+8, data+12, data+16
+	fontPath := table + uint32(len(lines)*recordWords*4)
+	const fontName = "$(AppDataRoot)Font/BitFont_Game12.bnd\x00"
 
 	b := &builder{p: mips.Program{Base: a.Cave}}
 	b.p.Emit(
@@ -200,8 +208,22 @@ func Subtitles(boot []byte, lines []Line) ([]byte, error) {
 	b.p.Emit(mips.Or(mips.S0, mips.RA, mips.Zero))
 	b.call(a.ExitTarget) // a0 and a1 are the caller's
 	b.addr(mips.T1, counter)
+	b.p.Emit(mips.Sw(mips.Zero, mips.T1, 0))
+	// Remove the boot font once: 2 means loaded by the patch, 3 removed.
+	b.addr(mips.T1, loaded)
+	b.p.Emit(mips.Lw(mips.T2, mips.T1, 0), mips.Addiu(mips.T3, mips.Zero, 2))
+	notOurs := b.p.Branch(mips.Bne, mips.T2, mips.T3)
+	b.p.Emit(mips.Addiu(mips.T2, mips.Zero, 3), mips.Sw(mips.T2, mips.T1, 0))
+	b.addr(mips.T1, a.FontPtr)
+	b.p.Emit(mips.Lw(mips.A0, mips.T1, 0), mips.Or(mips.A1, mips.Zero, mips.Zero))
+	b.call(a.DelFont)
+	b.addr(mips.T1, a.FontPtr)
+	b.p.Emit(mips.Lw(mips.A0, mips.T1, 0))
+	b.p.LoadConst(mips.T1, 0x401C0) // slot 0 binder inside CFontMng
+	b.p.Emit(mips.Addu(mips.A0, mips.A0, mips.T1))
+	b.call(a.BinderDelete)
+	notOurs()
 	b.p.Emit(
-		mips.Sw(mips.Zero, mips.T1, 0),
 		mips.Lw(mips.RA, mips.SP, 32),
 		mips.Lw(mips.S0, mips.SP, 36),
 		mips.Jr(mips.RA),
@@ -258,6 +280,63 @@ func Subtitles(boot []byte, lines []Line) ([]byte, error) {
 		mips.Addiu(mips.SP, mips.SP, 16),
 	)
 
+	// Fourth entry, from the boot function: load the game font, then start
+	// movie000 as the original call does.
+	var bootEntry uint32
+	if bootFont {
+		bootEntry = b.p.PC()
+		b.p.Emit(
+			mips.Addiu(mips.SP, mips.SP, -frame),
+			mips.Sw(mips.RA, mips.SP, 32),
+			mips.Sw(mips.S0, mips.SP, 36),
+			mips.Sw(mips.A0, mips.SP, 40),
+			mips.Bal(1),
+			mips.Nop(),
+		)
+		b.base = b.p.PC()
+		b.p.Emit(mips.Or(mips.S0, mips.RA, mips.Zero))
+		b.addr(mips.A1, bndPtr)
+		b.p.Emit(mips.Sw(mips.Zero, mips.A1, 0))
+		b.addr(mips.A0, a.FileSystem)
+		b.addr(mips.A2, fontPath)
+		b.p.Emit( // the remaining arguments as CBinder::LoadFile passes them
+			mips.Or(mips.A3, mips.Zero, mips.Zero),
+			mips.Addiu(mips.T0, mips.Zero, 1),
+			mips.Or(mips.T1, mips.Zero, mips.Zero),
+			mips.Or(mips.T2, mips.Zero, mips.Zero),
+			mips.Or(mips.T3, mips.Zero, mips.Zero),
+			mips.Sw(mips.Zero, mips.SP, 0),
+		)
+		b.call(a.AllocRead)
+		b.addr(mips.T1, bndPtr)
+		b.p.Emit(mips.Lw(mips.A2, mips.T1, 0))
+		noData := b.p.Branch(mips.Beq, mips.A2, mips.Zero)
+		b.addr(mips.T1, a.FontPtr)
+		b.p.Emit(mips.Lw(mips.A0, mips.T1, 0))
+		noMng := b.p.Branch(mips.Beq, mips.A0, mips.Zero)
+		b.p.Emit(
+			mips.Or(mips.A1, mips.Zero, mips.Zero),
+			mips.Addiu(mips.A3, mips.Zero, 1),
+			mips.Or(mips.T0, mips.Zero, mips.Zero),
+			mips.Or(mips.T1, mips.Zero, mips.Zero),
+			mips.Or(mips.T2, mips.Zero, mips.Zero),
+			mips.Or(mips.T3, mips.Zero, mips.Zero),
+		)
+		b.call(a.SetFont)
+		b.addr(mips.T1, loaded)
+		b.p.Emit(mips.Addiu(mips.T2, mips.Zero, 2), mips.Sw(mips.T2, mips.T1, 0))
+		noData()
+		noMng()
+		b.p.Emit(mips.Lw(mips.A0, mips.SP, 40))
+		b.call(a.BootTarget)
+		b.p.Emit(
+			mips.Lw(mips.RA, mips.SP, 32),
+			mips.Lw(mips.S0, mips.SP, 36),
+			mips.Jr(mips.RA),
+			mips.Addiu(mips.SP, mips.SP, frame),
+		)
+	}
+
 	if len(b.p.Words) > codeWords {
 		return nil, fmt.Errorf("subpatch: code is %d words, room for %d", len(b.p.Words), codeWords)
 	}
@@ -265,18 +344,24 @@ func Subtitles(boot []byte, lines []Line) ([]byte, error) {
 		b.p.Emit(mips.Nop())
 	}
 
-	b.p.Emit(0, 0) // counter, movie key
-	var text []byte
+	b.p.Emit(0, 0, 0, 0) // counter, movie key, boot font state, font BND pointer
+	text := []byte(fontName)
+	at := map[string]uint32{} // equal texts share one copy
 	for _, l := range lines {
+		off, ok := at[l.Text]
+		if !ok {
+			off = fontPath + uint32(len(text)) - mainBase
+			at[l.Text] = off
+			text = append(text, l.Text...)
+			text = append(text, 0)
+		}
 		b.p.Emit(l.Start, l.End,
 			math.Float32bits(l.X), math.Float32bits(l.Y),
 			math.Float32bits(l.X+1), math.Float32bits(l.Y+1),
-			strings+uint32(len(text))-mainBase, l.Align, l.Movie)
-		text = append(text, l.Text...)
-		text = append(text, 0)
+			off, l.Align, l.Movie)
 	}
 	code := append(b.p.Bytes(), text...)
-	if a.Cave+uint32(len(b.p.Words)*4) != strings {
+	if a.Cave+uint32(len(b.p.Words)*4) != fontPath {
 		return nil, errors.New("subpatch: data layout mismatch")
 	}
 	if a.Cave+uint32(len(code)) > a.CaveEnd {
@@ -287,5 +372,8 @@ func Subtitles(boot []byte, lines []Line) ([]byte, error) {
 	img.SetWord(a.DrawCall, mips.Jal(a.Cave))
 	img.SetWord(a.ExitCall, mips.Jal(exitEntry))
 	img.SetWord(a.FileCall, mips.Jal(fileEntry))
+	if bootFont {
+		img.SetWord(a.BootCall, mips.Jal(bootEntry))
+	}
 	return out, nil
 }

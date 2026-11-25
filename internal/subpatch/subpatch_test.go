@@ -68,17 +68,17 @@ func TestSubtitles(t *testing.T) {
 	if err != nil {
 		t.Skip(err)
 	}
-	if _, err := Subtitles(boot, []Line{{Start: 1, End: 2, Text: "100%"}}); err == nil {
+	if _, err := Subtitles(boot, []Line{{Start: 1, End: 2, Text: "100%"}}, false); err == nil {
 		t.Fatal("percent sign accepted")
 	}
-	if _, err := Subtitles(boot, []Line{{Start: 1, End: 2, Text: "é"}}); err == nil {
+	if _, err := Subtitles(boot, []Line{{Start: 1, End: 2, Text: "é"}}, false); err == nil {
 		t.Fatal("non-ASCII accepted")
 	}
 	lines := []Line{
 		{Start: 10, End: 20, X: 240, Y: 256, Align: AlignCenter, Text: "first"},
 		{Start: 15, End: 30, X: 8, Y: 100, Align: AlignLeft, Text: "second"},
 	}
-	out, err := Subtitles(boot, lines)
+	out, err := Subtitles(boot, lines, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,18 +90,21 @@ func TestSubtitles(t *testing.T) {
 	if img.Word(a.DrawCall) != mips.Jal(a.Cave) {
 		t.Fatal("draw hook not set")
 	}
+	if img.Word(a.BootCall)>>26 != 3 || img.Word(a.BootCall) == mips.Jal(a.BootTarget) {
+		t.Fatal("boot hook not set")
+	}
 	// The table follows the code and the counter.
-	rec := a.Cave + 224*4 + 8
+	rec := a.Cave + 320*4 + 16
 	if img.Word(rec) != 10 || img.Word(rec+4) != 20 || img.Word(rec+28) != AlignCenter {
 		t.Fatalf("first record: %d %d %#x", img.Word(rec), img.Word(rec+4), img.Word(rec+28))
 	}
 	if img.Word(rec+36) != 15 || img.Word(rec+36+28) != AlignLeft {
 		t.Fatal("second record wrong")
 	}
-	for i := uint32(0); i < 64; i++ { // a long list still fits the code space
+	for i := uint32(0); i < 40; i++ { // a long list still fits the code space
 		lines = append(lines, Line{Start: i, End: i + 1, Text: "a line of fifty characters for the size check ok."})
 	}
-	if _, err := Subtitles(boot, lines); err != nil {
+	if _, err := Subtitles(boot, lines, true); err != nil {
 		t.Fatal(err)
 	}
 }
