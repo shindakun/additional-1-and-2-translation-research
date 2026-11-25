@@ -57,7 +57,7 @@ Result: the build boots and regular text looks unchanged. The game shows little 
 
 ## Text test
 
-`scripts/build_english.sh [GAME]` builds `research/builds/GAME-english.iso` (default `kfaI`) with every current translation, in this order: images into `main.dat` (`research/img/edit/GAME`), text on top (`research/text/GAME-test.json`), FMG messages into `AdvSys.bnd` (`research/text/GAME-fmg-test.json`), the subtitle patch with the boot font and the chunk base patch into `EBOOT.BIN` (every `research/subs/GAME-movieNNN.tsv`), and the padded fonts. It verifies `main.dat` and leaves no other files. This is the image to play. It is larger than the original disc image: `main.dat` grows when chunks relocate, and `kfa iso put` moves the movies and `DUMMY.BIN` after it to the end of the image.
+`scripts/build_english.sh [GAME]` builds `research/builds/GAME-english.iso` (default `kfaI`) with every current translation, in this order: images into `main.dat` (`research/img/edit/GAME`), text on top (`research/text/GAME-test.json`), FMG messages into `AdvSys.bnd` (`research/text/GAME-fmg-test.json`), the subtitle patch with the boot font and the chunk base patch into `EBOOT.BIN` (every `research/subs/GAME-movieNNN.tsv`; with none, only the chunk base patch), and the padded fonts. It verifies `main.dat` and leaves no other files. This is the image to play. It is larger than the original disc image: `main.dat` grows when chunks relocate, and `kfa iso put` moves the movies and `DUMMY.BIN` after it to the end of the image.
 
 Test builds for one change go to `research/builds` under a name that says what they test, and are deleted after the test. Screenshots that show a result stay in `research/ppsspp/examples`.
 

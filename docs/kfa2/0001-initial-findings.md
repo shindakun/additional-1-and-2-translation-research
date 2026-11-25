@@ -70,9 +70,15 @@ Test: `kfa patch subtitles --boot-font` with one line on `movie000`, then `kfa p
 
 The title menu has a third item, `DATA CONVERT`. Additional I offers to save clear data for Additional II at its end (global text 3203, [kfa1/0004](../kfa1/0004-text.md)); the link between the two is not yet checked.
 
+## First build
+
+`scripts/text_merge.py` carries 1,533 of the 2,385 Additional I translations into `research/text/kfaII-test.json`; the other 852 have no matching entry in Additional II. 180 FMG messages carry over by ID; the five that differ get `KFA II`. `scripts/build_english.sh kfaII` builds `research/builds/kfaII-english.iso` ([kfa1/0009](../kfa1/0009-test-builds.md)): 39,200 slots in place, 947 strings moved, 63 chunks relocated, nothing refused. With no subtitle tables, the build skips the subtitle patch and applies only the chunk base patch.
+
+Headless PPSSPP: the town and the status overlay. Menu text from the carried-over English shows (`Status`, `Items`, `Magic`, `Camp`, `Short Sword`). Image text stays Japanese: the town map labels and the HUD stats.
+
 ## Next steps
 
-1. Merge the Additional I English into an Additional II translation file; translate the new entries.
+1. Translate the new entries.
 2. Locate the image text: town map, status screen, casino boards, HUD.
 3. Transcribe the seven movies ([kfa1/0011](../kfa1/0011-movie-script.md)).
 4. A build script for Additional II and a headless test.

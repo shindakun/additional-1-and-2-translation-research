@@ -27,7 +27,11 @@ for t in "$root"/research/subs/"$game"-movie*.tsv; do
 	subs="$subs ${m#"$game"-}.pmf=$t"
 done
 # shellcheck disable=SC2086 # subs is a list of arguments
-"$kfa" patch subtitles --boot-font "$gamedir/SYSDIR/BOOT.BIN" "$tmp/BOOT-sub.BIN" $subs
+if [ -n "$subs" ]; then
+	"$kfa" patch subtitles --boot-font "$gamedir/SYSDIR/BOOT.BIN" "$tmp/BOOT-sub.BIN" $subs
+else
+	cp "$gamedir/SYSDIR/BOOT.BIN" "$tmp/BOOT-sub.BIN"
+fi
 # Relocated chunks keep their pointers; the loader takes the base from the
 # chunk table (docs/kfa1/0004).
 "$kfa" patch chunkbase "$tmp/BOOT-sub.BIN" "$tmp/BOOT.BIN"
