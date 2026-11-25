@@ -18,5 +18,4 @@ Test with all batches: 43,799 slots in place, 3,277 strings moved, 77 chunks rel
 
 The dealer's game list (global text 870 to 875) places each item by the width of its Japanese: the left edge is the list center minus 8 pixels per Japanese character. Additional I centers by the drawn text, so it needs no change. In Additional II the English gets leading spaces, the Japanese character count minus half the English length, rounded down: one for `Roulette`, `Poker` and `Memory`, three for `Blackjack`. `Quit` shares its text with global text 460 and keeps no spaces. Headless PPSSPP: every item is within half a character of the center.
 
-
 1. Check the movie subtitles past the opening in game ([0005](0005-movies.md)).
