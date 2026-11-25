@@ -67,6 +67,8 @@ make check                 # format, vet, lint, test, markdown lint, tidy
 | `scripts/build_vwf_test.sh` | Build the proportional-font test image |
 | `scripts/build_text_test.sh` | Build an image with translations and edited images in `main.dat` |
 | `scripts/text_merge.py` | Carry translations into a new text export |
+| `scripts/text_apply_tsv.py` | Set translations from an index-to-English TSV |
+| `scripts/ppsspp-headless-stick.patch` | Analog stick input for PPSSPPHeadless `--press` |
 | `scripts/relabel_jpeg.py` | Replace label text in a JPEG within a byte budget (Pillow) |
 | `scripts/prx_unreferenced.py` | List functions no relocation or branch refers to |
 | `scripts/headless_shots.sh` | Screenshots of an image at emulated times, no window |

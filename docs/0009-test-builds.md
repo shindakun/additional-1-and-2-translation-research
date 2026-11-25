@@ -11,7 +11,7 @@ Test builds are images for PPSSPP. They go to `research/builds`, which git ignor
 
 ## Headless PPSSPP
 
-Build from the PPSSPP source (`research/tools/ppsspp-src`, with submodules). `HEADLESS_CROSS` builds the headless target without the SDL front end:
+Build from the PPSSPP source (`research/tools/ppsspp-src`, with submodules, commit `ee4594f`). Apply `scripts/ppsspp-headless-stick.patch` (`git apply`) for analog stick input. `HEADLESS_CROSS` builds the headless target without the SDL front end:
 
 ```sh
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DHEADLESS=ON -DHEADLESS_CROSS=ON ..
@@ -61,4 +61,8 @@ Result: the build boots and regular text looks unchanged. The game shows little 
 
 In town, Start opens the system menu; Down, Down, Circle opens the options screen.
 
-Headless input: `--press=SECONDS:MASK[:DURATION],...` holds buttons at emulated times (default 0.15 s). Masks: Select `0x1`, Start `0x8`, Up `0x10`, Right `0x20`, Down `0x40`, Left `0x80`, Triangle `0x1000`, Circle `0x2000`, Cross `0x4000`, Square `0x8000`. From boot, Start at 5 and 7 s skips the opening, and Circle at 10 s and after starts a new game; the town shows at about 45 s.
+Headless input: `--press=SECONDS:MASK[:DURATION],...` holds buttons at emulated times (default 0.15 s). Masks: Select `0x1`, Start `0x8`, Up `0x10`, Right `0x20`, Down `0x40`, Left `0x80`, Triangle `0x1000`, Circle `0x2000`, Cross `0x4000`, Square `0x8000`. With the stick patch, `0x10000000`, `0x20000000`, `0x40000000` and `0x80000000` push the left stick up, right, down and left.
+
+From boot, Start at 5 and 7 s skips the title movie. Circle at 10, 12, 14 and 16 s starts a new game. The opening movie plays from about 19 s; Circle at 28 s skips it. The town map shows at about 31 s.
+
+The town map cursor moves with the left stick only, about 430 pixels per second. It starts at about (255, 135). To enter the tavern: stick left for 0.16 s at 34 s, stick up for 0.06 s at 35 s, Circle at 36 s. Circle at 39 s and after advances the text.
