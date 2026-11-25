@@ -611,6 +611,7 @@ func textImport(a []string) error {
 type space struct {
 	units  []maindat.Plain
 	free   map[int][][2]int // unit to free [offset, length] runs
+	ascii  map[int]bool     // units whose free space takes ASCII only
 	done   map[[2]int]int   // unit and image index to qualities tried
 	shrunk int
 	err    error
@@ -621,11 +622,14 @@ type space struct {
 var shrinkQualities = []int{80, 75}
 
 func newSpace(units []maindat.Plain) *space {
-	s := &space{units: units, free: map[int][][2]int{}, done: map[[2]int]int{}}
+	s := &space{units: units, free: map[int][][2]int{}, ascii: map[int]bool{}, done: map[[2]int]int{}}
 	for i := range units {
 		if units[i].Name == "body" {
 			if off, n := gimFreeTail(units[i].Data); n > 0 {
 				s.free[i] = append(s.free[i], [2]int{off, n})
+				// The atlas is RGBA 5551: bit 7 of each high byte is alpha.
+				// ASCII bytes keep every pixel transparent.
+				s.ascii[i] = true
 			}
 		}
 	}
@@ -674,10 +678,18 @@ func gimFreeTail(data []byte) (int, int) {
 	return start + first*band, (bands - first) * band
 }
 
-func (s *space) alloc(unit, n int) (int, bool) {
+func (s *space) alloc(unit int, data []byte) (int, bool) {
 	u := &s.units[unit]
+	n := len(data)
 	if s.err != nil {
 		return 0, false
+	}
+	if s.ascii[unit] {
+		for _, c := range data {
+			if c >= 0x80 {
+				return 0, false
+			}
+		}
 	}
 	for {
 		for i, r := range s.free[unit] {

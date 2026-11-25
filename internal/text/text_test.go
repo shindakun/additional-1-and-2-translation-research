@@ -146,9 +146,9 @@ func TestMove(t *testing.T) {
 		data[i] = 0
 	}
 	calls := 0
-	alloc := func(unit, n int) (int, bool) {
+	alloc := func(unit int, b []byte) (int, bool) {
 		calls++
-		if unit != s.Unit || n > 64 {
+		if unit != s.Unit || len(b) > 64 {
 			return 0, false
 		}
 		return free, true

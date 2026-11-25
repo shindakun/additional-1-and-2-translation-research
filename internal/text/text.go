@@ -223,9 +223,11 @@ type Problem struct {
 	JA, EN, Where, Reason string
 }
 
-// Alloc returns the offset of n free bytes in unit, or false. Apply uses it
-// for text strings that do not fit their slot.
-type Alloc func(unit, n int) (int, bool)
+// Alloc returns the offset of free space in unit for data (the encoded
+// string and its terminator), or false. Apply uses it for text strings that
+// do not fit their slot. The allocator can refuse data that its space cannot
+// hold, for example non-ASCII bytes in texture space.
+type Alloc func(unit int, data []byte) (int, bool)
 
 // Result counts what Apply did.
 type Result struct {
@@ -268,7 +270,7 @@ func Apply(units []maindat.Plain, slots []Slot, entries []Entry, c *sjis.Codec, 
 			continue
 		}
 		if s.Kind == KindText && len(s.Ptrs) > 0 && alloc != nil {
-			if off, ok := alloc(s.Unit, len(b)+1); ok {
+			if off, ok := alloc(s.Unit, append(bytes.Clone(b), 0)); ok {
 				copy(data[off:], b)
 				data[off+len(b)] = 0
 				clear(old)
