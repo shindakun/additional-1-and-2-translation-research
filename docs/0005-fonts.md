@@ -34,7 +34,7 @@ Glyph, 24 bytes:
 | `0x14` | Advance (s16) |
 | `0x16` | Page (s16): texture = page ÷ 4, layer = page mod 4 |
 
-`FUN_00015F00` (Additional I, `FontDrawChar` in Adventure Player) adds the left offset to the pen position, draws the glyph at the drawn width, and adds the advance. `FUN_00016EA0` (`FontGetLineSize`) sums left offset and advance to measure a line. Per-glyph widths in the CCM therefore change text layout without code changes. This is not yet confirmed on screen.
+`FUN_00015F00` (Additional I, `FontDrawChar` in Adventure Player) adds the left offset to the pen position, draws the glyph at the drawn width, and adds the advance. `FUN_00016EA0` (`FontGetLineSize`) sums left offset and advance to measure a line. Per-glyph widths in the CCM therefore change text layout without code changes. [0009](0009-test-builds.md) has a test build to confirm this on screen. `kfa font vwf` sets proportional ASCII metrics from the glyph ink (`internal/font`).
 
 In all game fonts, the 95 ASCII glyphs have offset 0, width 8, advance 8, page 0. In `Debug.bnd` the ASCII glyphs have varied values, for example (2, 1, 4) and (0, 5, 6).
 
@@ -51,7 +51,6 @@ Pages in `BitFont_Game00`:
 ## Textures
 
 GIM, 512 × 512, 8-bit index, PSP swizzle (16-byte × 8-row tiles). Each pixel index holds four glyph layers. Palettes 0–3 of `Plt00.plt` each map the index to one layer's alpha (0, 85, 170 or 255). Palettes 4–15 map every index to alpha 0.
-
 
 ## Latin coverage
 

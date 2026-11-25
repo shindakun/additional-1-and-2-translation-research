@@ -13,7 +13,7 @@ The repository holds no game data and no keys. The scripts read both from your o
 | Text | Locations, IDs, names and markup known |
 | Fonts | Format known; ASCII glyphs present |
 | Movies | All have burned-in Japanese narration |
-| Go tools (`kfa`) | Planned |
+| Go tools (`kfa`) | ISO read and in-place patch, BND, `main.dat` verify, proportional fonts |
 
 ## Requirements
 
@@ -21,7 +21,7 @@ The repository holds no game data and no keys. The scripts read both from your o
   - `King's Field - Additional I (Japan, Asia).zip`
   - `King's Field - Additional II (Asia).zip`
 - Optional reference material in the root: `Adventure Player (Japan).zip` and `ADVPStudio101.exe` ([0007](docs/0007-adventure-player.md)).
-- Python 3, `7z`, `openssl`, `ffmpeg`.
+- Go (version in `go.mod`), Python 3, `7z`, `openssl`, `ffmpeg`.
 - For executable analysis: Ghidra 12.2, JDK 25 or later, and the [ghidra-allegrex](https://github.com/kotcrab/ghidra-allegrex) extension v21.6.
 
 ## Use
@@ -36,6 +36,17 @@ python3 -I scripts/scene_text.py research/maindat/kfaI research/maindat/kfaI/tex
 ```
 
 Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
+
+### Go tools
+
+```sh
+go build -o kfa ./cmd/kfa
+./kfa                      # lists commands
+KFA_DATA=$PWD/research go test ./...
+make check                 # format, vet, lint, test, markdown lint, tidy
+```
+
+[0002](docs/0002-tool-planning.md) lists every command and its state. [0009](docs/0009-test-builds.md) describes the test builds for PPSSPP.
 
 | Script | Action |
 |---|---|
@@ -52,6 +63,7 @@ Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
 | `scripts/font_pages.py` | Check glyph pages against textures |
 | `scripts/movie_sheets.sh` | Write movie contact sheets |
 | `scripts/pmf_streams.py` | Count packets per stream in a PMF movie |
+| `scripts/build_vwf_test.sh` | Build the proportional-font test image |
 | `scripts/ghidra/analyze.sh` | Decompile the executables with Ghidra |
 | `scripts/boot_info.py`, `gameinfo_dump.py`, `maindat_survey.py` | Early survey tools |
 
@@ -67,3 +79,4 @@ Output goes to `research/`, which git ignores. Use `kfaII` for Additional II.
 | [0006](docs/0006-movies.md) | Movies |
 | [0007](docs/0007-adventure-player.md) | Adventure Player disc and authoring tool |
 | [0008](docs/0008-open-questions.md) | Open questions |
+| [0009](docs/0009-test-builds.md) | Test builds |

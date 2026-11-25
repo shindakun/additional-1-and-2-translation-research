@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    name: Go (build / vet / test / lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          # Tracks go.mod so this cannot go stale against the module.
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify modules are tidy
+        run: |
+          go mod tidy
+          # go.sum joins the diff only when it exists: a project with no
+          # external dependencies never has one, and `git diff` on a path that
+          # is not in the working tree exits 128 instead of reporting no
+          # changes. `set --` rather than a bare $(...) keeps shellcheck quiet
+          # about word splitting.
+          set -- go.mod
+          [ -f go.sum ] && set -- "$@" go.sum
+          git diff --exit-code -- "$@"
+
+      - name: gofmt (check)
+        run: |
+          out=$(gofmt -l .)
+          if [ -n "$out" ]; then echo "Unformatted:"; echo "$out"; exit 1; fi
+
+      - name: Build
+        run: go build -o /dev/null ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test (race + coverage)
+        run: go test -race -coverprofile=coverage.out ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          # golangci-lint-action v9 supports the v2 config schema this repo uses.
+          version: v2.12
+
+  docs:
+    name: Docs (markdownlint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: markdownlint
+        # Config is .markdownlint-cli2.jsonc, discovered automatically.
+        uses: DavidAnson/markdownlint-cli2-action@v24
+        with:
+          globs: |
+            **/*.md
+            !node_modules

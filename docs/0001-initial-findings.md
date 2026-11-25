@@ -60,7 +60,7 @@ Sizes are totals in bytes.
 | BND, unnamed | `BND\0`, version `0x633` | Parsed | Container in `main.dat`, IDs only |
 | FMG | `00 00 01 00` | Parsed | Message table, Shift-JIS |
 | GIM | `MIG.00.1PSP` | Known | PSP texture |
-| HVG | `HVG  ` | Header seen | Holds a Sony sound bank (`IECSsreV`, `IECSdaeH`, `IECSigaV`, `IECSlpmS`) |
+| HVG | `48 56 47 20 20` (`HVG` and two spaces) | Header seen | Holds a Sony sound bank (`IECSsreV`, `IECSdaeH`, `IECSigaV`, `IECSlpmS`) |
 | LMN | `YGF_LMN` | Not studied | Layout |
 | MFX | `YGF_MFX` | Not studied | Effects |
 | CCM | `00 00 01 00` + size | Not studied | Font glyph map |

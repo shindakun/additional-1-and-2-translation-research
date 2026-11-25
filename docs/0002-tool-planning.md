@@ -34,17 +34,21 @@ Each format package has `Read(io.ReaderAt) (T, error)` and `Write(io.Writer, T) 
 
 ## Commands
 
-| Command | Action |
-|---|---|
-| `kfa iso extract <iso> <dir>` | Write all files to a directory tree |
-| `kfa iso build <dir> <iso>` | Build a UMD image from a directory tree |
-| `kfa bnd unpack <bnd> <dir>` | Write entries and `bnd.json` (IDs, names, order, version, alignment) |
-| `kfa bnd pack <dir> <bnd>` | Build a BND from a directory and its manifest |
-| `kfa fmg export <fmg> <json>` | Write ID, source and empty translation for each string |
-| `kfa fmg import <fmg> <json> <out>` | Write an FMG with the translations |
-| `kfa gim topng`, `kfa gim frompng` | Convert textures |
-| `kfa dat unpack`, `kfa dat pack` | Decrypt and split `main.dat`; encrypt, rebuild and re-sign it |
-| `kfa build <project>` | Build a finished ISO from translation files |
+| Command | Action | State |
+|---|---|---|
+| `kfa iso ls <iso>` | List files with sector and size | Built |
+| `kfa iso extract <iso> <dir>` | Write all files to a directory tree | Built |
+| `kfa iso put <iso> <path> <file>` | Replace a file in place; the new data must fit its sectors | Built |
+| `kfa iso build <dir> <iso>` | Build a UMD image from a directory tree | Not built |
+| `kfa bnd ls <bnd>` | List entries, nested BNDs included | Built |
+| `kfa bnd unpack <bnd> <dir>` | Write entries | Built |
+| `kfa bnd pack <dir> <bnd>` | Build a BND from a directory and a manifest | Not built; `internal/bnd` writes BNDs |
+| `kfa dat verify <boot> <main.dat>` | Check keys and MD5; re-encrypt every unit | Built |
+| `kfa dat unpack`, `kfa dat pack` | Decrypt and split `main.dat`; encrypt, rebuild and re-sign it | Not built; `internal/maindat` encrypts units and signs |
+| `kfa font vwf <in.bnd> <out.bnd> [gap] [space]` | Proportional ASCII metrics in every font inside a BND | Built |
+| `kfa fmg export`, `kfa fmg import` | FMG text out and in | Not built |
+| `kfa gim topng`, `kfa gim frompng` | Convert textures | Not built |
+| `kfa build <project>` | Build a finished ISO from translation files | Not built |
 
 ## Translation files
 
@@ -86,25 +90,37 @@ Load `BOOT.BIN` as a relocatable ELF at base 0. Adventure Player's `BOOT.BIN` ke
 
 ## Order of work
 
-| Step | Work | Needs |
-|---|---|---|
-| 1 | Module setup, `iso extract`, round-trip test harness | |
-| 2 | `bnd` unpack and pack, both variants | |
-| 3 | `sjis`, `fmg` export and import | 2 |
-| 4 | `iso build`; boot an unchanged build on PPSSPP | 1 |
-| 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | |
-| 6 | `dat unpack`, `dat pack` | 5 |
-| 7 | Text export through text headers ([0004](0004-text.md)); action struct layouts ([0007](0007-adventure-player.md)) | 6 |
-| 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 |
-| 9 | Executable patches for Latin text layout | 7, 8 |
-| 10 | `kfa build` end to end | all |
+| Step | Work | Needs | State |
+|---|---|---|---|
+| 1 | Module setup, `iso extract`, round-trip test harness | | Built |
+| 2 | `bnd` unpack and pack, both variants | | Library built; CLI unpack built |
+| 3 | `sjis`, `fmg` export and import | 2 | Not built |
+| 4 | `iso build`; boot an unchanged build on PPSSPP | 1 | In-place `iso put` built; full build not built |
+| 5 | `internal/maindat` from [0003](0003-maindat.md): keys from `BOOT.BIN`, AES-CBC, MD5 | | Built |
+| 6 | `dat unpack`, `dat pack` | 5 | Not built |
+| 7 | Text export through text headers ([0004](0004-text.md)); action struct layouts ([0007](0007-adventure-player.md)) | 6 | Research scripts only |
+| 8 | Test CCM glyph metrics for variable-width English in PPSSPP ([0005](0005-fonts.md)) | 3 | Test build ready ([0009](0009-test-builds.md)) |
+| 9 | Executable patches: Latin text layout, movie subtitles ([0006](0006-movies.md)) | 7, 8 | Not built |
+| 10 | `kfa build` end to end | all | Not built |
 
-Step 4 proves the build path before content changes. Steps 7 and 8 hold most of the open questions ([0008](0008-open-questions.md)). Steps 5 to 8 run in parallel with steps 1 to 4.
+Steps 7 and 8 hold most of the open questions ([0008](0008-open-questions.md)).
 
 ## Testing
 
 - Each format package has a round-trip test on original files.
-- Tests read game files from the path in `KFA_DATA`. Tests skip when it is not set. Game data is not committed.
+- Tests read game files from the path in `KFA_DATA`: the `research` directory written by `scripts/extract_iso.sh` and `scripts/maindat.py`. Tests skip when it is not set. Game data is not committed.
+
+```sh
+KFA_DATA=$PWD/research go test ./...
+```
+
+| Package | Test on disc data |
+|---|---|
+| `internal/bnd` | 276 BNDs on all three discs, nested included, re-encode byte for byte |
+| `internal/maindat` | Every unit of both `main.dat` files decrypts, re-encrypts and re-signs to the original; a changed byte changes the MD5 |
+| `internal/iso9660` | Every file of both images matches the 7-Zip extraction; in-place replacement reads back |
+| `internal/font` | CCM round trip; proportional metrics for all 95 ASCII glyphs |
+
 - Small synthetic fixtures cover edge cases: empty BND, FMG with unused IDs, markup tokens.
 - A built ISO passes when it boots in PPSSPP and shows the edited text.
 

@@ -43,3 +43,28 @@ tail -c +2049 movie000.pmf | ffmpeg -f mpeg -i - out.mp4
 The narration is part of the image. Translation needs new video with English text. The narration sits over moving art, so covering it needs a mask or a box behind the English text.
 
 No open-source tool writes PSMF; ffmpeg reads it but does not write it. The audio sits in its own stream, so a remuxer can copy the `0xBD` packets and replace the `0xE0` payload with a new encode at the same profile and level. The header's stream and entry-point tables must then be rebuilt; their layout is not yet decoded.
+
+## Subtitles
+
+A movie plays as its own scene. In Additional I, `FUN_0003EB28` (`CSimpleMovieScene::Draw` in Adventure Player) is 28 bytes and only calls `FUN_000B35D0` (`CAcffMovie::Draw`). The event and text system does not draw during the scene, so text actions cannot add subtitles.
+
+A code patch can add them without new video:
+
+1. Redirect `CSimpleMovieScene::Draw` to new code.
+2. Call `CAcffMovie::Draw` as before.
+3. Count frames. `FUN_0003EA84` (`CSimpleMovieScene::Update`) runs once per frame.
+4. Draw the subtitle for the current frame range with the engine's font code.
+
+Font calls available in Additional I:
+
+| Address | Function | Use |
+|---|---|---|
+| `0x14C1C` | `FsFontSetCurrent` | Select the font |
+| `0x14EA0` | `FsFontSetBaseColor` | Text color |
+| `0x15168` | `FsFontSetAlignment` | Alignment |
+| `0x15288` | `FsFontDrawText` | Draw at float x, y; Shift-JIS string |
+| `0x2FB4C` | `CAdvMenuPrinter::DrawText` | Alignment plus draw, from a position vector |
+
+The new code and the subtitle table need space in `BOOT.BIN`. Function addresses in this PRX appear only through relocations, so the relocation table identifies unreferenced functions to reuse.
+
+The narration then stays in the video under the English text. A box behind the subtitle covers it.

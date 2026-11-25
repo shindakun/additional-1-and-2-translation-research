@@ -1,0 +1,189 @@
+// Package maindat reads and writes the ADVP container (main.dat, .adv).
+// See docs/0003-maindat.md.
+package maindat
+
+import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/md5"
+	"crypto/sha1"
+	"encoding/binary"
+	"encoding/hex"
+	"errors"
+	"fmt"
+)
+
+// keyTables gives the virtual addresses of the encrypted key table and its
+// AES key in each known BOOT.BIN, by the file's SHA-1.
+var keyTables = map[string][2]int{
+	"e62c3559fc94e9c917081bdf5bbf8dd5713ef1ae": {0x12C85C, 0x12C918}, // Additional I
+	"e832e575aef3cb4cf1e68ec3104c970a0191ab11": {0x12CA5C, 0x12CB18}, // Additional II
+	"c37b28402bc0405c626be1b01329fd305838f20d": {0x123944, 0x123A10}, // Adventure Player
+}
+
+// elfDataDelta converts a virtual address to a BOOT.BIN file offset.
+const elfDataDelta = 0x80
+
+// Keys is one key set from the decrypted key table.
+type Keys struct {
+	Salt, Key, IV [16]byte
+}
+
+// KeysFromBoot derives both key sets from a known BOOT.BIN.
+func KeysFromBoot(boot []byte) ([2]Keys, error) {
+	var ks [2]Keys
+	sum := sha1.Sum(boot)
+	addr, ok := keyTables[hex.EncodeToString(sum[:])]
+	if !ok {
+		return ks, errors.New("maindat: unknown BOOT.BIN")
+	}
+	table := boot[addr[0]+elfDataDelta : addr[0]+elfDataDelta+0x80]
+	block, err := aes.NewCipher(boot[addr[1]+elfDataDelta : addr[1]+elfDataDelta+16])
+	if err != nil {
+		return ks, err
+	}
+	rec := make([]byte, len(table))
+	for i := 0; i < len(table); i += 16 {
+		block.Decrypt(rec[i:], table[i:])
+	}
+	// 16 records of 8 bytes; byte c of every record forms column c.
+	col := func(c int) (v [16]byte) {
+		for i := range v {
+			v[i] = rec[i*8+c]
+		}
+		return v
+	}
+	for n := range ks {
+		ks[n] = Keys{Salt: col(n), Key: col(2 + n), IV: col(4 + n)}
+	}
+	return ks, nil
+}
+
+// File is an ADVP container held in memory as its original bytes.
+type File struct {
+	Raw      []byte
+	Keys     Keys
+	KeyIndex int
+	block    cipher.Block
+}
+
+var advpMagic = []byte("ADVP")
+
+// Open selects the key set that decrypts the header and checks the MD5.
+func Open(raw []byte, ks [2]Keys) (*File, error) {
+	if len(raw) < 0x130 {
+		return nil, errors.New("maindat: file too short")
+	}
+	for n, k := range ks {
+		f := &File{Raw: raw, Keys: k, KeyIndex: n}
+		var err error
+		if f.block, err = aes.NewCipher(k.Key[:]); err != nil {
+			return nil, err
+		}
+		if bytes.Equal(f.Decrypt(0x10, 4), advpMagic) {
+			if f.Digest() != [16]byte(raw[:16]) {
+				return f, errors.New("maindat: MD5 mismatch")
+			}
+			return f, nil
+		}
+	}
+	return nil, errors.New("maindat: no key decrypts the header")
+}
+
+func blocks(n int) int { return (n + 15) &^ 15 }
+
+// Decrypt returns n plaintext bytes of the unit that starts at off. Every
+// unit is its own CBC chain with the fixed IV.
+func (f *File) Decrypt(off, n int) []byte {
+	out := make([]byte, blocks(n))
+	cipher.NewCBCDecrypter(f.block, f.Keys.IV[:]).CryptBlocks(out, f.Raw[off:off+blocks(n)])
+	return out[:n]
+}
+
+// Encrypt writes plain as the unit that starts at off. A length that is not
+// a multiple of 16 keeps the decrypted tail of the last block, so an
+// unchanged unit re-encrypts to its original bytes.
+func (f *File) Encrypt(off int, plain []byte) {
+	full := f.Decrypt(off, blocks(len(plain)))
+	copy(full, plain)
+	cipher.NewCBCEncrypter(f.block, f.Keys.IV[:]).CryptBlocks(f.Raw[off:off+len(full)], full)
+}
+
+// Digest is the MD5 over the file with bytes 0-15 replaced by the salt.
+func (f *File) Digest() [16]byte {
+	h := md5.New()
+	h.Write(f.Keys.Salt[:])
+	h.Write(f.Raw[16:])
+	var d [16]byte
+	copy(d[:], h.Sum(nil))
+	return d
+}
+
+// Sign stores the digest in bytes 0-15.
+func (f *File) Sign() {
+	d := f.Digest()
+	copy(f.Raw, d[:])
+}
+
+// Unit is one encrypted range.
+type Unit struct {
+	Name     string
+	Off, Len int
+}
+
+// Header holds the parsed fields the layout needs. Offsets are file offsets.
+type Header struct {
+	Version, Size   uint32
+	DiscID          string
+	BodyStart       int
+	BodyEnd         int
+	Extra           [4][2]uint32 // offset, size; 0xFFFFFFFF offset = unused
+	ChunkTableCount int
+	ChunkTable      int
+}
+
+// Units lists every encrypted unit: header, body, chunks, the three extra
+// ranges and the music tracks. Plain sound BNDs are not units.
+func (f *File) Units() (Header, []Unit, error) {
+	le := binary.LittleEndian
+	var h Header
+	hb := append(make([]byte, 0x10), f.Decrypt(0x10, 0x120)...)
+	h.Version, h.Size = le.Uint32(hb[0x14:]), le.Uint32(hb[0x18:])
+	h.DiscID = string(bytes.TrimRight(hb[0x34:0x44], "\x00"))
+	h.BodyEnd, h.BodyStart = int(le.Uint32(hb[0x58:])), int(le.Uint32(hb[0x5C:]))
+	for i := range h.Extra {
+		h.Extra[i] = [2]uint32{le.Uint32(hb[0x60+i*8:]), le.Uint32(hb[0x64+i*8:])}
+	}
+	if int(h.Size) != len(f.Raw) || h.BodyEnd > len(f.Raw) || h.BodyStart >= h.BodyEnd {
+		return h, nil, fmt.Errorf("maindat: header sizes do not match file")
+	}
+	units := []Unit{{"header", 0x10, 0x120}, {"body", h.BodyStart, h.BodyEnd - h.BodyStart}}
+	body := append(make([]byte, h.BodyStart), f.Decrypt(h.BodyStart, h.BodyEnd-h.BodyStart)...)
+	th := int(le.Uint32(body[0x14C:]))
+	if th == 0 {
+		return h, units, nil // .adv layout without a block list
+	}
+	h.ChunkTableCount, h.ChunkTable = int(le.Uint32(body[th:])), int(le.Uint32(body[th+4:]))
+	for i := 0; i < h.ChunkTableCount; i++ {
+		e := body[h.ChunkTable+i*16:]
+		size, id, off := le.Uint32(e), le.Uint32(e[4:]), le.Uint32(e[8:])
+		units = append(units, Unit{fmt.Sprintf("chunks/%03d_%05d.bin", i, id), int(off), int(size)})
+	}
+	for i, name := range []string{"", "thumb.bmp", "skin.skn", "bgm.tbl"} {
+		off, n := h.Extra[i][0], h.Extra[i][1]
+		if off == 0xFFFFFFFF || name == "" {
+			continue
+		}
+		units = append(units, Unit{name, int(off), int(n)})
+	}
+	if off := h.Extra[3][0]; off != 0xFFFFFFFF {
+		tbl := f.Decrypt(int(off), int(h.Extra[3][1]))
+		for i := 0; i < int(le.Uint32(tbl)); i++ {
+			e := tbl[0x10+i*16:]
+			id, n, o := le.Uint32(e), le.Uint32(e[4:]), le.Uint32(e[8:])
+			units = append(units, Unit{fmt.Sprintf("bgm/%d.at3", id), int(o), int(n)})
+		}
+	}
+	return h, units, nil
+}

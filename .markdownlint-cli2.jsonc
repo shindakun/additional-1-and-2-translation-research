@@ -1,0 +1,51 @@
+{
+  // markdownlint-cli2 configuration.
+  // Rule reference: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+  //
+  // Note on versions: there is no "markdownlint v2" package. The tool is
+  // markdownlint-cli2 (0.23.x), the rule library is markdownlint (0.41.x), and
+  // the GitHub Action is at v24. What is versioned "2" here is this config
+  // schema: the object-under-"config" form, which is what cli2 expects.
+  "config": {
+    "default": true,
+
+    // MD004: unordered list bullets must be consistent within the repo's docs.
+    "MD004": { "style": "consistent" },
+
+    // MD010: hard tabs. Go code samples are gofmt output, which indents with
+    // tabs, so tabs inside fenced code are correct and must not be "fixed".
+    // Still flag stray tabs in prose.
+    "MD010": { "code_blocks": false },
+
+    // MD013: line length. Design docs use long lines; do not wrap prose.
+    "MD013": false,
+
+    // MD024: allow duplicate heading text in different sections. Design docs
+    // repeat headings like "Open items" under several sections.
+    "MD024": { "siblings_only": true },
+
+    // MD029: ordered lists use incrementing numbers.
+    "MD029": { "style": "ordered" },
+
+    // MD033: allow inline HTML where genuinely needed.
+    "MD033": false,
+
+    // MD036: allow emphasis used as a pseudo-heading.
+    "MD036": false,
+
+    // MD041: first line does not have to be a top-level heading. A README that
+    // opens with a badge would otherwise fail.
+    "MD041": false,
+
+    // MD060: table pipe spacing. Design docs use compact tables with
+    // "|---|---|" separators, which is valid GFM and easier to hand-edit.
+    "MD060": false
+  },
+
+  "ignores": [
+    "**/node_modules/**",
+    // research/ holds extracted disc data and cloned third-party repos; it is
+    // git-ignored and its markdown is not ours to lint.
+    "research/**"
+  ]
+}
