@@ -18,6 +18,40 @@ The repository holds no game data and no keys. The scripts read both from your o
 | Movies | All have burned-in Japanese narration. Additional I: English subtitle tables for all four movies. Additional II: tables for all seven. The subtitles are a draft machine translation. The openings are seen in game |
 | Go tools (`kfa`) | ISO, BND, `main.dat` unpack and pack, text, FMG and image export and import, fonts, movie patch |
 
+## Screenshots
+
+### Additional I
+
+Opening movie with English subtitles:
+
+![Opening movie with English subtitles](docs/images/kfa1/opening.png)
+
+Town map:
+
+![Town map](docs/images/kfa1/town.png)
+
+Mossy Ruins:
+
+![Mossy Ruins corridor](docs/images/kfa1/dungeon.png)
+
+![Mossy Ruins stairs](docs/images/kfa1/dungeon-stairs.png)
+
+### Additional II
+
+Opening movie with English subtitles:
+
+![Opening movie with English subtitles](docs/images/kfa2/opening.png)
+
+Town map:
+
+![Town map](docs/images/kfa2/town.png)
+
+Mossy Ruins:
+
+![Mossy Ruins corridor](docs/images/kfa2/dungeon.png)
+
+![Mossy Ruins stairs](docs/images/kfa2/dungeon-stairs.png)
+
 ## Patches
 
 The [releases](https://github.com/shindakun/additional-1-and-2-translation-research/releases) hold xdelta3 patches, one per game, with their own version numbers (`kfaI-v…`, `kfaII-v…`). Each release has a readme with the SHA-256 of the original and the patched ISO. Apply a patch to your own ISO:
