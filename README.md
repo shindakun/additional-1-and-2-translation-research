@@ -34,7 +34,9 @@ Mossy Ruins:
 
 ![Mossy Ruins corridor](docs/images/kfa1/dungeon.png)
 
-![Mossy Ruins stairs](docs/images/kfa1/dungeon-stairs.png)
+Status screen in the dungeon (R):
+
+![Status screen](docs/images/kfa1/status.png)
 
 ### Additional II
 
@@ -50,7 +52,9 @@ Mossy Ruins:
 
 ![Mossy Ruins corridor](docs/images/kfa2/dungeon.png)
 
-![Mossy Ruins stairs](docs/images/kfa2/dungeon-stairs.png)
+Status screen in the dungeon (R):
+
+![Status screen](docs/images/kfa2/status.png)
 
 ## Patches
 
