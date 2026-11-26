@@ -68,9 +68,18 @@ The patches are pre-releases of the draft machine translation.
 
 ## Requirements
 
-- The two archives in the repository root:
-  - `King's Field - Additional I (Japan, Asia).zip`
-  - `King's Field - Additional II (Asia).zip`
+The original ISOs. The patches and the tools need these exact images:
+
+| Game | ISO SHA-256 |
+|---|---|
+| Additional I (ULJS-00070) | `f4e785cc22a199e1dccabce2f083bf3105ca9a54e4abcccfbced86ce02d4c055` |
+| Additional II (ULJS-00076) | `ad794f2e3aed5c8b30d342576e748ec2e228d3dc13c8069c89acd5415ffccb68` |
+
+Check an ISO with `shasum -a 256 FILE.iso`.
+
+For the tools:
+
+- The two archives that hold the ISOs, in the repository root: `King's Field - Additional I (Japan, Asia).zip` and `King's Field - Additional II (Asia).zip`. Their hashes are in [kfa1/0001](docs/kfa1/0001-initial-findings.md).
 - Optional reference material in the root: `Adventure Player (Japan).zip` and `ADVPStudio101.exe` ([0007](docs/kfa1/0007-adventure-player.md)).
 - Go (version in `go.mod`), Python 3, `7z`, `openssl`, `ffmpeg`.
 - For executable analysis: Ghidra 12.2, JDK 25 or later, and the [ghidra-allegrex](https://github.com/kotcrab/ghidra-allegrex) extension v21.6.
