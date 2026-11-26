@@ -9,7 +9,7 @@ The movie format, the subtitle patch and the method are in [kfa1/0006](../kfa1/0
 | `movie202`, `movie203` | 1:02, 1:06 | The labyrinth's history; the two differ in the last blocks. New Game plays `movie203` |
 | `movie210`, `movie211`, `movie212` | 2:30, 2:06, 2:36 | Three endings, then the credits in English |
 
-Times are seconds from the first frame. Each block starts 1 s before the Japanese and ends about 1 s after it. The opening times come from a 10 fps edge count ([kfa1/0011](../kfa1/0011-movie-script.md)); the others from one frame every 2 s, ±1 s. `/` marks a line break.
+Times are seconds from the first frame. The times come from a 10 fps edge count ([kfa1/0011](../kfa1/0011-movie-script.md)). Each block starts 1.3 s before the Japanese and ends 1.5 s after it, or 0.2 s before the next block. `/` marks a line break.
 
 The English is a draft machine translation. Names follow [kfa1/0004](../kfa1/0004-text.md#proper-names).
 
@@ -32,50 +32,50 @@ The English is a draft machine translation. Names follow [kfa1/0004](../kfa1/000
 
 | Start | End | English |
 |---|---|---|
-| 1 | 11 | The labyrinth of Traujito, where the king of Rikistria, / once driven out by his people, hid himself. |
-| 11 | 19 | Fearing the living king, Rikistria's central council / sent many mercenaries into the labyrinth. |
-| 19 | 33 | Most mercenaries died in the labyrinth. But a nameless one / of a ruined band went in alone later and slew the king. |
-| 33 | 43 | In the labyrinth slept two holy swords / stolen from the kingdom of Verdite. |
-| 43 | 53 | The nameless mercenary found a holy sword here / and returned it to an envoy from Verdite. |
-| 53 | 62 | One was sealed in the vault of Verdite, / but the other has not yet been found. |
+| 1.6 | 10.3 | The labyrinth of Traujito, where the king of Rikistria, / once driven out by his people, hid himself. |
+| 10.5 | 19.4 | Fearing the living king, Rikistria's central council / sent many mercenaries into the labyrinth. |
+| 19.6 | 33.4 | Most mercenaries died in the labyrinth. But a nameless one / of a ruined band went in alone later and slew the king. |
+| 33.6 | 42.7 | In the labyrinth slept two holy swords / stolen from the kingdom of Verdite. |
+| 42.9 | 52.1 | The nameless mercenary found a holy sword here / and returned it to an envoy from Verdite. |
+| 52.9 | 61.9 | One was sealed in the vault of Verdite, / but the other has not yet been found. |
 
 ## movie203
 
 | Start | End | English |
 |---|---|---|
-| 1 | 11 | The labyrinth of Traujito, where the king of Rikistria, / once driven out by his people, hid himself. |
-| 11 | 19 | Fearing the living king, Rikistria's central council / sent many mercenaries into the labyrinth. |
-| 19 | 33 | Most mercenaries died in the labyrinth. But a nameless one / of a ruined band went in alone later and slew the king. |
-| 33 | 45 | It was rumored that two holy swords / stolen from Verdite lay in the labyrinth. |
-| 45 | 55 | After the king was slain, knights came often / to search the labyrinth, but none came back alive. |
-| 55 | 65 | And neither holy sword has been found. |
+| 1.6 | 10.3 | The labyrinth of Traujito, where the king of Rikistria, / once driven out by his people, hid himself. |
+| 10.5 | 19.4 | Fearing the living king, Rikistria's central council / sent many mercenaries into the labyrinth. |
+| 19.6 | 33.4 | Most mercenaries died in the labyrinth. But a nameless one / of a ruined band went in alone later and slew the king. |
+| 33.6 | 44.5 | It was rumored that two holy swords / stolen from Verdite lay in the labyrinth. |
+| 44.7 | 55.8 | After the king was slain, knights came often / to search the labyrinth, but none came back alive. |
+| 56.5 | 63.9 | And neither holy sword has been found. |
 
 ## movie210
 
 | Start | End | English |
 |---|---|---|
-| 4 | 17 | The earth fell still, and quiet returned to the labyrinth. / With Dark Slayer, its light gone, in his hand, / the young man left the labyrinth. |
-| 21 | 37 | On the survey team's report, the Republic's council / blamed the disasters on magic stored in the labyrinth, / and reported that the situation was settling. |
-| 39 | 51 | In Traujito the rebuilding was already under way. / The young man set out for his homeland. / People paused in their work to see him off. |
-| 55 | 67 | And once again, / the labyrinth was sealed. |
+| 4.7 | 16.9 | The earth fell still, and quiet returned to the labyrinth. / With Dark Slayer, its light gone, in his hand, / the young man left the labyrinth. |
+| 21.4 | 35.9 | On the survey team's report, the Republic's council / blamed the disasters on magic stored in the labyrinth, / and reported that the situation was settling. |
+| 36.4 | 51.1 | In Traujito the rebuilding was already under way. / The young man set out for his homeland. / People paused in their work to see him off. |
+| 55.6 | 65.8 | And once again, / the labyrinth was sealed. |
 
 ## movie211
 
 | Start | End | English |
 |---|---|---|
-| 5 | 15 | When all was over, / the place called the Holy Land / had become a land thick with foul air. |
-| 15 | 23 | No living soul was left there. / People feared the curse of the king of Rikistria, / and the Republic gave up its claim to the land. |
-| 25 | 37 | No one knows the truth of what happened here, / nor what caused it. |
+| 4.7 | 13.5 | When all was over, / the place called the Holy Land / had become a land thick with foul air. |
+| 13.7 | 23.9 | No living soul was left there. / People feared the curse of the king of Rikistria, / and the Republic gave up its claim to the land. |
+| 28.1 | 37 | No one knows the truth of what happened here, / nor what caused it. |
 
 ## movie212
 
 | Start | End | English |
 |---|---|---|
-| 1 | 13 | After a great rumbling, the labyrinth collapsed. / Earthquakes never struck the town of Traujito again. |
-| 15 | 23 | The labyrinth was lost, / and the history of Rikistria came to its end. |
-| 27 | 39 | On the survey team's report, the Republic's council / blamed the disasters on magic stored in the labyrinth, / and reported that the situation was settling. |
-| 43 | 57 | Some time after the collapse, a young man pulled / from the rubble woke. The people were relieved / he was safe, and the town was filled with joy. |
-| 59 | 68 | The two holy swords the young man held in the rubble / were then sealed in the vault of the Verdite royal house. |
+| 3.1 | 12.9 | After a great rumbling, the labyrinth collapsed. / Earthquakes never struck the town of Traujito again. |
+| 14.2 | 22.9 | The labyrinth was lost, / and the history of Rikistria came to its end. |
+| 26.6 | 39.9 | On the survey team's report, the Republic's council / blamed the disasters on magic stored in the labyrinth, / and reported that the situation was settling. |
+| 43.6 | 57 | Some time after the collapse, a young man pulled / from the rubble woke. The people were relieved / he was safe, and the town was filled with joy. |
+| 58.2 | 68.1 | The two holy swords the young man held in the rubble / were then sealed in the vault of the Verdite royal house. |
 
 ## Test
 
